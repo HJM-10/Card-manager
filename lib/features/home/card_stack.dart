@@ -131,6 +131,7 @@ class _CardFace extends StatelessWidget {
 
     return PhysicalShape(
       clipper: const NotchedCardClipper(),
+      clipBehavior: Clip.antiAlias,
       color: card.gradient.last,
       elevation: isFront ? 10 : 4,
       shadowColor: Colors.black.withValues(alpha: 0.35),
