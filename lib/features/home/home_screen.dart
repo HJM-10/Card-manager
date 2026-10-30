@@ -8,6 +8,7 @@ import '../../core/widgets/motion.dart';
 import '../../data/models.dart';
 import '../../data/providers.dart';
 import 'card_stack.dart';
+import '../expenses/expenses_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -187,11 +188,13 @@ class _ExpensesSection extends ConsumerWidget {
             children: [
               Text('Manage Expenses', style: AppText.heading()),
               const Spacer(),
-              Text('View All', style: AppText.caption()),
+              TextButton(onPressed: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const ExpensesScreen())), child: const Text('View All')),
             ],
           ),
           const SizedBox(height: 6),
-          for (final e in expenses) _ExpenseRow(expense: e),
+          if (expenses.isEmpty) const Padding(padding: EdgeInsets.all(16), child: Text('No expenses yet. Add one to start tracking.')),
+          for (final e in expenses.take(5)) InkWell(onTap: () => showExpenseEditor(context, expense: e), child: _ExpenseRow(expense: e)),
+          TextButton.icon(onPressed: () => showExpenseEditor(context), icon: const Icon(Icons.add), label: const Text('Add expense')),
         ],
       ),
     );

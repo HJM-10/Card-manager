@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/theme/app_colors.dart';
@@ -99,46 +98,46 @@ class CardsNotifier extends Notifier<List<CreditCard>> {
 final cardsProvider =
     NotifierProvider<CardsNotifier, List<CreditCard>>(CardsNotifier.new);
 
-final expensesProvider = Provider<List<Expense>>(
-  (ref) => const [
-    Expense(
-      title: 'House Rent',
-      timestamp: '10:00 am 15 March, 2025',
-      amount: 300,
-      icon: Icons.home_outlined,
-    ),
-    Expense(
-      title: 'Internet Bill',
-      timestamp: '12:30 pm 15 March, 2025',
-      amount: 85,
-      icon: Icons.wifi_rounded,
-    ),
-    Expense(
-      title: 'Groceries',
-      timestamp: '09:30 am 14 March, 2025',
-      amount: 240,
-      icon: Icons.shopping_cart_outlined,
-    ),
-    Expense(
-      title: 'Electricity',
-      timestamp: '06:15 pm 12 March, 2025',
-      amount: 120,
-      icon: Icons.bolt_outlined,
-    ),
-    Expense(
-      title: 'Gym Membership',
-      timestamp: '08:00 am 10 March, 2025',
-      amount: 45,
-      icon: Icons.fitness_center_rounded,
-    ),
-    Expense(
-      title: 'Streaming',
-      timestamp: '09:45 pm 08 March, 2025',
-      amount: 15.99,
-      icon: Icons.play_circle_outline_rounded,
-    ),
-  ],
-);
+const expenseCategories = ['Housing', 'Food', 'Bills', 'Transport', 'Leisure', 'Other'];
+
+class ExpensesNotifier extends Notifier<List<Expense>> {
+  @override
+  List<Expense> build() {
+    final saved = ref.read(localStoreProvider).read('expenses.v1');
+    if (saved is List) {
+      try {
+        return saved.map((e) => Expense.fromJson(Map<String, dynamic>.from(e as Map))).toList();
+      } catch (_) {
+        ref.read(localStoreProvider).warning.value = 'Saved expenses could not be read.';
+      }
+    }
+    return [];
+  }
+  Future<void> upsert(Expense expense) async {
+    if (expense.title.trim().isEmpty || expense.cents <= 0 || expense.cents > 99999999999) {
+      throw ArgumentError('Enter a title and a positive amount.');
+    }
+    if (expense.cardId != null && !ref.read(cardsProvider).any((c) => c.id == expense.cardId)) {
+      throw StateError('Choose a card that is still in your wallet.');
+    }
+    final next = [...state.where((e) => e.id != expense.id), expense]..sort((a, b) => b.date.compareTo(a.date));
+    await ref.read(localStoreProvider).write('expenses.v1', next.map((e) => e.toJson()).toList());
+    state = next;
+  }
+  Future<void> remove(String id) async {
+    final next = state.where((e) => e.id != id).toList();
+    await ref.read(localStoreProvider).write('expenses.v1', next.map((e) => e.toJson()).toList());
+    state = next;
+  }
+}
+final expensesProvider = NotifierProvider<ExpensesNotifier, List<Expense>>(ExpensesNotifier.new);
+
+int? parseAmountCents(String input) {
+  final match = RegExp(r'^(\d{1,9})(?:\.(\d{1,2}))?$').firstMatch(input.trim());
+  if (match == null) return null;
+  final value = int.parse(match[1]!) * 100 + int.parse((match[2] ?? '').padRight(2, '0'));
+  return value > 0 ? value : null;
+}
 
 /// Selected bottom-nav tab.
 class TabNotifier extends Notifier<int> {

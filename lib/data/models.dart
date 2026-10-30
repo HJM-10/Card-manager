@@ -38,14 +38,37 @@ class CreditCard {
 
 class Expense {
   const Expense({
+    required this.id,
     required this.title,
-    required this.timestamp,
-    required this.amount,
-    required this.icon,
+    required this.date,
+    required this.cents,
+    required this.category,
+    this.cardId,
+    this.kind = 'expense',
   });
 
+  final String id;
   final String title;
-  final String timestamp;
-  final double amount;
-  final IconData icon;
+  final DateTime date;
+  final int cents;
+  final String category;
+  final String? cardId;
+  final String kind;
+  bool get isSpending => kind == 'expense' || kind == 'send';
+  double get amount => cents / 100;
+  String get timestamp => '${date.day}/${date.month}/${date.year} · $category';
+  IconData get icon => switch (category) {
+    'Housing' => Icons.home_outlined,
+    'Food' => Icons.shopping_cart_outlined,
+    'Bills' => Icons.bolt_outlined,
+    'Transport' => Icons.directions_bus_outlined,
+    'Leisure' => Icons.movie_outlined,
+    _ => Icons.receipt_long_outlined,
+  };
+  Map<String, Object?> toJson() => {'id': id, 'title': title, 'date': date.toIso8601String(), 'cents': cents, 'category': category, 'cardId': cardId, 'kind': kind};
+  factory Expense.fromJson(Map<String, dynamic> json) => Expense(
+    id: json['id'] as String, title: json['title'] as String,
+    date: DateTime.parse(json['date'] as String), cents: json['cents'] as int,
+    category: json['category'] as String, cardId: json['cardId'] as String?, kind: json['kind'] as String? ?? 'expense',
+  );
 }
