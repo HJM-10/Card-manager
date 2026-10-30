@@ -9,6 +9,7 @@ import '../../data/models.dart';
 import '../../data/providers.dart';
 import 'card_stack.dart';
 import '../expenses/expenses_screen.dart';
+import '../actions/demo_action_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -59,7 +60,7 @@ class _Header extends ConsumerWidget {
           ),
         ),
         Pressable(
-          onTap: () {},
+          onTap: () => showDialog<void>(context: context, builder: (context) => AlertDialog(title: const Text('Notifications'), content: const Text('You are all caught up. View your recorded activity in Expenses.'), actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text('Done'))])),
           child: Container(
             width: 42,
             height: 42,
@@ -124,7 +125,7 @@ class _Section extends StatelessWidget {
   }
 }
 
-class _QuickActions extends StatelessWidget {
+class _QuickActions extends ConsumerWidget {
   const _QuickActions();
 
   static const _items = [
@@ -135,7 +136,7 @@ class _QuickActions extends StatelessWidget {
   ];
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return _Section(
       padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
       child: Row(
@@ -143,13 +144,17 @@ class _QuickActions extends StatelessWidget {
         children: [
           for (final (icon, label) in _items)
             Pressable(
-              onTap: () => ScaffoldMessenger.of(context)
-                ..hideCurrentSnackBar()
-                ..showSnackBar(SnackBar(
-                  content: Text('$label is coming soon'),
-                  behavior: SnackBarBehavior.floating,
-                  duration: const Duration(seconds: 1),
-                )),
+              onTap: () {
+                if (label != 'More') {
+                  Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => DemoActionScreen(action: label)));
+                } else {
+                  showModalBottomSheet<void>(context: context, builder: (sheetContext) => SafeArea(child: Column(mainAxisSize: MainAxisSize.min, children: [
+                    ListTile(leading: const Icon(Icons.receipt_long), title: const Text('Expenses & activity'), onTap: () { Navigator.pop(sheetContext); Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const ExpensesScreen())); }),
+                    ListTile(leading: const Icon(Icons.bar_chart), title: const Text('Statistics'), onTap: () { Navigator.pop(sheetContext); ref.read(tabProvider.notifier).select(2); }),
+                    ListTile(leading: const Icon(Icons.settings), title: const Text('Profile & settings'), onTap: () { Navigator.pop(sheetContext); ref.read(tabProvider.notifier).select(3); }),
+                  ])));
+                }
+              },
               child: SizedBox(
                 width: 64,
                 child: Column(
