@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'data/local_store.dart';
+import 'data/settings.dart';
 
 import 'core/theme/app_colors.dart';
 import 'core/theme/app_theme.dart';
@@ -23,15 +24,17 @@ Future<void> main() async {
   runApp(ProviderScope(overrides: [localStoreProvider.overrideWithValue(store)], child: const MagpieApp()));
 }
 
-class MagpieApp extends StatelessWidget {
+class MagpieApp extends ConsumerWidget {
   const MagpieApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return MaterialApp(
       title: 'Magpie',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(),
+      darkTheme: AppTheme.dark(),
+      themeMode: ref.watch(settingsProvider).themeMode,
       // On web/desktop, keep a phone-sized canvas so the layout matches the
       // mobile reference.
       builder: (context, child) {

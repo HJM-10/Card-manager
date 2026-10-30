@@ -89,10 +89,10 @@ class _AddCardSheetState extends ConsumerState<AddCardSheet> {
       padding: EdgeInsets.only(bottom: bottomInset),
       child: Container(
         width: double.infinity,
-        decoration: const BoxDecoration(
-          color: AppColors.sheet,
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.vertical(
-            top: Radius.circular(AppRadii.sheet),
+            top: const Radius.circular(AppRadii.sheet),
           ),
         ),
         padding: EdgeInsets.fromLTRB(20, 10, 20, 20 + safeBottom),
@@ -156,7 +156,7 @@ class _AddCardSheetState extends ConsumerState<AddCardSheet> {
             child: BrandLogo(
               key: ValueKey(brand),
               brand: brand,
-              color: AppColors.textPrimary,
+                    color: Theme.of(context).colorScheme.onSurface,
               height: 15,
             ),
           ),
@@ -238,7 +238,7 @@ class _AddingState extends StatelessWidget {
           const GooeyLoader(size: 40),
           const SizedBox(height: 14),
           Text('Adding your card...',
-              style: AppText.caption(AppColors.textPrimary)),
+              style: AppText.caption()),
         ],
       ),
     );
@@ -289,9 +289,9 @@ class _Field extends StatelessWidget {
         errorMaxLines: 2,
         labelText: hint == '000' ? 'CVV' : hint == 'MM/YY' ? 'Expiry date' : 'Card number',
         hintText: hint,
-        hintStyle: AppText.body(AppColors.textMuted),
+        hintStyle: AppText.body(Theme.of(context).colorScheme.onSurfaceVariant),
         filled: true,
-        fillColor: AppColors.field,
+        fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
         isDense: true,
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 14, vertical: 16),

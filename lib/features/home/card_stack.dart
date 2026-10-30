@@ -3,11 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme.dart';
-import '../../core/utils/card_utils.dart';
 import '../../core/widgets/brand_logo.dart';
 import '../../core/widgets/motion.dart';
 import '../../data/models.dart';
 import '../../data/providers.dart';
+import '../../data/settings.dart';
 import '../add_card/add_card_sheet.dart';
 
 const _frontHeight = 200.0;
@@ -127,14 +127,14 @@ class _EnterFromTop extends StatelessWidget {
   }
 }
 
-class _CardFace extends StatelessWidget {
+class _CardFace extends ConsumerWidget {
   const _CardFace({required this.card, required this.isFront});
 
   final CreditCard card;
   final bool isFront;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final masked = isFront
         ? '•••• •••• •••• ${card.last4}'
         : '•••• •••• ${card.last4}';
@@ -205,7 +205,7 @@ class _CardFace extends StatelessWidget {
                                 builder: (context, v, _) => FittedBox(
                                   fit: BoxFit.scaleDown,
                                   alignment: Alignment.centerLeft,
-                                  child: Text(formatMoney(v),
+                                  child: Text(ref.watch(moneyProvider)(v),
                                       style: AppText.balance()),
                                 ),
                               ),

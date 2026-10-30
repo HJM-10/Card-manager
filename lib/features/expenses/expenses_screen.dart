@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/models.dart';
 import '../../data/providers.dart';
-import '../../core/utils/card_utils.dart';
+import '../../data/settings.dart';
 
 class ExpensesScreen extends ConsumerStatefulWidget {
   const ExpensesScreen({super.key});
@@ -31,7 +31,7 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen> {
       if (entries.isEmpty) const Padding(padding: EdgeInsets.all(24), child: Text('No activity found. Add an expense or change your filters.')),
       for (final e in entries) Card(child: ListTile(
         leading: Icon(e.icon), title: Text(e.title), subtitle: Text('${e.timestamp}${e.kind == 'expense' ? '' : ' · Demo ${e.kind}'}'),
-        trailing: Text(formatMoney(e.amount)), onTap: () => showExpenseEditor(context, expense: e),
+        trailing: Text(ref.watch(moneyProvider)(e.amount)), onTap: () => showExpenseEditor(context, expense: e),
       )),
     ]));
   }

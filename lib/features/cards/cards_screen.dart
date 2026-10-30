@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/providers.dart';
 import '../../data/models.dart';
-import '../../core/utils/card_utils.dart';
+import '../../data/settings.dart';
 import '../add_card/add_card_sheet.dart';
 
 class CardsScreen extends ConsumerWidget {
@@ -34,7 +34,7 @@ class CardsScreen extends ConsumerWidget {
     await showModalBottomSheet<void>(context: context, isScrollControlled: true, builder: (sheetContext) => SafeArea(
       child: SingleChildScrollView(child: Padding(padding: const EdgeInsets.all(24), child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
         Text('${card.brand.name.toUpperCase()} •••• ${card.last4}', style: Theme.of(context).textTheme.titleLarge),
-        Text('Holder: ${card.holder}\nExpiry: ${card.expiry}\nDemo balance: ${formatMoney(card.balance)}'),
+        Text('Holder: ${card.holder}\nExpiry: ${card.expiry}\nDemo balance: ${ref.read(moneyProvider)(card.balance)}'),
         const SizedBox(height: 16),
         FilledButton(onPressed: () async {
           await ref.read(cardsProvider.notifier).bringToFront(card.id);

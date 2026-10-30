@@ -8,6 +8,7 @@ import '../../data/providers.dart';
 import '../home/home_screen.dart';
 import '../cards/cards_screen.dart';
 import '../statistics/statistics_screen.dart';
+import '../profile/profile_screen.dart';
 import '../../data/local_store.dart';
 
 /// Hosts the tabs and the floating dark nav bar.
@@ -18,7 +19,7 @@ class AppShell extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final tab = ref.watch(tabProvider);
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Stack(
         children: [
           IndexedStack(
@@ -27,7 +28,7 @@ class AppShell extends ConsumerWidget {
               HomeScreen(),
               CardsScreen(),
               StatisticsScreen(),
-              _Placeholder(title: 'Profile', icon: Icons.person_outline_rounded),
+              ProfileScreen(),
             ],
           ),
           // Fade content out under the nav bar.
@@ -43,8 +44,8 @@ class AppShell extends ConsumerWidget {
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
-                      AppColors.background.withValues(alpha: 0),
-                      AppColors.background,
+                      Theme.of(context).scaffoldBackgroundColor.withValues(alpha: 0),
+                      Theme.of(context).scaffoldBackgroundColor,
                     ],
                   ),
                 ),
@@ -141,26 +142,3 @@ class FloatingNavBar extends ConsumerWidget {
   }
 }
 
-class _Placeholder extends StatelessWidget {
-  const _Placeholder({required this.title, required this.icon});
-  final String title;
-  final IconData icon;
-
-  @override
-  Widget build(BuildContext context) {
-    return SafeArea(
-      child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 40, color: AppColors.textMuted),
-            const SizedBox(height: 12),
-            Text(title, style: AppText.title()),
-            const SizedBox(height: 4),
-            Text('Coming soon', style: AppText.caption()),
-          ],
-        ),
-      ),
-    );
-  }
-}

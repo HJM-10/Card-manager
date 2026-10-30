@@ -103,12 +103,12 @@ class ExpiryFormatter extends TextInputFormatter {
 }
 
 /// "$56,782.80"
-String formatMoney(double value) {
+String formatMoney(double value, {String symbol = r'$'}) {
   final fixed = value.abs().toStringAsFixed(2);
   final parts = fixed.split('.');
   final whole = parts[0].replaceAllMapped(
     RegExp(r'\B(?=(\d{3})+(?!\d))'),
     (_) => ',',
   );
-  return '${value < 0 ? '-' : ''}\$$whole.${parts[1]}';
+  return '${value < 0 ? '-' : ''}$symbol$whole.${parts[1]}';
 }

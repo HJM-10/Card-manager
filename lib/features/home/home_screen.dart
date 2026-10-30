@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme.dart';
-import '../../core/utils/card_utils.dart';
+import '../../data/settings.dart';
 import '../../core/widgets/motion.dart';
 import '../../data/models.dart';
 import '../../data/providers.dart';
@@ -41,18 +41,18 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-class _Header extends StatelessWidget {
+class _Header extends ConsumerWidget {
   const _Header();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Row(
       children: [
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Hello DailyFlutterUI', style: AppText.title()),
+              Text('Hello ${ref.watch(settingsProvider).name}', style: AppText.title()),
               const SizedBox(height: 2),
               Text("Let's save your money.", style: AppText.caption()),
             ],
@@ -63,15 +63,15 @@ class _Header extends StatelessWidget {
           child: Container(
             width: 42,
             height: 42,
-            decoration: const BoxDecoration(
-              color: AppColors.surface,
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surface,
               shape: BoxShape.circle,
             ),
             child: Stack(
               alignment: Alignment.center,
               children: [
-                const Icon(Icons.notifications_none_rounded,
-                    size: 21, color: AppColors.textPrimary),
+                Icon(Icons.notifications_none_rounded,
+                    size: 21, color: Theme.of(context).colorScheme.onSurface),
                 Positioned(
                   top: 9,
                   right: 10,
@@ -116,7 +116,7 @@ class _Section extends StatelessWidget {
     return Container(
       padding: padding ?? const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(AppRadii.section),
       ),
       child: child,
@@ -157,14 +157,14 @@ class _QuickActions extends StatelessWidget {
                     Container(
                       width: 42,
                       height: 42,
-                      decoration: const BoxDecoration(
-                        color: AppColors.iconTile,
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.surfaceContainerHighest,
                         shape: BoxShape.circle,
                       ),
-                      child: Icon(icon, size: 19, color: AppColors.textPrimary),
+                      child: Icon(icon, size: 19),
                     ),
                     const SizedBox(height: 8),
-                    Text(label, style: AppText.caption(AppColors.textPrimary)),
+                    Text(label, style: AppText.caption()),
                   ],
                 ),
               ),
@@ -201,12 +201,12 @@ class _ExpensesSection extends ConsumerWidget {
   }
 }
 
-class _ExpenseRow extends StatelessWidget {
+class _ExpenseRow extends ConsumerWidget {
   const _ExpenseRow({required this.expense});
   final Expense expense;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
@@ -214,11 +214,11 @@ class _ExpenseRow extends StatelessWidget {
           Container(
             width: 40,
             height: 40,
-            decoration: const BoxDecoration(
-              color: AppColors.iconTile,
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
               shape: BoxShape.circle,
             ),
-            child: Icon(expense.icon, size: 19, color: AppColors.textPrimary),
+            child: Icon(expense.icon, size: 19),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -231,7 +231,7 @@ class _ExpenseRow extends StatelessWidget {
               ],
             ),
           ),
-          Text(formatMoney(expense.amount), style: AppText.body()),
+          Text(ref.watch(moneyProvider)(expense.amount), style: AppText.body()),
         ],
       ),
     );
