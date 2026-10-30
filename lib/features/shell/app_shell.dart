@@ -6,6 +6,8 @@ import '../../core/theme/app_theme.dart';
 import '../../core/widgets/motion.dart';
 import '../../data/providers.dart';
 import '../home/home_screen.dart';
+import '../cards/cards_screen.dart';
+import '../../data/local_store.dart';
 
 /// Hosts the tabs and the floating dark nav bar.
 class AppShell extends ConsumerWidget {
@@ -22,7 +24,7 @@ class AppShell extends ConsumerWidget {
             index: tab,
             children: const [
               HomeScreen(),
-              _Placeholder(title: 'Cards', icon: Icons.credit_card_rounded),
+              CardsScreen(),
               _Placeholder(title: 'Statistics', icon: Icons.bar_chart_rounded),
               _Placeholder(title: 'Profile', icon: Icons.person_outline_rounded),
             ],
@@ -53,6 +55,15 @@ class AppShell extends ConsumerWidget {
             right: 0,
             bottom: 24,
             child: Center(child: FloatingNavBar()),
+          ),
+          Positioned(left: 16, right: 16, top: MediaQuery.paddingOf(context).top,
+            child: ValueListenableBuilder<String?>(
+              valueListenable: ref.watch(localStoreProvider).warning,
+              builder: (_, warning, __) => warning == null ? const SizedBox.shrink() : Material(
+                color: Theme.of(context).colorScheme.errorContainer,
+                child: Padding(padding: const EdgeInsets.all(12), child: Text(warning)),
+              ),
+            ),
           ),
         ],
       ),

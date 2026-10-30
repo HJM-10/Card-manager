@@ -20,4 +20,15 @@ void main() {
     expect(raw, isNot(contains('number')));
     expect(raw, isNot(contains('cvv')));
   });
+  test('removing all cards keeps an empty wallet after restart', () async {
+    final store = LocalStore(null);
+    final first = ProviderContainer(overrides: [localStoreProvider.overrideWithValue(store)]);
+    addTearDown(first.dispose);
+    for (final card in [...first.read(cardsProvider)]) {
+      await first.read(cardsProvider.notifier).remove(card.id);
+    }
+    final second = ProviderContainer(overrides: [localStoreProvider.overrideWithValue(store)]);
+    addTearDown(second.dispose);
+    expect(second.read(cardsProvider), isEmpty);
+  });
 }

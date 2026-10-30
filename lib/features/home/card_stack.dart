@@ -23,6 +23,16 @@ class CardStack extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final cards = ref.watch(cardsProvider);
+    if (cards.isEmpty) {
+      return Card(child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(children: [
+          const Icon(Icons.account_balance_wallet_outlined, size: 40),
+          const Text('Your wallet is empty'),
+          FilledButton.icon(onPressed: () => showAddCardSheet(context), icon: const Icon(Icons.add), label: const Text('Add Card')),
+        ]),
+      ));
+    }
     // Show at most 3 cards so the stack keeps the reference proportions.
     final visible = cards.length > 3 ? cards.sublist(cards.length - 3) : cards;
     final height = _frontHeight + (visible.length - 1) * _peek;

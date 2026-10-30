@@ -55,6 +55,8 @@ class CardsNotifier extends Notifier<List<CreditCard>> {
     state = cards;
   }
 
+  Future<void> remove(String id) => _save(state.where((c) => c.id != id).toList());
+
   /// Moves the tapped card to the front of the stack.
   Future<void> bringToFront(String id) async {
     final card = state.firstWhere((c) => c.id == id);
