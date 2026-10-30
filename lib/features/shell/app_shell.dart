@@ -7,6 +7,7 @@ import '../../core/widgets/motion.dart';
 import '../../data/providers.dart';
 import '../home/home_screen.dart';
 import '../cards/cards_screen.dart';
+import '../statistics/statistics_screen.dart';
 import '../../data/local_store.dart';
 
 /// Hosts the tabs and the floating dark nav bar.
@@ -25,7 +26,7 @@ class AppShell extends ConsumerWidget {
             children: const [
               HomeScreen(),
               CardsScreen(),
-              _Placeholder(title: 'Statistics', icon: Icons.bar_chart_rounded),
+              StatisticsScreen(),
               _Placeholder(title: 'Profile', icon: Icons.person_outline_rounded),
             ],
           ),
