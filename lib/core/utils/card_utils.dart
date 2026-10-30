@@ -36,14 +36,10 @@ bool passesLuhn(String input) {
   return sum % 10 == 0;
 }
 
-/// The demo number typed in the video (4123 4567 8671 2323) fails Luhn,
-/// so the check is off by default to match the reference flow.
-const kEnforceLuhn = false;
-
 bool isCardNumberValid(String input) {
   final digits = input.replaceAll(RegExp(r'\D'), '');
   if (digits.length != 16) return false;
-  return !kEnforceLuhn || passesLuhn(digits);
+  return detectBrand(digits) != CardBrand.unknown && passesLuhn(digits);
 }
 
 bool isExpiryValid(String input, {DateTime? now}) {

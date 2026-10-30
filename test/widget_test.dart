@@ -42,5 +42,11 @@ void main() {
       expect(passesLuhn('4242 4242 4242 4242'), isTrue);
       expect(passesLuhn('4123 4567 8671 2323'), isFalse);
     });
+    test('card validation rejects unchecked and unsupported numbers', () {
+      expect(isCardNumberValid('4242 4242 4242 4242'), isTrue);
+      expect(isCardNumberValid('4123 4567 8671 2323'), isFalse);
+      expect(isCardNumberValid('0000 0000 0000 0000'), isFalse);
+      expect(isCardNumberValid('4242'), isFalse);
+    });
   });
 }

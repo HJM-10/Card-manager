@@ -49,6 +49,13 @@ class CardsNotifier extends Notifier<List<CreditCard>> {
     required String number,
     required String expiry,
   }) async {
+    if (!isCardNumberValid(number) || !isExpiryValid(expiry)) {
+      throw ArgumentError('Check the card number and expiry date.');
+    }
+    final last4 = number.replaceAll(RegExp(r'\D'), '').substring(12);
+    if (state.any((c) => c.last4 == last4 && c.brand == detectBrand(number))) {
+      throw StateError('A card with this network and last four digits already exists.');
+    }
     await Future<void>.delayed(const Duration(milliseconds: 2400));
     final digits = number.replaceAll(RegExp(r'\D'), '');
     final gradient =

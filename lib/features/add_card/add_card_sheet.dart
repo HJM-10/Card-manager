@@ -36,6 +36,7 @@ class _AddCardSheetState extends ConsumerState<AddCardSheet> {
   final _expiry = TextEditingController();
   final _cvv = TextEditingController();
   bool _adding = false;
+  String? _error;
 
   @override
   void initState() {
@@ -62,13 +63,21 @@ class _AddCardSheetState extends ConsumerState<AddCardSheet> {
     if (!_valid || _adding) return;
     FocusScope.of(context).unfocus();
     HapticFeedback.lightImpact();
-    setState(() => _adding = true);
-    await ref
+    setState(() { _adding = true; _error = null; });
+    try {
+      await ref
         .read(cardsProvider.notifier)
         .addCard(number: _number.text, expiry: _expiry.text);
     if (!mounted) return;
     HapticFeedback.mediumImpact();
     Navigator.of(context).pop();
+    } catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _adding = false;
+        _error = error is StateError ? error.message.toString() : 'Unable to add card. Check the details and try again.';
+      });
+    }
   }
 
   @override
@@ -91,7 +100,7 @@ class _AddCardSheetState extends ConsumerState<AddCardSheet> {
           duration: const Duration(milliseconds: 420),
           curve: Curves.easeInOutCubic,
           alignment: Alignment.topCenter,
-          child: Column(
+          child: SingleChildScrollView(child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
@@ -109,7 +118,7 @@ class _AddCardSheetState extends ConsumerState<AddCardSheet> {
                 child: _adding ? const _AddingState() : _buildForm(),
               ),
             ],
-          ),
+          )),
         ),
       ),
     );
@@ -125,12 +134,17 @@ class _AddCardSheetState extends ConsumerState<AddCardSheet> {
         const SizedBox(height: 14),
         Text('Add Card', style: AppText.title().copyWith(fontSize: 18)),
         const SizedBox(height: 2),
-        Text('Enter your card details.', style: AppText.caption()),
+        Text('Demo wallet. Use test card details only.', style: AppText.caption()),
+        if (_error != null) Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: Text(_error!, style: const TextStyle(color: Colors.red)),
+        ),
         const SizedBox(height: 18),
         _Label('Card number'),
         _Field(
           controller: _number,
           hint: '0000 0000 0000 0000',
+          error: _number.text.isNotEmpty && !isCardNumberValid(_number.text) ? 'Enter a valid 16-digit Visa or Mastercard.' : null,
           formatters: [CardNumberFormatter()],
           autofocus: true,
           suffix: AnimatedSwitcher(
@@ -158,6 +172,7 @@ class _AddCardSheetState extends ConsumerState<AddCardSheet> {
                   _Field(
                     controller: _expiry,
                     hint: 'MM/YY',
+                    error: _expiry.text.isNotEmpty && !isExpiryValid(_expiry.text) ? 'Enter a current MM/YY.' : null,
                     formatters: [ExpiryFormatter()],
                   ),
                 ],
@@ -249,6 +264,7 @@ class _Field extends StatelessWidget {
     this.suffix,
     this.obscure = false,
     this.autofocus = false,
+    this.error,
   });
 
   final TextEditingController controller;
@@ -257,6 +273,7 @@ class _Field extends StatelessWidget {
   final Widget? suffix;
   final bool obscure;
   final bool autofocus;
+  final String? error;
 
   @override
   Widget build(BuildContext context) {
@@ -268,6 +285,9 @@ class _Field extends StatelessWidget {
       inputFormatters: formatters,
       style: AppText.body().copyWith(letterSpacing: 0.4),
       decoration: InputDecoration(
+        errorText: error,
+        errorMaxLines: 2,
+        labelText: hint == '000' ? 'CVV' : hint == 'MM/YY' ? 'Expiry date' : 'Card number',
         hintText: hint,
         hintStyle: AppText.body(AppColors.textMuted),
         filled: true,
@@ -293,3 +313,4 @@ class _Field extends StatelessWidget {
     );
   }
 }
+
