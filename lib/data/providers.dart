@@ -4,11 +4,22 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/theme/app_colors.dart';
 import '../core/utils/card_utils.dart';
 import 'models.dart';
+import 'local_store.dart';
 
 /// Cards in stack order: index 0 is the back, the last item is the front.
 class CardsNotifier extends Notifier<List<CreditCard>> {
   @override
-  List<CreditCard> build() => const [
+  List<CreditCard> build() {
+    final store = ref.read(localStoreProvider);
+    final saved = store.read('cards.v1');
+    if (saved is List) {
+      try {
+        return saved.map((c) => CreditCard.fromJson(Map<String, dynamic>.from(c as Map))).toList();
+      } catch (_) {
+        store.warning.value = 'Saved cards could not be read. Demo cards are shown.';
+      }
+    }
+    return const [
         CreditCard(
           id: 'c1',
           brand: CardBrand.visa,
@@ -37,11 +48,19 @@ class CardsNotifier extends Notifier<List<CreditCard>> {
           gradient: CardPalette.violet,
         ),
       ];
+  }
+
+  Future<void> _save(List<CreditCard> cards) async {
+    await ref.read(localStoreProvider).write('cards.v1', cards.map((c) => c.toJson()).toList());
+    state = cards;
+  }
 
   /// Moves the tapped card to the front of the stack.
-  void bringToFront(String id) {
+  Future<void> bringToFront(String id) async {
     final card = state.firstWhere((c) => c.id == id);
-    state = [...state.where((c) => c.id != id), card];
+    try {
+      await _save([...state.where((c) => c.id != id), card]);
+    } catch (_) { /* LocalStore exposes the save failure to the app. */ }
   }
 
   /// Simulates a network call, then adds the card at the front.
@@ -60,7 +79,7 @@ class CardsNotifier extends Notifier<List<CreditCard>> {
     final digits = number.replaceAll(RegExp(r'\D'), '');
     final gradient =
         CardPalette.forNewCards[state.length % CardPalette.forNewCards.length];
-    state = [
+    await _save([
       ...state,
       CreditCard(
         id: 'c${DateTime.now().microsecondsSinceEpoch}',
@@ -71,7 +90,7 @@ class CardsNotifier extends Notifier<List<CreditCard>> {
         balance: 0,
         gradient: gradient,
       ),
-    ];
+    ]);
   }
 }
 

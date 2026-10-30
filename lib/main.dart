@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'data/local_store.dart';
 
 import 'core/theme/app_colors.dart';
 import 'core/theme/app_theme.dart';
 import 'features/splash/splash_screen.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
@@ -17,7 +19,8 @@ void main() {
       systemNavigationBarIconBrightness: Brightness.dark,
     ),
   );
-  runApp(const ProviderScope(child: MagpieApp()));
+  final store = LocalStore(await SharedPreferences.getInstance());
+  runApp(ProviderScope(overrides: [localStoreProvider.overrideWithValue(store)], child: const MagpieApp()));
 }
 
 class MagpieApp extends StatelessWidget {

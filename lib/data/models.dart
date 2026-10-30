@@ -20,6 +20,20 @@ class CreditCard {
   final String expiry;
   final double balance;
   final List<Color> gradient;
+
+  Map<String, Object> toJson() => {
+    'id': id, 'brand': brand.name, 'last4': last4, 'holder': holder,
+    'expiry': expiry, 'balance': balance,
+    'gradient': gradient.map((c) => c.toARGB32()).toList(),
+  };
+
+  factory CreditCard.fromJson(Map<String, dynamic> json) => CreditCard(
+    id: json['id'] as String,
+    brand: CardBrand.values.byName(json['brand'] as String),
+    last4: json['last4'] as String, holder: json['holder'] as String,
+    expiry: json['expiry'] as String, balance: (json['balance'] as num).toDouble(),
+    gradient: (json['gradient'] as List).map((c) => Color(c as int)).toList(),
+  );
 }
 
 class Expense {
