@@ -10,10 +10,14 @@ void main() {
     SharedPreferences.setMockInitialValues({});
     final prefs = await SharedPreferences.getInstance();
     final store = LocalStore(prefs);
-    final first = ProviderContainer(overrides: [localStoreProvider.overrideWithValue(store)]);
+    final first = ProviderContainer(
+      overrides: [localStoreProvider.overrideWithValue(store)],
+    );
     addTearDown(first.dispose);
     await first.read(cardsProvider.notifier).bringToFront('c1');
-    final second = ProviderContainer(overrides: [localStoreProvider.overrideWithValue(LocalStore(prefs))]);
+    final second = ProviderContainer(
+      overrides: [localStoreProvider.overrideWithValue(LocalStore(prefs))],
+    );
     addTearDown(second.dispose);
     expect(second.read(cardsProvider).last.id, 'c1');
     final raw = prefs.getString('cards.v1')!;
@@ -22,12 +26,16 @@ void main() {
   });
   test('removing all cards keeps an empty wallet after restart', () async {
     final store = LocalStore(null);
-    final first = ProviderContainer(overrides: [localStoreProvider.overrideWithValue(store)]);
+    final first = ProviderContainer(
+      overrides: [localStoreProvider.overrideWithValue(store)],
+    );
     addTearDown(first.dispose);
     for (final card in [...first.read(cardsProvider)]) {
       await first.read(cardsProvider.notifier).remove(card.id);
     }
-    final second = ProviderContainer(overrides: [localStoreProvider.overrideWithValue(store)]);
+    final second = ProviderContainer(
+      overrides: [localStoreProvider.overrideWithValue(store)],
+    );
     addTearDown(second.dispose);
     expect(second.read(cardsProvider), isEmpty);
   });

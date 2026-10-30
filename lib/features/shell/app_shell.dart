@@ -44,7 +44,9 @@ class AppShell extends ConsumerWidget {
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
-                      Theme.of(context).scaffoldBackgroundColor.withValues(alpha: 0),
+                      Theme.of(
+                        context,
+                      ).scaffoldBackgroundColor.withValues(alpha: 0),
                       Theme.of(context).scaffoldBackgroundColor,
                     ],
                   ),
@@ -52,19 +54,27 @@ class AppShell extends ConsumerWidget {
               ),
             ),
           ),
-          const Positioned(
+          Positioned(
             left: 0,
             right: 0,
-            bottom: 24,
-            child: Center(child: FloatingNavBar()),
+            bottom: 16 + MediaQuery.paddingOf(context).bottom,
+            child: const Center(child: FloatingNavBar()),
           ),
-          Positioned(left: 16, right: 16, top: MediaQuery.paddingOf(context).top,
+          Positioned(
+            left: 16,
+            right: 16,
+            top: MediaQuery.paddingOf(context).top,
             child: ValueListenableBuilder<String?>(
               valueListenable: ref.watch(localStoreProvider).warning,
-              builder: (_, warning, __) => warning == null ? const SizedBox.shrink() : Material(
-                color: Theme.of(context).colorScheme.errorContainer,
-                child: Padding(padding: const EdgeInsets.all(12), child: Text(warning)),
-              ),
+              builder: (_, warning, __) => warning == null
+                  ? const SizedBox.shrink()
+                  : Material(
+                      color: Theme.of(context).colorScheme.errorContainer,
+                      child: Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Text(warning),
+                      ),
+                    ),
             ),
           ),
         ],
@@ -105,34 +115,47 @@ class FloatingNavBar extends ConsumerWidget {
           for (var i = 0; i < _items.length; i++)
             Pressable(
               onTap: () => ref.read(tabProvider.notifier).select(i),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 320),
-                curve: Curves.easeOutCubic,
-                height: 44,
-                padding: EdgeInsets.symmetric(horizontal: i == current ? 16 : 13),
-                decoration: BoxDecoration(
-                  color: i == current ? AppColors.darkSoft : Colors.transparent,
-                  borderRadius: BorderRadius.circular(999),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      _items[i].$1,
-                      size: 19,
-                      color: i == current ? Colors.white : Colors.white54,
-                    ),
-                    AnimatedSize(
-                      duration: const Duration(milliseconds: 320),
-                      curve: Curves.easeOutCubic,
-                      child: i == current
-                          ? Padding(
-                              padding: const EdgeInsets.only(left: 7),
-                              child: Text(_items[i].$2,
-                                  style: AppText.caption(Colors.white)),
-                            )
-                          : const SizedBox.shrink(),
-                    ),
-                  ],
+              child: Semantics(
+                label: _items[i].$2,
+                selected: i == current,
+                excludeSemantics: true,
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 320),
+                  curve: Curves.easeOutCubic,
+                  height: 44,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: i == current ? 16 : 13,
+                  ),
+                  decoration: BoxDecoration(
+                    color: i == current
+                        ? AppColors.darkSoft
+                        : Colors.transparent,
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        _items[i].$1,
+                        size: 19,
+                        color: i == current ? Colors.white : Colors.white54,
+                      ),
+                      AnimatedSize(
+                        duration: const Duration(milliseconds: 320),
+                        curve: Curves.easeOutCubic,
+                        child:
+                            i == current &&
+                                MediaQuery.textScalerOf(context).scale(12) <= 16
+                            ? Padding(
+                                padding: const EdgeInsets.only(left: 7),
+                                child: Text(
+                                  _items[i].$2,
+                                  style: AppText.caption(Colors.white),
+                                ),
+                              )
+                            : const SizedBox.shrink(),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -141,4 +164,3 @@ class FloatingNavBar extends ConsumerWidget {
     );
   }
 }
-

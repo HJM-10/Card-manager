@@ -40,7 +40,10 @@ class _SplashScreenState extends State<SplashScreen>
   ];
 
   Animation<double> _curve(double begin, double end, Curve curve) =>
-      CurvedAnimation(parent: _c, curve: Interval(begin, end, curve: curve));
+      CurvedAnimation(
+        parent: _c,
+        curve: Interval(begin, end, curve: curve),
+      );
 
   @override
   void initState() {
@@ -57,8 +60,10 @@ class _SplashScreenState extends State<SplashScreen>
         transitionsBuilder: (_, a, __, child) => FadeTransition(
           opacity: CurvedAnimation(parent: a, curve: Curves.easeOut),
           child: SlideTransition(
-            position: Tween(begin: const Offset(0, 0.03), end: Offset.zero)
-                .animate(CurvedAnimation(parent: a, curve: Curves.easeOutCubic)),
+            position: Tween(
+              begin: const Offset(0, 0.03),
+              end: Offset.zero,
+            ).animate(CurvedAnimation(parent: a, curve: Curves.easeOutCubic)),
             child: child,
           ),
         ),

@@ -53,14 +53,31 @@ class _Header extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Hello ${ref.watch(settingsProvider).name}', style: AppText.title()),
+              Text(
+                'Hello ${ref.watch(settingsProvider).name}',
+                style: AppText.title(),
+              ),
               const SizedBox(height: 2),
               Text("Let's save your money.", style: AppText.caption()),
             ],
           ),
         ),
         Pressable(
-          onTap: () => showDialog<void>(context: context, builder: (context) => AlertDialog(title: const Text('Notifications'), content: const Text('You are all caught up. View your recorded activity in Expenses.'), actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text('Done'))])),
+          onTap: () => showDialog<void>(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text('Notifications'),
+              content: const Text(
+                'You are all caught up. View your recorded activity in Expenses.',
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Done'),
+                ),
+              ],
+            ),
+          ),
           child: Container(
             width: 42,
             height: 42,
@@ -71,8 +88,11 @@ class _Header extends ConsumerWidget {
             child: Stack(
               alignment: Alignment.center,
               children: [
-                Icon(Icons.notifications_none_rounded,
-                    size: 21, color: Theme.of(context).colorScheme.onSurface),
+                Icon(
+                  Icons.notifications_none_rounded,
+                  size: 21,
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
                 Positioned(
                   top: 9,
                   right: 10,
@@ -146,13 +166,50 @@ class _QuickActions extends ConsumerWidget {
             Pressable(
               onTap: () {
                 if (label != 'More') {
-                  Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => DemoActionScreen(action: label)));
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => DemoActionScreen(action: label),
+                    ),
+                  );
                 } else {
-                  showModalBottomSheet<void>(context: context, builder: (sheetContext) => SafeArea(child: Column(mainAxisSize: MainAxisSize.min, children: [
-                    ListTile(leading: const Icon(Icons.receipt_long), title: const Text('Expenses & activity'), onTap: () { Navigator.pop(sheetContext); Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const ExpensesScreen())); }),
-                    ListTile(leading: const Icon(Icons.bar_chart), title: const Text('Statistics'), onTap: () { Navigator.pop(sheetContext); ref.read(tabProvider.notifier).select(2); }),
-                    ListTile(leading: const Icon(Icons.settings), title: const Text('Profile & settings'), onTap: () { Navigator.pop(sheetContext); ref.read(tabProvider.notifier).select(3); }),
-                  ])));
+                  showModalBottomSheet<void>(
+                    context: context,
+                    builder: (sheetContext) => SafeArea(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          ListTile(
+                            leading: const Icon(Icons.receipt_long),
+                            title: const Text('Expenses & activity'),
+                            onTap: () {
+                              Navigator.pop(sheetContext);
+                              Navigator.of(context).push(
+                                MaterialPageRoute<void>(
+                                  builder: (_) => const ExpensesScreen(),
+                                ),
+                              );
+                            },
+                          ),
+                          ListTile(
+                            leading: const Icon(Icons.bar_chart),
+                            title: const Text('Statistics'),
+                            onTap: () {
+                              Navigator.pop(sheetContext);
+                              ref.read(tabProvider.notifier).select(2);
+                            },
+                          ),
+                          ListTile(
+                            leading: const Icon(Icons.settings),
+                            title: const Text('Profile & settings'),
+                            onTap: () {
+                              Navigator.pop(sheetContext);
+                              ref.read(tabProvider.notifier).select(3);
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
                 }
               },
               child: SizedBox(
@@ -163,7 +220,9 @@ class _QuickActions extends ConsumerWidget {
                       width: 42,
                       height: 42,
                       decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.surfaceContainerHighest,
                         shape: BoxShape.circle,
                       ),
                       child: Icon(icon, size: 19),
@@ -191,15 +250,35 @@ class _ExpensesSection extends ConsumerWidget {
         children: [
           Row(
             children: [
-              Text('Manage Expenses', style: AppText.heading()),
-              const Spacer(),
-              TextButton(onPressed: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const ExpensesScreen())), child: const Text('View All')),
+              Expanded(
+                child: Text('Recent activity', style: AppText.heading()),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => const ExpensesScreen(),
+                  ),
+                ),
+                child: const Text('View All'),
+              ),
             ],
           ),
           const SizedBox(height: 6),
-          if (expenses.isEmpty) const Padding(padding: EdgeInsets.all(16), child: Text('No expenses yet. Add one to start tracking.')),
-          for (final e in expenses.take(5)) InkWell(onTap: () => showExpenseEditor(context, expense: e), child: _ExpenseRow(expense: e)),
-          TextButton.icon(onPressed: () => showExpenseEditor(context), icon: const Icon(Icons.add), label: const Text('Add expense')),
+          if (expenses.isEmpty)
+            const Padding(
+              padding: EdgeInsets.all(16),
+              child: Text('No expenses yet. Add one to start tracking.'),
+            ),
+          for (final e in expenses.take(5))
+            InkWell(
+              onTap: () => showExpenseEditor(context, expense: e),
+              child: _ExpenseRow(expense: e),
+            ),
+          TextButton.icon(
+            onPressed: () => showExpenseEditor(context),
+            icon: const Icon(Icons.add),
+            label: const Text('Add expense'),
+          ),
         ],
       ),
     );

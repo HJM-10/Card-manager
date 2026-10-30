@@ -24,18 +24,29 @@ class CardStack extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final cards = ref.watch(cardsProvider);
     if (cards.isEmpty) {
-      return Card(child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(children: [
-          const Icon(Icons.account_balance_wallet_outlined, size: 40),
-          const Text('Your wallet is empty'),
-          FilledButton.icon(onPressed: () => showAddCardSheet(context), icon: const Icon(Icons.add), label: const Text('Add Card')),
-        ]),
-      ));
+      return Card(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            children: [
+              const Icon(Icons.account_balance_wallet_outlined, size: 40),
+              const Text('Your wallet is empty'),
+              FilledButton.icon(
+                onPressed: () => showAddCardSheet(context),
+                icon: const Icon(Icons.add),
+                label: const Text('Add Card'),
+              ),
+            ],
+          ),
+        ),
+      );
     }
     // Show at most 3 cards so the stack keeps the reference proportions.
     final visible = cards.length > 3 ? cards.sublist(cards.length - 3) : cards;
-    final height = _frontHeight + (visible.length - 1) * _peek;
+    final frontHeight =
+        _frontHeight +
+        (MediaQuery.textScalerOf(context).scale(14) - 14).clamp(0, 42) * 5;
+    final height = frontHeight + (visible.length - 1) * _peek;
 
     return SizedBox(
       height: height,
@@ -50,15 +61,15 @@ class CardStack extends ConsumerWidget {
               top: i * _peek,
               left: 0,
               right: 0,
-              height: _frontHeight,
+              height: frontHeight,
               child: _EnterFromTop(
                 child: Pressable(
                   scale: 0.985,
                   onTap: i == visible.length - 1
                       ? null
                       : () => ref
-                          .read(cardsProvider.notifier)
-                          .bringToFront(visible[i].id),
+                            .read(cardsProvider.notifier)
+                            .bringToFront(visible[i].id),
                   child: _CardFace(
                     card: visible[i],
                     isFront: i == visible.length - 1,
@@ -78,22 +89,28 @@ class CardStack extends ConsumerWidget {
                   color: AppColors.dark,
                   borderRadius: BorderRadius.circular(999),
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      width: 18,
-                      height: 18,
-                      decoration: const BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: 18,
+                        height: 18,
+                        decoration: const BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.add,
+                          size: 14,
+                          color: AppColors.dark,
+                        ),
                       ),
-                      child: const Icon(Icons.add,
-                          size: 14, color: AppColors.dark),
-                    ),
-                    const SizedBox(width: 8),
-                    Text('Add Card', style: AppText.caption(Colors.white)),
-                  ],
+                      const SizedBox(width: 8),
+                      Text('Add Card', style: AppText.caption(Colors.white)),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -156,16 +173,8 @@ class _CardFace extends ConsumerWidget {
         child: Stack(
           children: [
             // Soft decorative glow circles.
-            Positioned(
-              right: -40,
-              top: -60,
-              child: _glow(170),
-            ),
-            Positioned(
-              left: -50,
-              bottom: -80,
-              child: _glow(190),
-            ),
+            Positioned(right: -40, top: -60, child: _glow(170)),
+            Positioned(left: -50, bottom: -80, child: _glow(190)),
             Padding(
               padding: const EdgeInsets.fromLTRB(18, 13, 18, 16),
               child: Column(
@@ -177,10 +186,16 @@ class _CardFace extends ConsumerWidget {
                       children: [
                         BrandLogo(brand: card.brand, height: 14),
                         const Spacer(),
-                        Text(
-                          masked,
-                          style: AppText.tiny(Colors.white70)
-                              .copyWith(letterSpacing: 0.6),
+                        Flexible(
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(
+                              masked,
+                              style: AppText.tiny(
+                                Colors.white70,
+                              ).copyWith(letterSpacing: 0.6),
+                            ),
+                          ),
                         ),
                       ],
                     ),
@@ -194,19 +209,26 @@ class _CardFace extends ConsumerWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text('Balance',
-                                  style: AppText.tiny(Colors.white60)),
+                              Text(
+                                'Demo balance',
+                                style: AppText.tiny(Colors.white60),
+                              ),
                               const SizedBox(height: 2),
                               TweenAnimationBuilder<double>(
                                 key: ValueKey(card.id),
-                                tween: Tween(begin: 0, end: card.balance),
+                                tween: Tween(
+                                  begin: 0,
+                                  end: ref.watch(demoBalanceProvider(card.id)),
+                                ),
                                 duration: const Duration(milliseconds: 1200),
                                 curve: Curves.easeOutCubic,
                                 builder: (context, v, _) => FittedBox(
                                   fit: BoxFit.scaleDown,
                                   alignment: Alignment.centerLeft,
-                                  child: Text(ref.watch(moneyProvider)(v),
-                                      style: AppText.balance()),
+                                  child: Text(
+                                    ref.watch(moneyProvider)(v),
+                                    style: AppText.balance(),
+                                  ),
                                 ),
                               ),
                             ],
@@ -215,11 +237,15 @@ class _CardFace extends ConsumerWidget {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
-                            Text('Exp. Date',
-                                style: AppText.tiny(Colors.white60)),
+                            Text(
+                              'Exp. Date',
+                              style: AppText.tiny(Colors.white60),
+                            ),
                             const SizedBox(height: 4),
-                            Text(card.expiry,
-                                style: AppText.caption(Colors.white)),
+                            Text(
+                              card.expiry,
+                              style: AppText.caption(Colors.white),
+                            ),
                           ],
                         ),
                       ],
@@ -227,7 +253,12 @@ class _CardFace extends ConsumerWidget {
                     const Spacer(),
                     Text('Name', style: AppText.tiny(Colors.white60)),
                     const SizedBox(height: 2),
-                    Text(card.holder, style: AppText.caption(Colors.white)),
+                    Text(
+                      card.holder,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppText.caption(Colors.white),
+                    ),
                   ],
                 ],
               ),
@@ -239,13 +270,13 @@ class _CardFace extends ConsumerWidget {
   }
 
   Widget _glow(double size) => Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: Colors.white.withValues(alpha: 0.06),
-        ),
-      );
+    width: size,
+    height: size,
+    decoration: BoxDecoration(
+      shape: BoxShape.circle,
+      color: Colors.white.withValues(alpha: 0.06),
+    ),
+  );
 }
 
 /// Rounded card with an inverted-corner cut-out in the bottom-right.

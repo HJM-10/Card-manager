@@ -20,8 +20,20 @@ Future<void> main() async {
       systemNavigationBarIconBrightness: Brightness.dark,
     ),
   );
-  final store = LocalStore(await SharedPreferences.getInstance());
-  runApp(ProviderScope(overrides: [localStoreProvider.overrideWithValue(store)], child: const MagpieApp()));
+  late final LocalStore store;
+  try {
+    store = LocalStore(await SharedPreferences.getInstance());
+  } catch (_) {
+    store = LocalStore(null, unavailable: true);
+    store.warning.value =
+        'Local storage is unavailable. Please restart before saving changes.';
+  }
+  runApp(
+    ProviderScope(
+      overrides: [localStoreProvider.overrideWithValue(store)],
+      child: const MagpieApp(),
+    ),
+  );
 }
 
 class MagpieApp extends ConsumerWidget {

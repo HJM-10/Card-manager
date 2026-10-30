@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import '../utils/card_utils.dart';
 
@@ -22,7 +21,8 @@ class BrandLogo extends StatelessWidget {
       case CardBrand.visa:
         return Text(
           'VISA',
-          style: GoogleFonts.poppins(
+          style: TextStyle(
+            fontFamily: 'PlusJakartaSans',
             fontSize: height,
             height: 1,
             fontWeight: FontWeight.w800,
@@ -38,13 +38,13 @@ class BrandLogo extends StatelessWidget {
           height: d,
           child: Stack(
             children: [
-              Positioned(
-                left: 0,
-                child: _circle(d, const Color(0xFFEB001B)),
-              ),
+              Positioned(left: 0, child: _circle(d, const Color(0xFFEB001B))),
               Positioned(
                 right: 0,
-                child: _circle(d, const Color(0xFFF79E1B).withValues(alpha: 0.9)),
+                child: _circle(
+                  d,
+                  const Color(0xFFF79E1B).withValues(alpha: 0.9),
+                ),
               ),
             ],
           ),
@@ -55,8 +55,8 @@ class BrandLogo extends StatelessWidget {
   }
 
   Widget _circle(double d, Color c) => Container(
-        width: d,
-        height: d,
-        decoration: BoxDecoration(color: c, shape: BoxShape.circle),
-      );
+    width: d,
+    height: d,
+    decoration: BoxDecoration(color: c, shape: BoxShape.circle),
+  );
 }

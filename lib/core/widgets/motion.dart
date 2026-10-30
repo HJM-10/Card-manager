@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 /// Fades and slides its child in after [delay]. Used for staggered entrances.
 class FadeSlideIn extends StatefulWidget {
@@ -21,10 +22,14 @@ class FadeSlideIn extends StatefulWidget {
 
 class _FadeSlideInState extends State<FadeSlideIn>
     with SingleTickerProviderStateMixin {
-  late final AnimationController _c =
-      AnimationController(vsync: this, duration: widget.duration);
-  late final Animation<double> _curve =
-      CurvedAnimation(parent: _c, curve: Curves.easeOutCubic);
+  late final AnimationController _c = AnimationController(
+    vsync: this,
+    duration: widget.duration,
+  );
+  late final Animation<double> _curve = CurvedAnimation(
+    parent: _c,
+    curve: Curves.easeOutCubic,
+  );
 
   @override
   void initState() {
@@ -75,6 +80,7 @@ class Pressable extends StatefulWidget {
 
 class _PressableState extends State<Pressable> {
   bool _down = false;
+  bool _focused = false;
 
   void _set(bool v) {
     if (widget.onTap == null) return;
@@ -83,17 +89,48 @@ class _PressableState extends State<Pressable> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTapDown: (_) => _set(true),
-      onTapUp: (_) => _set(false),
-      onTapCancel: () => _set(false),
-      onTap: widget.onTap,
-      child: AnimatedScale(
-        scale: _down ? widget.scale : 1,
-        duration: const Duration(milliseconds: 120),
-        curve: Curves.easeOut,
-        child: widget.child,
+    return Semantics(
+      button: true,
+      enabled: widget.onTap != null,
+      child: FocusableActionDetector(
+        enabled: widget.onTap != null,
+        onShowFocusHighlight: (focused) => setState(() => _focused = focused),
+        shortcuts: const {
+          SingleActivator(LogicalKeyboardKey.enter): ActivateIntent(),
+          SingleActivator(LogicalKeyboardKey.space): ActivateIntent(),
+        },
+        actions: {
+          ActivateIntent: CallbackAction<ActivateIntent>(
+            onInvoke: (_) {
+              widget.onTap?.call();
+              return null;
+            },
+          ),
+        },
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTapDown: (_) => _set(true),
+          onTapUp: (_) => _set(false),
+          onTapCancel: () => _set(false),
+          onTap: widget.onTap,
+          child: AnimatedScale(
+            scale: _down ? widget.scale : 1,
+            duration: const Duration(milliseconds: 120),
+            curve: Curves.easeOut,
+            child: Container(
+              foregroundDecoration: _focused
+                  ? BoxDecoration(
+                      border: Border.all(
+                        color: Theme.of(context).colorScheme.primary,
+                        width: 2,
+                      ),
+                      borderRadius: BorderRadius.circular(16),
+                    )
+                  : null,
+              child: widget.child,
+            ),
+          ),
+        ),
       ),
     );
   }

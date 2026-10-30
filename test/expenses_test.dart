@@ -14,16 +14,29 @@ void main() {
   });
   test('expense create, edit, restore and delete', () async {
     final store = LocalStore(null);
-    final container = ProviderContainer(overrides: [localStoreProvider.overrideWithValue(store)]);
+    final container = ProviderContainer(
+      overrides: [localStoreProvider.overrideWithValue(store)],
+    );
     addTearDown(container.dispose);
-    Expense entry(int cents) => Expense(id: 'e1', title: 'Lunch', date: DateTime(2026, 10, 30), cents: cents, category: 'Food', cardId: 'c1');
+    Expense entry(int cents) => Expense(
+      id: 'e1',
+      title: 'Lunch',
+      date: DateTime(2026, 10, 30),
+      cents: cents,
+      category: 'Food',
+      cardId: 'c1',
+    );
     await container.read(expensesProvider.notifier).upsert(entry(1230));
     await container.read(expensesProvider.notifier).upsert(entry(1599));
     expect(container.read(expensesProvider).single.cents, 1599);
-    final restored = ProviderContainer(overrides: [localStoreProvider.overrideWithValue(store)]);
+    expect(container.read(demoBalanceProvider('c1')), 12464.51);
+    final restored = ProviderContainer(
+      overrides: [localStoreProvider.overrideWithValue(store)],
+    );
     addTearDown(restored.dispose);
     expect(restored.read(expensesProvider).single.cardId, 'c1');
     await restored.read(expensesProvider.notifier).remove('e1');
     expect(restored.read(expensesProvider), isEmpty);
+    expect(restored.read(demoBalanceProvider('c1')), 12480.50);
   });
 }
