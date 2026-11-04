@@ -8,6 +8,7 @@ import 'data/settings.dart';
 import 'core/theme/app_colors.dart';
 import 'core/theme/app_theme.dart';
 import 'features/splash/splash_screen.dart';
+import 'features/account/spendtrail_app.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,7 +32,9 @@ Future<void> main() async {
   runApp(
     ProviderScope(
       overrides: [localStoreProvider.overrideWithValue(store)],
-      child: const MagpieApp(),
+      child: const bool.fromEnvironment('LEGACY_DEMO')
+          ? const MagpieApp()
+          : const SpendTrailApp(),
     ),
   );
 }
