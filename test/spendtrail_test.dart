@@ -1,10 +1,13 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
+import 'package:my_app/data/local_store.dart';
 import 'package:my_app/data/spendtrail_api.dart';
 import 'package:my_app/features/account/spendtrail_app.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   testWidgets('register, add masked card, sign out and sign in again', (
@@ -37,7 +40,7 @@ void main() {
       }),
     );
     addTearDown(api.close);
-    await tester.pumpWidget(SpendTrailApp(api: api));
+    await tester.pumpWidget(ProviderScope(child: SpendTrailApp(api: api)));
     await tester.tap(find.text('New here? Create account'));
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextFormField).at(0), 'Alice');
@@ -49,6 +52,7 @@ void main() {
       find.byType(TextFormField).at(2),
       'synthetic-password',
     );
+    await tester.ensureVisible(find.text('Create account'));
     await tester.tap(find.text('Create account'));
     await tester.pumpAndSettle();
     expect(find.textContaining('Your wallet is ready'), findsOneWidget);
@@ -87,7 +91,7 @@ void main() {
       ),
     );
     addTearDown(api.close);
-    await tester.pumpWidget(SpendTrailApp(api: api));
+    await tester.pumpWidget(ProviderScope(child: SpendTrailApp(api: api)));
     await tester.enterText(
       find.byType(TextFormField).at(0),
       'alice@example.com',
@@ -103,5 +107,56 @@ void main() {
       tester.widget<FilledButton>(find.byType(FilledButton)).onPressed,
       isNotNull,
     );
+  });
+
+  testWidgets('appearance persists and sign-up fits a small screen', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(320, 568));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    SharedPreferences.setMockInitialValues({});
+    final preferences = await SharedPreferences.getInstance();
+    Widget app() => ProviderScope(
+      overrides: [
+        localStoreProvider.overrideWithValue(LocalStore(preferences)),
+      ],
+      child: const SpendTrailApp(),
+    );
+
+    await tester.pumpWidget(app());
+    await tester.tap(find.byTooltip('Appearance'));
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.byWidgetPredicate(
+        (widget) =>
+            widget is CheckedPopupMenuItem<String> && widget.value == 'dark',
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(
+      tester.widget<MaterialApp>(find.byType(MaterialApp)).themeMode,
+      ThemeMode.dark,
+    );
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pumpWidget(app());
+    await tester.pumpAndSettle();
+    expect(
+      tester.widget<MaterialApp>(find.byType(MaterialApp)).themeMode,
+      ThemeMode.dark,
+    );
+    await tester.tap(find.text('Sign up'));
+    await tester.pumpAndSettle();
+    expect(find.text('Create your account.'), findsOneWidget);
+    await tester.ensureVisible(find.byTooltip('Show password'));
+    await tester.tap(find.byTooltip('Show password'));
+    await tester.pumpAndSettle();
+    expect(
+      tester.widget<EditableText>(find.byType(EditableText).last).obscureText,
+      isFalse,
+    );
+    await tester.ensureVisible(find.text('Create account'));
+    expect(find.text('Create account').hitTestable(), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 }

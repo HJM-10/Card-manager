@@ -1,19 +1,38 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../data/settings.dart';
 import '../../data/spendtrail_api.dart';
 
-class SpendTrailApp extends StatefulWidget {
+class SpendTrailApp extends ConsumerStatefulWidget {
   const SpendTrailApp({super.key, this.api});
   final SpendTrailApi? api;
 
   @override
-  State<SpendTrailApp> createState() => _SpendTrailAppState();
+  ConsumerState<SpendTrailApp> createState() => _SpendTrailAppState();
 }
 
-class _SpendTrailAppState extends State<SpendTrailApp> {
+class _SpendTrailAppState extends ConsumerState<SpendTrailApp> {
   late final api = widget.api ?? SpendTrailApi();
   Map<String, dynamic>? user;
+
+  ThemeData theme(Brightness brightness) {
+    final light = brightness == Brightness.light;
+    return ThemeData(
+      useMaterial3: true,
+      fontFamily: 'PlusJakartaSans',
+      scaffoldBackgroundColor: light ? const Color(0xFFFFF7ED) : null,
+      colorScheme: ColorScheme.fromSeed(
+        brightness: brightness,
+        seedColor: const Color(0xFFEB7867),
+        primary: light ? const Color(0xFF102735) : null,
+      ),
+      inputDecorationTheme: const InputDecorationTheme(
+        border: OutlineInputBorder(),
+      ),
+    );
+  }
 
   @override
   void dispose() {
@@ -25,18 +44,9 @@ class _SpendTrailAppState extends State<SpendTrailApp> {
   Widget build(BuildContext context) => MaterialApp(
     title: 'SpendTrail',
     debugShowCheckedModeBanner: false,
-    theme: ThemeData(
-      useMaterial3: true,
-      fontFamily: 'PlusJakartaSans',
-      scaffoldBackgroundColor: const Color(0xFFFFF7ED),
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: const Color(0xFFEB7867),
-        primary: const Color(0xFF102735),
-      ),
-      inputDecorationTheme: const InputDecorationTheme(
-        border: OutlineInputBorder(),
-      ),
-    ),
+    theme: theme(Brightness.light),
+    darkTheme: theme(Brightness.dark),
+    themeMode: ref.watch(settingsProvider).themeMode,
     home: user == null
         ? _SignIn(
             api: api,
@@ -48,6 +58,68 @@ class _SpendTrailAppState extends State<SpendTrailApp> {
             onSignedOut: () => setState(() => user = null),
           ),
   );
+}
+
+class _AppearanceMenu extends ConsumerStatefulWidget {
+  const _AppearanceMenu({this.onDark = false});
+
+  final bool onDark;
+
+  @override
+  ConsumerState<_AppearanceMenu> createState() => _AppearanceMenuState();
+}
+
+class _AppearanceMenuState extends ConsumerState<_AppearanceMenu> {
+  bool saving = false;
+
+  Future<void> select(String appearance) async {
+    final settings = ref.read(settingsProvider);
+    if (settings.appearance == appearance) return;
+    setState(() => saving = true);
+    try {
+      await ref
+          .read(settingsProvider.notifier)
+          .save(
+            name: settings.name,
+            currency: settings.currency,
+            appearance: appearance,
+          );
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Appearance could not be saved.')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => saving = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final appearance = ref.watch(settingsProvider).appearance;
+    return PopupMenuButton<String>(
+      tooltip: 'Appearance',
+      icon: Icon(
+        Icons.brightness_6_outlined,
+        color: widget.onDark ? Colors.white : null,
+      ),
+      enabled: !saving,
+      onSelected: select,
+      itemBuilder: (_) => [
+        for (final (value, label) in [
+          ('system', 'System'),
+          ('light', 'Light'),
+          ('dark', 'Dark'),
+        ])
+          CheckedPopupMenuItem(
+            value: value,
+            checked: appearance == value,
+            child: Text(label),
+          ),
+      ],
+    );
+  }
 }
 
 class _SignIn extends StatefulWidget {
@@ -64,6 +136,7 @@ class _SignInState extends State<_SignIn> {
       email = TextEditingController(),
       password = TextEditingController();
   bool registering = false, busy = false;
+  bool hidePassword = true;
   String? error;
   @override
   void dispose() {
@@ -94,116 +167,300 @@ class _SignInState extends State<_SignIn> {
     }
   }
 
+  void setRegistering(bool value) {
+    setState(() {
+      registering = value;
+      hidePassword = true;
+      error = null;
+    });
+  }
+
   @override
-  Widget build(BuildContext context) => Scaffold(
-    body: SafeArea(
-      child: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 460),
-          child: Form(
-            key: form,
-            child: ListView(
-              shrinkWrap: true,
-              padding: const EdgeInsets.all(24),
-              children: [
-                Text(
-                  'SpendTrail',
-                  style: Theme.of(context).textTheme.headlineLarge,
-                ),
-                const SizedBox(height: 12),
-                const Text('Your cards. Your spending. One clear picture.'),
-                const SizedBox(height: 28),
-                Text(
-                  registering ? 'Create your account' : 'Welcome back',
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                const SizedBox(height: 20),
-                if (registering) ...[
-                  TextFormField(
-                    controller: name,
-                    enabled: !busy,
-                    maxLength: 50,
-                    decoration: const InputDecoration(labelText: 'Name'),
-                    validator: (v) => v == null || v.trim().isEmpty
-                        ? 'Enter your name.'
-                        : null,
-                  ),
-                  const SizedBox(height: 16),
-                ],
-                TextFormField(
-                  controller: email,
-                  enabled: !busy,
-                  keyboardType: TextInputType.emailAddress,
-                  autofillHints: const [AutofillHints.email],
-                  decoration: const InputDecoration(labelText: 'Email'),
-                  validator: (v) =>
-                      v == null ||
-                          !RegExp(
-                            r'^[^\s@]+@[^\s@]+\.[^\s@]+$',
-                          ).hasMatch(v.trim())
-                      ? 'Enter a valid email.'
-                      : null,
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: password,
-                  enabled: !busy,
-                  obscureText: true,
-                  maxLength: 128,
-                  autocorrect: false,
-                  enableSuggestions: false,
-                  decoration: const InputDecoration(
-                    labelText: 'Password',
-                    helperText: 'At least 10 characters',
-                  ),
-                  validator: (v) => (v?.length ?? 0) < 10
-                      ? 'Use at least 10 characters.'
-                      : null,
-                ),
-                if (error != null)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    child: Text(
-                      error!,
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.error,
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final light = theme.brightness == Brightness.light;
+    final colors = ColorScheme.fromSeed(
+      seedColor: const Color(0xFF2269CD),
+      brightness: theme.brightness,
+    );
+    final action = light ? const Color(0xFF2269CD) : const Color(0xFFABCFFF);
+    final fieldFill = light
+        ? const Color(0xFFF1F2F6)
+        : colors.surfaceContainerHighest;
+    return Scaffold(
+      backgroundColor: const Color(0xFF10131D),
+      body: SafeArea(
+        bottom: false,
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 480),
+            child: LayoutBuilder(
+              builder: (context, viewport) {
+                final headerHeight = (viewport.maxHeight * .36).clamp(
+                  146.0,
+                  290.0,
+                );
+                return SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      _LoginHeader(
+                        registering: registering,
+                        minHeight: headerHeight,
                       ),
-                    ),
+                      Container(
+                        constraints: BoxConstraints(
+                          minHeight: (viewport.maxHeight - headerHeight).clamp(
+                            0.0,
+                            double.infinity,
+                          ),
+                        ),
+                        decoration: BoxDecoration(
+                          color: light ? Colors.white : colors.surface,
+                          borderRadius: const BorderRadius.vertical(
+                            top: Radius.circular(28),
+                          ),
+                        ),
+                        child: SafeArea(
+                          top: false,
+                          minimum: const EdgeInsets.fromLTRB(24, 20, 24, 24),
+                          child: Theme(
+                            data: theme.copyWith(
+                              colorScheme: colors,
+                              inputDecorationTheme: InputDecorationThemeData(
+                                filled: true,
+                                fillColor: fieldFill,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(14),
+                                  borderSide: BorderSide.none,
+                                ),
+                              ),
+                            ),
+                            child: AutofillGroup(
+                              child: buildForm(colors, action, fieldFill),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                FilledButton(
-                  onPressed: busy ? null : submit,
-                  child: Text(
-                    busy
-                        ? 'Please wait…'
-                        : registering
-                        ? 'Create account'
-                        : 'Sign in',
-                  ),
-                ),
-                TextButton(
-                  onPressed: busy
-                      ? null
-                      : () => setState(() {
-                          registering = !registering;
-                          error = null;
-                        }),
-                  child: Text(
-                    registering
-                        ? 'Already registered? Sign in'
-                        : 'New here? Create account',
-                  ),
-                ),
-                const SizedBox(height: 20),
-                const Text(
-                  'Semester prototype · Fictional card profiles · PKR\nSign in again after restarting the app.',
-                ),
-              ],
+                );
+              },
             ),
           ),
         ),
       ),
+    );
+  }
+
+  Widget buildForm(ColorScheme colors, Color action, Color fieldFill) => Form(
+    key: form,
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SegmentedButton<bool>(
+          segments: const [
+            ButtonSegment(value: false, label: Text('Log in')),
+            ButtonSegment(value: true, label: Text('Sign up')),
+          ],
+          selected: {registering},
+          onSelectionChanged: busy
+              ? null
+              : (value) => setRegistering(value.single),
+          showSelectedIcon: false,
+          style: SegmentedButton.styleFrom(
+            backgroundColor: fieldFill,
+            selectedBackgroundColor: colors.inverseSurface,
+            selectedForegroundColor: colors.onInverseSurface,
+            side: BorderSide.none,
+          ),
+        ),
+        const SizedBox(height: 14),
+        if (registering) ...[
+          TextFormField(
+            controller: name,
+            enabled: !busy,
+            maxLength: 50,
+            decoration: const InputDecoration(
+              labelText: 'Name',
+              prefixIcon: Icon(Icons.person_outline),
+              counterText: '',
+            ),
+            validator: (v) =>
+                v == null || v.trim().isEmpty ? 'Enter your name.' : null,
+          ),
+          const SizedBox(height: 12),
+        ],
+        TextFormField(
+          controller: email,
+          enabled: !busy,
+          keyboardType: TextInputType.emailAddress,
+          autofillHints: const [AutofillHints.email],
+          decoration: const InputDecoration(
+            labelText: 'Email',
+            prefixIcon: Icon(Icons.mail_outline),
+          ),
+          validator: (v) =>
+              v == null ||
+                  !RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$').hasMatch(v.trim())
+              ? 'Enter a valid email.'
+              : null,
+        ),
+        const SizedBox(height: 12),
+        TextFormField(
+          controller: password,
+          enabled: !busy,
+          obscureText: hidePassword,
+          maxLength: 128,
+          autocorrect: false,
+          enableSuggestions: false,
+          autofillHints: [
+            registering ? AutofillHints.newPassword : AutofillHints.password,
+          ],
+          decoration: InputDecoration(
+            labelText: 'Password',
+            helperText: registering ? 'At least 10 characters' : null,
+            counterText: '',
+            prefixIcon: const Icon(Icons.lock_outline),
+            suffixIcon: IconButton(
+              tooltip: hidePassword ? 'Show password' : 'Hide password',
+              onPressed: busy
+                  ? null
+                  : () => setState(() => hidePassword = !hidePassword),
+              icon: Icon(
+                hidePassword
+                    ? Icons.visibility_outlined
+                    : Icons.visibility_off_outlined,
+              ),
+            ),
+          ),
+          validator: (v) =>
+              (v?.length ?? 0) < 10 ? 'Use at least 10 characters.' : null,
+        ),
+        if (error != null)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            child: Text(error!, style: TextStyle(color: colors.error)),
+          ),
+        const SizedBox(height: 16),
+        FilledButton(
+          onPressed: busy ? null : submit,
+          style: FilledButton.styleFrom(
+            backgroundColor: action,
+            foregroundColor: colors.brightness == Brightness.light
+                ? Colors.white
+                : const Color(0xFF102735),
+            minimumSize: const Size.fromHeight(48),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14),
+            ),
+          ),
+          child: Text(
+            busy
+                ? 'Please wait…'
+                : registering
+                ? 'Create account'
+                : 'Sign in',
+          ),
+        ),
+        TextButton(
+          onPressed: busy ? null : () => setRegistering(!registering),
+          style: TextButton.styleFrom(foregroundColor: action),
+          child: Text(
+            registering
+                ? 'Already registered? Sign in'
+                : 'New here? Create account',
+          ),
+        ),
+        Text(
+          'Fictional card profiles · PKR',
+          textAlign: TextAlign.center,
+          style: TextStyle(color: colors.onSurfaceVariant),
+        ),
+      ],
     ),
   );
+}
+
+class _LoginHeader extends StatelessWidget {
+  const _LoginHeader({required this.registering, required this.minHeight});
+
+  final bool registering;
+  final double minHeight;
+
+  @override
+  Widget build(BuildContext context) => Stack(
+    children: [
+      const Positioned.fill(child: CustomPaint(painter: _LoginStreak())),
+      const Positioned(top: 0, right: 10, child: _AppearanceMenu(onDark: true)),
+      Container(
+        constraints: BoxConstraints(minHeight: minHeight),
+        alignment: Alignment.center,
+        padding: const EdgeInsets.fromLTRB(48, 42, 48, 20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'SpendTrail',
+              style: TextStyle(
+                color: Color(0xFFBBD6FF),
+                fontSize: 14,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 1.3,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              registering ? 'Create your account.' : 'Welcome back.',
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Colors.white,
+                fontStyle: FontStyle.italic,
+                fontSize: 32,
+                fontWeight: FontWeight.w700,
+                height: 1.1,
+              ),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Your cards. Your spending. One clear picture.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Color(0xFFC2CAD8), fontSize: 13),
+            ),
+          ],
+        ),
+      ),
+    ],
+  );
+}
+
+class _LoginStreak extends CustomPainter {
+  const _LoginStreak();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final streak = Path()
+      ..moveTo(size.width * .73, 0)
+      ..lineTo(size.width * .60, size.height * .34)
+      ..lineTo(size.width * .67, size.height * .39)
+      ..lineTo(size.width * .54, size.height * .63)
+      ..lineTo(size.width * .57, size.height * .68)
+      ..lineTo(size.width * .43, size.height);
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 7
+      ..color = const Color(0x88518DEE)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 16);
+    canvas.drawPath(streak, paint);
+    paint
+      ..strokeWidth = 1.25
+      ..color = const Color(0x5578AEFF)
+      ..maskFilter = null;
+    canvas.drawPath(streak, paint);
+  }
+
+  @override
+  bool shouldRepaint(_LoginStreak oldDelegate) => false;
 }
 
 class _Wallet extends StatefulWidget {
@@ -299,6 +556,7 @@ class _WalletState extends State<_Wallet> {
     appBar: AppBar(
       title: const Text('SpendTrail'),
       actions: [
+        const _AppearanceMenu(),
         TextButton(
           onPressed: signingOut
               ? null

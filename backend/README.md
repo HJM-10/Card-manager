@@ -29,6 +29,8 @@ flutter run -d chrome --web-port 5173 --dart-define=SPENDTRAIL_PREVIEW=true --da
 
 For the Android emulator, use the same preview flag with `--dart-define=API_BASE_URL=http://10.0.2.2:8000`. Debug Android builds permit local HTTP. Release builds require an HTTPS API. Physical devices need a reachable server address; development binding/firewall changes must be configured separately. Web origins must be explicitly listed in `CORS_ORIGINS`.
 
+The **Appearance** menu on the sign-in screen and in the signed-in wallet offers System, Light and Dark. The app saves the choice on the device.
+
 ## This Windows workspace
 
 The machine has pgAdmin's embedded Python rather than a normal Python installation. Packages were installed under ignored `backend/.local/packages`. The optional `run.py` launcher adds that directory to the Python path.
