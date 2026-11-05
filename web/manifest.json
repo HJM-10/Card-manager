@@ -1,6 +1,6 @@
 {
-    "name": "Magpie",
-    "short_name": "Magpie",
+    "name": "SpendTrail",
+    "short_name": "SpendTrail",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#ECEBEF",

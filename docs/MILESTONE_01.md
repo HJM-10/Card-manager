@@ -6,7 +6,7 @@ Delivered on 4 November 2026 as the first usable slice of the SpendTrail roadmap
 
 The milestone introduced a SpendTrail registration/login flow. A signed-in user can create, list, edit and archive fictional card profiles through FastAPI and PostgreSQL. Starting a fresh client and signing in again restores the saved profiles. Empty, loading, validation, server-error and retry states are included. Sessions expire after 12 hours and logout revokes the current token. Session tokens are deliberately held in memory, so app restart requires sign-in.
 
-The account preview uses a coral/navy/cream palette and PKR context. The original Magpie interface is the default launch. Use `--dart-define=SPENDTRAIL_PREVIEW=true` to review the account milestone.
+The current app opens the SpendTrail splash and sign-in, then shows the original wallet layout in PKR. Server-backed profiles are available under **Cards → Account card profiles**.
 
 ## Evidence
 

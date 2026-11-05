@@ -12,7 +12,9 @@ import '../expenses/expenses_screen.dart';
 import '../actions/demo_action_screen.dart';
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({super.key, this.accountName, this.appearanceAction});
+  final String? accountName;
+  final Widget? appearanceAction;
 
   @override
   Widget build(BuildContext context) {
@@ -22,17 +24,22 @@ class HomeScreen extends StatelessWidget {
       child: ListView(
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 120),
         physics: const BouncingScrollPhysics(),
-        children: const [
-          FadeSlideIn(child: _Header()),
-          SizedBox(height: 18),
-          FadeSlideIn(delay: step, child: CardStack()),
-          SizedBox(height: 14),
+        children: [
           FadeSlideIn(
+            child: _Header(
+              accountName: accountName,
+              appearanceAction: appearanceAction,
+            ),
+          ),
+          const SizedBox(height: 18),
+          const FadeSlideIn(delay: step, child: CardStack()),
+          const SizedBox(height: 14),
+          const FadeSlideIn(
             delay: Duration(milliseconds: 180),
             child: _QuickActions(),
           ),
-          SizedBox(height: 14),
-          FadeSlideIn(
+          const SizedBox(height: 14),
+          const FadeSlideIn(
             delay: Duration(milliseconds: 270),
             child: _ExpensesSection(),
           ),
@@ -43,7 +50,9 @@ class HomeScreen extends StatelessWidget {
 }
 
 class _Header extends ConsumerWidget {
-  const _Header();
+  const _Header({this.accountName, this.appearanceAction});
+  final String? accountName;
+  final Widget? appearanceAction;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -54,7 +63,7 @@ class _Header extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Hello ${ref.watch(settingsProvider).name}',
+                'Hello ${accountName ?? ref.watch(settingsProvider).name}',
                 style: AppText.title(),
               ),
               const SizedBox(height: 2),
@@ -62,6 +71,7 @@ class _Header extends ConsumerWidget {
             ],
           ),
         ),
+        if (appearanceAction != null) appearanceAction!,
         Pressable(
           onTap: () => showDialog<void>(
             context: context,

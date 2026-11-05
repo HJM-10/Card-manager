@@ -2,8 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/theme/app_theme.dart';
+import '../../data/providers.dart';
 import '../../data/settings.dart';
 import '../../data/spendtrail_api.dart';
+import '../shell/app_shell.dart';
+import '../splash/splash_screen.dart';
 
 class SpendTrailApp extends ConsumerStatefulWidget {
   const SpendTrailApp({super.key, this.api});
@@ -16,20 +20,45 @@ class SpendTrailApp extends ConsumerStatefulWidget {
 class _SpendTrailAppState extends ConsumerState<SpendTrailApp> {
   late final api = widget.api ?? SpendTrailApi();
   Map<String, dynamic>? user;
+  bool showingSplash = true;
+  bool signingOut = false;
 
-  ThemeData theme(Brightness brightness) {
-    final light = brightness == Brightness.light;
-    return ThemeData(
-      useMaterial3: true,
-      fontFamily: 'PlusJakartaSans',
-      scaffoldBackgroundColor: light ? const Color(0xFFFFF7ED) : null,
-      colorScheme: ColorScheme.fromSeed(
-        brightness: brightness,
-        seedColor: const Color(0xFFEB7867),
-        primary: light ? const Color(0xFF102735) : null,
-      ),
-      inputDecorationTheme: const InputDecorationTheme(
-        border: OutlineInputBorder(),
+  void finishSignOut(BuildContext context) {
+    Navigator.of(context).popUntil((route) => route.isFirst);
+    ref.read(tabProvider.notifier).select(0);
+    setState(() => user = null);
+  }
+
+  Future<void> signOut(BuildContext context) async {
+    if (signingOut) return;
+    signingOut = true;
+    try {
+      await api.logout();
+      if (context.mounted) finishSignOut(context);
+    } on ApiException catch (error) {
+      if (!context.mounted) return;
+      if (error.unauthorized) {
+        finishSignOut(context);
+      } else {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(error.message)));
+      }
+    } finally {
+      signingOut = false;
+    }
+  }
+
+  void openAccountCards(BuildContext context, Map<String, dynamic> account) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => _Wallet(
+          api: api,
+          user: account,
+          onSignedOut: () {
+            if (context.mounted) finishSignOut(context);
+          },
+        ),
       ),
     );
   }
@@ -41,23 +70,33 @@ class _SpendTrailAppState extends ConsumerState<SpendTrailApp> {
   }
 
   @override
-  Widget build(BuildContext context) => MaterialApp(
-    title: 'SpendTrail',
-    debugShowCheckedModeBanner: false,
-    theme: theme(Brightness.light),
-    darkTheme: theme(Brightness.dark),
-    themeMode: ref.watch(settingsProvider).themeMode,
-    home: user == null
-        ? _SignIn(
-            api: api,
-            onAuthenticated: (value) => setState(() => user = value),
-          )
-        : _Wallet(
-            api: api,
-            user: user!,
-            onSignedOut: () => setState(() => user = null),
-          ),
-  );
+  Widget build(BuildContext context) {
+    final account = user;
+    return MaterialApp(
+      title: 'SpendTrail',
+      debugShowCheckedModeBanner: false,
+      theme: AppTheme.light(),
+      darkTheme: AppTheme.dark(),
+      themeMode: ref.watch(settingsProvider).themeMode,
+      home: showingSplash
+          ? SplashScreen(
+              onComplete: () => setState(() => showingSplash = false),
+            )
+          : account == null
+          ? _SignIn(
+              api: api,
+              onAuthenticated: (value) => setState(() => user = value),
+            )
+          : Builder(
+              builder: (context) => AppShell(
+                accountName: account['name'] as String,
+                appearanceAction: const _AppearanceMenu(),
+                onAccountCards: () => openAccountCards(context, account),
+                onSignOut: () => signOut(context),
+              ),
+            ),
+    );
+  }
 }
 
 class _AppearanceMenu extends ConsumerStatefulWidget {
@@ -79,11 +118,7 @@ class _AppearanceMenuState extends ConsumerState<_AppearanceMenu> {
     try {
       await ref
           .read(settingsProvider.notifier)
-          .save(
-            name: settings.name,
-            currency: settings.currency,
-            appearance: appearance,
-          );
+          .save(name: settings.name, appearance: appearance);
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -554,7 +589,7 @@ class _WalletState extends State<_Wallet> {
   @override
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(
-      title: const Text('SpendTrail'),
+      title: const Text('Account cards'),
       actions: [
         const _AppearanceMenu(),
         TextButton(

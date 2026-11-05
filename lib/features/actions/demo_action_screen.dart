@@ -96,10 +96,7 @@ class _DemoActionScreenState extends ConsumerState<DemoActionScreen> {
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
                   ),
-                  decoration: InputDecoration(
-                    labelText:
-                        'Amount (${ref.watch(settingsProvider).currency})',
-                  ),
+                  decoration: InputDecoration(labelText: 'Amount (PKR)'),
                   validator: (v) => parseAmountCents(v ?? '') == null
                       ? 'Enter a positive amount with up to two decimals.'
                       : null,

@@ -32,20 +32,20 @@ Future<void> main() async {
   runApp(
     ProviderScope(
       overrides: [localStoreProvider.overrideWithValue(store)],
-      child: const bool.fromEnvironment('SPENDTRAIL_PREVIEW')
-          ? const SpendTrailApp()
-          : const MagpieApp(),
+      child: const bool.fromEnvironment('LEGACY_DEMO')
+          ? const WalletDemoApp()
+          : const SpendTrailApp(),
     ),
   );
 }
 
-class MagpieApp extends ConsumerWidget {
-  const MagpieApp({super.key});
+class WalletDemoApp extends ConsumerWidget {
+  const WalletDemoApp({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return MaterialApp(
-      title: 'Magpie',
+      title: 'SpendTrail',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(),
       darkTheme: AppTheme.dark(),

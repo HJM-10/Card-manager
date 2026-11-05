@@ -1,16 +1,14 @@
-# Card-manager
+# SpendTrail
 
-The next implementation target is **SpendTrail**. See the [project roadmap](docs/ROADMAP.md) for the six-week build plan, ordered backlog and acceptance criteria. The features below describe the existing Magpie demo baseline.
+See the [project roadmap](docs/ROADMAP.md) for the six-week build plan, ordered backlog and acceptance criteria.
 
-**Default launch:** the original animated wallet described below. The SpendTrail registration/login and PostgreSQL-backed card profiles are available as a separate preview with `--dart-define=SPENDTRAIL_PREVIEW=true`. See the [backend setup and API guide](backend/README.md) for preview instructions.
-
-**Magpie** is a local demo wallet and expense tracker built in Flutter, with an animated interface inspired by the reference video.
+**Default launch:** the animated SpendTrail splash, sign-in or registration, then the original wallet layout. Open **Cards → Account card profiles** to manage server-backed fictional cards. See the [backend setup and API guide](backend/README.md) to run the API. Use `--dart-define=LEGACY_DEMO=true` for a local-only review of the wallet.
 
 All balances and money actions are simulated. No bank connection, payment processing, or messages to recipients.
 
 ## Features
 
-- **Animated splash:** coins drop above a cash stack, the illustration collapses into the `Magpie.` wordmark, and a progress bar fills.
+- **Animated splash:** coins drop above a cash stack, the illustration collapses into the SpendTrail wordmark, and a progress bar fills.
 - **Wallet-style card stack:** tap a back card to bring it to the front; the balance counts up.
 - **Notched front card:** an inverted-corner cut-out holds the *Add Card* pill (`CustomClipper`).
 - **Add Card sheet:** live `0000 0000 0000 0000` formatting, `MM/YY` auto-slash, Visa/Mastercard detection with an animated logo, and a button that only enables on a valid form.
@@ -19,7 +17,7 @@ All balances and money actions are simulated. No bank connection, payment proces
 - **Saved wallet:** card display details and ordering survive restarts. View details, choose a default card, or remove cards.
 - **Expenses & activity:** add, edit, delete, search and filter records by category or card. Dates and exact cents are saved locally.
 - **Statistics:** monthly spending totals, category breakdowns and a six-month trend based on your records. Requests and top-ups are excluded from spending.
-- **Profile:** saved name, currency label and system/light/dark appearance. Currency selection changes labels without converting amounts.
+- **Appearance:** System, Light and Dark are available from sign-in, Home and Profile. All demo amounts use PKR.
 - **Demo actions:** Send, Request and TopUp have review and confirmation screens. Expenses and demo sends reduce the demo balance; top-ups increase it. Requests remain pending. Editing/deleting activity recalculates balances.
 - **Offline font:** Plus Jakarta Sans and its OFL license are bundled with the app.
 
@@ -63,15 +61,14 @@ flutter build apk --release
 
 Tests exercise startup and adding a card, expense editing, action confirmation,
 restoration after restart, storage failures, duplicate rejection, statistics,
-currency settings and small-screen layouts with enlarged text. Visual preview
+PKR formatting and small-screen layouts with enlarged text. Visual preview
 tests write PNGs for all tabs in light/dark themes under `build/qa/`.
 
 The Android APK uses the project's existing debug signing setup for local review.
 Configure a production application ID and release signing before store distribution.
 Physical-device frame-rate profiling and iOS packaging require their target devices/toolchain.
 
-Data is stored only on the current device/browser profile. Clearing app data or
-browser storage removes it; there is no cloud backup or account synchronization.
+Demo wallet records and appearance are stored on the current device or browser. Account card profiles are stored separately in PostgreSQL.
 
 See [docs/IMPLEMENTATION.md](docs/IMPLEMENTATION.md) for delivery history and checks,
 and [PROPOSAL.md](PROPOSAL.md) for the original reference design proposal.

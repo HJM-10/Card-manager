@@ -5,6 +5,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:my_app/data/local_store.dart';
+import 'package:my_app/data/providers.dart';
+import 'package:my_app/data/settings.dart';
 import 'package:my_app/data/spendtrail_api.dart';
 import 'package:my_app/features/account/spendtrail_app.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -40,7 +42,19 @@ void main() {
       }),
     );
     addTearDown(api.close);
-    await tester.pumpWidget(ProviderScope(child: SpendTrailApp(api: api)));
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: SpendTrailApp(api: api),
+      ),
+    );
+    expect(find.text('SpendTrail.', findRichText: true), findsOneWidget);
+    expect(find.text('Sign in'), findsNothing);
+    await tester.pumpAndSettle();
+    expect(find.text('Sign in'), findsOneWidget);
+    expect(find.text('Hello Alice'), findsNothing);
     await tester.tap(find.text('New here? Create account'));
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextFormField).at(0), 'Alice');
@@ -54,6 +68,22 @@ void main() {
     );
     await tester.ensureVisible(find.text('Create account'));
     await tester.tap(find.text('Create account'));
+    await tester.pumpAndSettle();
+    expect(find.text('Hello Alice'), findsOneWidget);
+    expect(find.textContaining('Rs '), findsWidgets);
+    await tester.tap(find.byTooltip('Appearance'));
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.byWidgetPredicate(
+        (widget) =>
+            widget is CheckedPopupMenuItem<String> && widget.value == 'dark',
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(container.read(settingsProvider).themeMode, ThemeMode.dark);
+    container.read(tabProvider.notifier).select(1);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Account card profiles'));
     await tester.pumpAndSettle();
     expect(find.textContaining('Your wallet is ready'), findsOneWidget);
     await tester.tap(find.text('Add fictional card'));
@@ -77,6 +107,11 @@ void main() {
     );
     await tester.tap(find.text('Sign in'));
     await tester.pumpAndSettle();
+    expect(find.text('Hello Alice'), findsOneWidget);
+    container.read(tabProvider.notifier).select(1);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Account card profiles'));
+    await tester.pumpAndSettle();
     expect(find.text('Daily spending'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
@@ -92,6 +127,7 @@ void main() {
     );
     addTearDown(api.close);
     await tester.pumpWidget(ProviderScope(child: SpendTrailApp(api: api)));
+    await tester.pumpAndSettle();
     await tester.enterText(
       find.byType(TextFormField).at(0),
       'alice@example.com',
@@ -124,6 +160,7 @@ void main() {
     );
 
     await tester.pumpWidget(app());
+    await tester.pumpAndSettle();
     await tester.tap(find.byTooltip('Appearance'));
     await tester.pumpAndSettle();
     await tester.tap(

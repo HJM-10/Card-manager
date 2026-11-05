@@ -6,7 +6,8 @@ import '../../data/settings.dart';
 import '../add_card/add_card_sheet.dart';
 
 class CardsScreen extends ConsumerWidget {
-  const CardsScreen({super.key});
+  const CardsScreen({super.key, this.onAccountCards});
+  final VoidCallback? onAccountCards;
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final cards = ref.watch(cardsProvider);
@@ -16,6 +17,17 @@ class CardsScreen extends ConsumerWidget {
         children: [
           Text('Your cards', style: Theme.of(context).textTheme.headlineMedium),
           const Text('The default card appears at the front of your wallet.'),
+          if (onAccountCards != null)
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.cloud_outlined),
+              title: const Text('Account card profiles'),
+              subtitle: const Text(
+                'Manage fictional cards saved to your account',
+              ),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: onAccountCards,
+            ),
           const SizedBox(height: 16),
           FilledButton.icon(
             onPressed: () => showAddCardSheet(context),

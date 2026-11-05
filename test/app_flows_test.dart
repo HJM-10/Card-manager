@@ -17,11 +17,14 @@ void main() {
     final container = ProviderContainer();
     addTearDown(container.dispose);
     await tester.pumpWidget(
-      UncontrolledProviderScope(container: container, child: const MagpieApp()),
+      UncontrolledProviderScope(
+        container: container,
+        child: const WalletDemoApp(),
+      ),
     );
     await tester.pump(const Duration(seconds: 3));
     await tester.pumpAndSettle();
-    expect(find.text('Hello Magpie user'), findsOneWidget);
+    expect(find.text('Hello SpendTrail user'), findsOneWidget);
     await tester.tap(find.text('Add Card'));
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextField).at(0), '4242424242424242');
@@ -58,7 +61,6 @@ void main() {
           .read(settingsProvider.notifier)
           .save(
             name: 'A long profile name for layout checks',
-            currency: 'PKR',
             appearance: 'dark',
           );
       await tester.pumpWidget(

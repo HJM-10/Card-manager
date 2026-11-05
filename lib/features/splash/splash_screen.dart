@@ -6,10 +6,12 @@ import '../shell/app_shell.dart';
 
 /// Timeline (2.9 s):
 ///  • cash stack pops in, coins drop one by one into an arc
-///  • illustration collapses away, leaving the "Magpie." wordmark centered
-///  • purple progress bar fills at the bottom, then fades into Home
+///  • illustration collapses away, leaving the SpendTrail wordmark centered
+///  • purple progress bar fills at the bottom
 class SplashScreen extends StatefulWidget {
-  const SplashScreen({super.key});
+  const SplashScreen({super.key, this.onComplete});
+
+  final VoidCallback? onComplete;
 
   @override
   State<SplashScreen> createState() => _SplashScreenState();
@@ -53,6 +55,11 @@ class _SplashScreenState extends State<SplashScreen>
 
   void _goHome() {
     if (!mounted) return;
+    final onComplete = widget.onComplete;
+    if (onComplete != null) {
+      onComplete();
+      return;
+    }
     Navigator.of(context).pushReplacement(
       PageRouteBuilder(
         transitionDuration: const Duration(milliseconds: 600),
@@ -80,7 +87,7 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: AnimatedBuilder(
         animation: _c,
         builder: (context, _) {
@@ -114,7 +121,7 @@ class _SplashScreenState extends State<SplashScreen>
                           children: [
                             Text.rich(
                               TextSpan(
-                                text: 'Magpie',
+                                text: 'SpendTrail',
                                 children: [
                                   TextSpan(
                                     text: '.',
@@ -122,7 +129,9 @@ class _SplashScreenState extends State<SplashScreen>
                                   ),
                                 ],
                               ),
-                              style: AppText.wordmark(),
+                              style: AppText.wordmark(
+                                Theme.of(context).colorScheme.onSurface,
+                              ),
                             ),
                             const SizedBox(height: 6),
                             Text(

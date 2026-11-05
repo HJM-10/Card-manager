@@ -13,7 +13,17 @@ import '../../data/local_store.dart';
 
 /// Hosts the tabs and the floating dark nav bar.
 class AppShell extends ConsumerWidget {
-  const AppShell({super.key});
+  const AppShell({
+    super.key,
+    this.accountName,
+    this.appearanceAction,
+    this.onAccountCards,
+    this.onSignOut,
+  });
+
+  final String? accountName;
+  final Widget? appearanceAction;
+  final VoidCallback? onAccountCards, onSignOut;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -24,11 +34,14 @@ class AppShell extends ConsumerWidget {
         children: [
           IndexedStack(
             index: tab,
-            children: const [
-              HomeScreen(),
-              CardsScreen(),
-              StatisticsScreen(),
-              ProfileScreen(),
+            children: [
+              HomeScreen(
+                accountName: accountName,
+                appearanceAction: appearanceAction,
+              ),
+              CardsScreen(onAccountCards: onAccountCards),
+              const StatisticsScreen(),
+              ProfileScreen(onSignOut: onSignOut),
             ],
           ),
           // Fade content out under the nav bar.

@@ -3,7 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/settings.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
-  const ProfileScreen({super.key});
+  const ProfileScreen({super.key, this.onSignOut});
+  final VoidCallback? onSignOut;
   @override
   ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
 }
@@ -13,7 +14,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   late final name = TextEditingController(
     text: ref.read(settingsProvider).name,
   );
-  late String currency = ref.read(settingsProvider).currency;
   late String appearance = ref.read(settingsProvider).appearance;
   bool saving = false;
   @override
@@ -23,98 +23,99 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   @override
-  Widget build(BuildContext context) => SafeArea(
-    child: Form(
-      key: form,
-      child: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 20, 20, 140),
-        children: [
-          Text(
-            'Profile & settings',
-            style: Theme.of(context).textTheme.headlineMedium,
-          ),
-          const SizedBox(height: 20),
-          TextFormField(
-            controller: name,
-            maxLength: 50,
-            decoration: const InputDecoration(labelText: 'Your name'),
-            validator: (v) =>
-                v == null || v.trim().isEmpty ? 'Enter your name.' : null,
-          ),
-          DropdownButtonFormField<String>(
-            initialValue: currency,
-            decoration: const InputDecoration(labelText: 'Display currency'),
-            items: currencies.keys
-                .map((c) => DropdownMenuItem(value: c, child: Text(c)))
-                .toList(),
-            onChanged: saving ? null : (v) => setState(() => currency = v!),
-          ),
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 12),
-            child: Text(
-              'Currency changes the label on all demo amounts. It does not convert values or exchange money.',
+  Widget build(BuildContext context) {
+    final savedAppearance = ref.watch(
+      settingsProvider.select((s) => s.appearance),
+    );
+    ref.listen(
+      settingsProvider.select((s) => s.appearance),
+      (_, next) => setState(() => appearance = next),
+    );
+    return SafeArea(
+      child: Form(
+        key: form,
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 140),
+          children: [
+            Text(
+              'Profile & settings',
+              style: Theme.of(context).textTheme.headlineMedium,
             ),
-          ),
-          DropdownButtonFormField<String>(
-            initialValue: appearance,
-            decoration: const InputDecoration(labelText: 'Appearance'),
-            items: ['system', 'light', 'dark']
-                .map(
-                  (v) => DropdownMenuItem(
-                    value: v,
-                    child: Text('${v[0].toUpperCase()}${v.substring(1)}'),
-                  ),
-                )
-                .toList(),
-            onChanged: saving ? null : (v) => setState(() => appearance = v!),
-          ),
-          const SizedBox(height: 24),
-          FilledButton(
-            onPressed: saving
-                ? null
-                : () async {
-                    if (!form.currentState!.validate()) return;
-                    setState(() => saving = true);
-                    try {
-                      await ref
-                          .read(settingsProvider.notifier)
-                          .save(
-                            name: name.text,
-                            currency: currency,
-                            appearance: appearance,
+            const SizedBox(height: 20),
+            TextFormField(
+              controller: name,
+              maxLength: 50,
+              decoration: const InputDecoration(labelText: 'Demo profile name'),
+              validator: (v) =>
+                  v == null || v.trim().isEmpty ? 'Enter your name.' : null,
+            ),
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 12),
+              child: Text('Currency · PKR'),
+            ),
+            DropdownButtonFormField<String>(
+              key: ValueKey(savedAppearance),
+              initialValue: appearance,
+              decoration: const InputDecoration(labelText: 'Appearance'),
+              items: ['system', 'light', 'dark']
+                  .map(
+                    (v) => DropdownMenuItem(
+                      value: v,
+                      child: Text('${v[0].toUpperCase()}${v.substring(1)}'),
+                    ),
+                  )
+                  .toList(),
+              onChanged: saving ? null : (v) => setState(() => appearance = v!),
+            ),
+            const SizedBox(height: 24),
+            FilledButton(
+              onPressed: saving
+                  ? null
+                  : () async {
+                      if (!form.currentState!.validate()) return;
+                      setState(() => saving = true);
+                      try {
+                        await ref
+                            .read(settingsProvider.notifier)
+                            .save(name: name.text, appearance: appearance);
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Settings saved')),
                           );
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Settings saved')),
-                        );
-                      }
-                    } catch (_) {
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text(
-                              'Settings could not be saved. Please try again.',
+                        }
+                      } catch (_) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                'Settings could not be saved. Please try again.',
+                              ),
                             ),
-                          ),
-                        );
+                          );
+                        }
+                      } finally {
+                        if (mounted) setState(() => saving = false);
                       }
-                    } finally {
-                      if (mounted) setState(() => saving = false);
-                    }
-                  },
-            child: Text(saving ? 'Saving…' : 'Save settings'),
-          ),
-          const SizedBox(height: 24),
-          const ListTile(
-            contentPadding: EdgeInsets.zero,
-            leading: Icon(Icons.info_outline),
-            title: Text('Magpie demo wallet'),
-            subtitle: Text(
-              'Local data on this device. Cards and balances are demo records. No bank connection or real payments.',
+                    },
+              child: Text(saving ? 'Saving…' : 'Save settings'),
             ),
-          ),
-        ],
+            const SizedBox(height: 24),
+            const ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: Icon(Icons.info_outline),
+              title: Text('SpendTrail demo wallet'),
+              subtitle: Text(
+                'Local data on this device. Cards and balances are demo records. No bank connection or real payments.',
+              ),
+            ),
+            if (widget.onSignOut != null)
+              OutlinedButton(
+                onPressed: widget.onSignOut,
+                child: const Text('Sign out'),
+              ),
+          ],
+        ),
       ),
-    ),
-  );
+    );
+  }
 }
