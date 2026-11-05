@@ -1,6 +1,6 @@
 # SpendTrail project roadmap
 
-Created: 4 November 2026. Status: first account/card vertical slice implemented; the full six-week milestones remain in progress. See [milestone evidence](MILESTONE_01.md).
+Created: 4 November 2026. The account/card slice and the first manual purchase endpoints are implemented. See [account/card evidence](MILESTONE_01.md) and the [purchase API contract](../backend/README.md).
 
 ## Goal and scope
 
@@ -68,10 +68,12 @@ Weeks are sequential working blocks, not promised calendar dates. Week 4 has the
 
 ### 3. Build the transaction core
 
+Manual purchases now persist in PostgreSQL and are available through authenticated history and detail endpoints. The 5 November 2026 backend run passed all nine tests against PostgreSQL 15, including concurrent retries, ownership, archived-card history and rollback when an outbox write fails. The next step is Flutter purchase entry and history. The remaining transaction sources and category rules expand this foundation.
+
 - [ ] Add Merchant, Category and SpendingTransaction records with required references and constraints.
 - [ ] Define purchase/refund types, approved/declined states and source/channel values explicitly.
-- [ ] Require a non-null source reference for every source; enforce unique `(card_id, source, source_reference)`.
-- [ ] Save transaction, audit record and notification outbox event atomically.
+- [x] Require a non-null source reference and enforce unique `(card_id, source, source_reference)` at the database level.
+- [x] Save the transaction, creation audit record and notification outbox event atomically.
 - [ ] Add history/detail APIs, pagination, date/card/category/status filters and search.
 - [ ] Connect manual entry and history screens to the API.
 - [ ] Enforce ownership on reads and writes, including a database trigger rejecting cross-user categories.

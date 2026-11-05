@@ -120,3 +120,88 @@ def test_database_constraints_and_rollback(client):
             conn.execute("INSERT INTO card_profiles (id,user_id,label,network,last4,expiry_month,expiry_year) VALUES (%s,%s,'Invalid','visa','invalid',12,2099)", (uuid4(), user_id))
     with db.connect() as conn:
         assert conn.execute('SELECT count(*) AS n FROM card_profiles').fetchone()['n'] == 0
+
+
+def purchase_payload(client, headers):
+    card = client.post('/cards', headers=headers, json=CARD)
+    assert card.status_code == 201, card.text
+    return {
+        'card_id': card.json()['id'],
+        'merchant': 'Corner Market',
+        'amount': '1250.05',
+        'occurred_at': '2026-11-05T10:30:00+05:00',
+        'channel': 'pos',
+        'source_reference': str(uuid4()),
+    }
+
+
+def test_manual_purchase_history_and_archived_card(client):
+    alice = account(client)
+    bob = account(client, 'bob@example.com')
+    purchase = purchase_payload(client, alice)
+    assert client.post('/transactions', headers=bob, json=purchase).status_code == 404
+    response = client.post('/transactions', headers=alice, json=purchase)
+    assert response.status_code == 201, response.text
+    saved = response.json()
+    assert (saved['amount'], saved['currency'], saved['kind'], saved['status']) == ('1250.05', 'PKR', 'purchase', 'approved')
+    path = '/transactions/' + saved['id']
+    assert client.get(path, headers=bob).status_code == 404
+    assert client.get('/transactions', headers=bob).json() == []
+    assert client.get('/transactions').status_code == 401
+
+    older = {**purchase, 'source_reference': str(uuid4()), 'occurred_at': '2026-10-31T23:59:00+05:00'}
+    response = client.post('/transactions', headers=alice, json=older)
+    assert response.status_code == 201, response.text
+    assert client.get('/transactions?limit=1', headers=alice).json() == [saved]
+    assert client.get('/transactions?limit=1&offset=1', headers=alice).json() == [response.json()]
+
+    assert client.delete('/cards/' + purchase['card_id'], headers=alice).status_code == 204
+    login = client.post('/auth/login', json={'email': 'alice@example.com', 'password': PASSWORD})
+    assert login.status_code == 200
+    new_session = {'Authorization': 'Bearer ' + login.json()['access_token']}
+    assert client.get(path, headers=new_session).json() == saved
+    retry = client.post('/transactions', headers=new_session, json=purchase)
+    assert retry.status_code == 200
+    assert retry.json() == saved
+    new_purchase = {**purchase, 'source_reference': str(uuid4())}
+    assert client.post('/transactions', headers=new_session, json=new_purchase).status_code == 404
+
+
+def test_purchase_validation_and_concurrent_retries(client):
+    headers = account(client)
+    purchase = purchase_payload(client, headers)
+    for invalid in [
+        {'amount': '12.001'}, {'amount': '0.00'}, {'amount': 12.50},
+        {'occurred_at': '2026-11-05T10:30:00'}, {'channel': 'bank_feed'},
+        {'merchant': ' '}, {'status': 'declined'},
+    ]:
+        assert client.post('/transactions', headers=headers, json={**purchase, **invalid}).status_code == 422
+
+    def create(_):
+        with TestClient(main.app) as request_client:
+            response = request_client.post('/transactions', headers=headers, json=purchase)
+            return response.status_code, response.json()
+
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        first, second = executor.map(create, range(2))
+    assert sorted([first[0], second[0]]) == [200, 201]
+    assert first[1] == second[1]
+    changed = {**purchase, 'amount': '1250.06'}
+    assert client.post('/transactions', headers=headers, json=changed).status_code == 409
+    with db.connect() as conn:
+        for table in ('spending_transactions', 'transaction_audit_events', 'transaction_outbox'):
+            count = conn.execute(sql.SQL('SELECT count(*) AS n FROM {}').format(sql.Identifier(table))).fetchone()
+            assert count['n'] == 1
+
+
+def test_outbox_failure_rolls_back_purchase_and_audit(client):
+    headers = account(client)
+    purchase = purchase_payload(client, headers)
+    with db.connect() as conn:
+        conn.execute('ALTER TABLE transaction_outbox ADD CHECK (false)')
+    with TestClient(main.app, raise_server_exceptions=False) as request_client:
+        assert request_client.post('/transactions', headers=headers, json=purchase).status_code == 500
+    with db.connect() as conn:
+        for table in ('merchants', 'spending_transactions', 'transaction_audit_events', 'transaction_outbox'):
+            count = conn.execute(sql.SQL('SELECT count(*) AS n FROM {}').format(sql.Identifier(table))).fetchone()
+            assert count['n'] == 0

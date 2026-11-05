@@ -2,14 +2,15 @@ import hashlib
 import os
 import secrets
 from datetime import datetime, timezone
-from typing import Literal
+from decimal import Decimal
+from typing import Annotated, Literal
 from uuid import UUID, uuid4
 
-from fastapi import Depends, FastAPI, HTTPException, Response
+from fastapi import Depends, FastAPI, HTTPException, Query, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from psycopg.errors import UniqueViolation
-from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
+from pydantic import AwareDatetime, BaseModel, ConfigDict, EmailStr, Field, field_validator
 from pwdlib import PasswordHash
 
 from .db import connect
@@ -55,6 +56,46 @@ class CardInput(Input):
     last4: str = Field(pattern=r'^[0-9]{4}$')
     expiry_month: int = Field(ge=1, le=12)
     expiry_year: int = Field(ge=2026, le=2100)
+
+
+class PurchaseInput(Input):
+    card_id: UUID
+    merchant: str = Field(min_length=1, max_length=100)
+    amount: str = Field(pattern=r'^[0-9]{1,12}\.[0-9]{2}$')
+    occurred_at: AwareDatetime = Field(
+        ge=datetime(2000, 1, 1, tzinfo=timezone.utc),
+        lt=datetime(2101, 1, 1, tzinfo=timezone.utc),
+    )
+    channel: Literal['online', 'pos']
+    source_reference: UUID
+
+    @field_validator('amount')
+    @classmethod
+    def positive_amount(cls, value):
+        if Decimal(value) <= 0:
+            raise ValueError('Enter an amount greater than zero')
+        return value
+
+    @field_validator('occurred_at', mode='before')
+    @classmethod
+    def timestamp_string(cls, value):
+        if not isinstance(value, str) or 'T' not in value:
+            raise ValueError('Use an ISO 8601 date and time with a timezone')
+        return value
+
+
+class TransactionRecord(BaseModel):
+    id: UUID
+    card_id: UUID
+    merchant: str
+    amount: Decimal
+    currency: Literal['PKR'] = 'PKR'
+    occurred_at: AwareDatetime
+    source: str
+    source_reference: str
+    kind: str
+    status: str
+    channel: str
 
 
 def digest(token):
@@ -180,3 +221,87 @@ def archive_card(card_id: UUID, user=Depends(current_session)):
         row = db.execute('UPDATE card_profiles SET archived=true WHERE id=%s AND user_id=%s AND NOT archived RETURNING id', (card_id, user['id'])).fetchone()
         if not row:
             raise HTTPException(404, 'Card not found')
+
+
+TRANSACTION_SELECT = '''
+    SELECT t.id, t.card_id, m.name AS merchant, t.amount, t.occurred_at,
+           t.source, t.source_reference, t.kind, t.status, t.channel
+    FROM spending_transactions t
+    JOIN merchants m ON (m.user_id, m.id) = (t.user_id, t.merchant_id)
+'''
+
+
+@app.post('/transactions', status_code=201, response_model=TransactionRecord,
+          responses={200: {'model': TransactionRecord, 'description': 'Existing matching purchase'}})
+def record_purchase(body: PurchaseInput, response: Response, user=Depends(current_session)):
+    user_id = user['id']
+    reference = str(body.source_reference)
+    amount = Decimal(body.amount)
+    with connect() as db:
+        # Serialize retries on a card and coordinate with card archival.
+        card = db.execute(
+            'SELECT archived FROM card_profiles WHERE user_id = %s AND id = %s FOR NO KEY UPDATE',
+            (user_id, body.card_id),
+        ).fetchone()
+        if card is None:
+            raise HTTPException(404, 'Card not found')
+
+        existing = db.execute(
+            TRANSACTION_SELECT + '''
+            WHERE t.user_id = %s AND t.card_id = %s
+              AND t.source = 'manual' AND t.source_reference = %s
+            ''',
+            (user_id, body.card_id, reference),
+        ).fetchone()
+        if existing is not None:
+            saved_values = (existing['merchant'], existing['amount'], existing['occurred_at'], existing['channel'])
+            if saved_values != (body.merchant, amount, body.occurred_at, body.channel):
+                raise HTTPException(409, 'This purchase reference is already in use')
+            response.status_code = 200
+            return existing
+        if card['archived']:
+            raise HTTPException(404, 'Card not found')
+
+        db.execute(
+            'INSERT INTO merchants (id, user_id, name) VALUES (%s, %s, %s) ON CONFLICT (user_id, name) DO NOTHING',
+            (uuid4(), user_id, body.merchant),
+        )
+        transaction_id = uuid4()
+        db.execute(
+            '''
+            INSERT INTO spending_transactions
+                (id, user_id, card_id, merchant_id, amount, occurred_at, source, source_reference, kind, status, channel)
+            SELECT %s, user_id, %s, id, %s, %s, 'manual', %s, 'purchase', 'approved', %s
+            FROM merchants WHERE user_id = %s AND name = %s
+            ''',
+            (transaction_id, body.card_id, amount, body.occurred_at, reference, body.channel, user_id, body.merchant),
+        )
+        return db.execute(
+            TRANSACTION_SELECT + ' WHERE t.user_id = %s AND t.id = %s',
+            (user_id, transaction_id),
+        ).fetchone()
+
+
+@app.get('/transactions', response_model=list[TransactionRecord])
+def transaction_history(
+    limit: Annotated[int, Query(ge=1, le=100)] = 25,
+    offset: Annotated[int, Query(ge=0, le=2_147_483_647)] = 0,
+    user=Depends(current_session),
+):
+    with connect() as db:
+        return db.execute(
+            TRANSACTION_SELECT + ' WHERE t.user_id = %s ORDER BY t.occurred_at DESC, t.id DESC LIMIT %s OFFSET %s',
+            (user['id'], limit, offset),
+        ).fetchall()
+
+
+@app.get('/transactions/{transaction_id}', response_model=TransactionRecord)
+def transaction_detail(transaction_id: UUID, user=Depends(current_session)):
+    with connect() as db:
+        row = db.execute(
+            TRANSACTION_SELECT + ' WHERE t.user_id = %s AND t.id = %s',
+            (user['id'], transaction_id),
+        ).fetchone()
+    if row is None:
+        raise HTTPException(404, 'Transaction not found')
+    return row
