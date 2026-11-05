@@ -47,6 +47,7 @@ class _FadeSlideInState extends State<FadeSlideIn>
 
   @override
   Widget build(BuildContext context) {
+    if (MediaQuery.disableAnimationsOf(context)) return widget.child;
     return AnimatedBuilder(
       animation: _curve,
       builder: (context, child) => Opacity(
@@ -114,7 +115,9 @@ class _PressableState extends State<Pressable> {
           onTapCancel: () => _set(false),
           onTap: widget.onTap,
           child: AnimatedScale(
-            scale: _down ? widget.scale : 1,
+            scale: _down && !MediaQuery.disableAnimationsOf(context)
+                ? widget.scale
+                : 1,
             duration: const Duration(milliseconds: 120),
             curve: Curves.easeOut,
             child: Container(

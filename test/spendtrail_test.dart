@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:my_app/data/local_store.dart';
+import 'package:my_app/core/theme/wallet_style.dart';
 import 'package:my_app/data/providers.dart';
 import 'package:my_app/data/settings.dart';
 import 'package:my_app/data/spendtrail_api.dart';
@@ -81,6 +82,27 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(container.read(settingsProvider).themeMode, ThemeMode.dark);
+    expect(container.read(settingsProvider).walletStyle, WalletStyle.classic);
+    container.read(tabProvider.notifier).select(3);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('SpendTrail Classic'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Fig Carousel').last);
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('Save settings'));
+    await tester.tap(find.text('Save settings'));
+    await tester.pumpAndSettle();
+    expect(
+      container.read(settingsProvider).walletStyle,
+      WalletStyle.figCarousel,
+    );
+    expect(container.read(settingsProvider).themeMode, ThemeMode.dark);
+    container.read(tabProvider.notifier).select(0);
+    await tester.pumpAndSettle();
+    expect(find.text('Card 1 of 3'), findsOneWidget);
+    await tester.tap(find.byTooltip('Next card'));
+    await tester.pumpAndSettle();
+    expect(find.text('Card 2 of 3'), findsOneWidget);
     container.read(tabProvider.notifier).select(1);
     await tester.pumpAndSettle();
     await tester.tap(find.text('Account card profiles'));
@@ -107,7 +129,7 @@ void main() {
     );
     await tester.tap(find.text('Sign in'));
     await tester.pumpAndSettle();
-    expect(find.text('Hello Alice'), findsOneWidget);
+    expect(find.text('Hello, Alice'), findsOneWidget);
     container.read(tabProvider.notifier).select(1);
     await tester.pumpAndSettle();
     await tester.tap(find.text('Account card profiles'));

@@ -17,9 +17,9 @@ All balances and money actions are simulated. No bank connection, payment proces
 - **Saved wallet:** card display details and ordering survive restarts. View details, choose a default card, or remove cards.
 - **Expenses & activity:** add, edit, delete, search and filter records by category or card. Dates and exact cents are saved locally.
 - **Statistics:** monthly spending totals, category breakdowns and a six-month trend based on your records. Requests and top-ups are excluded from spending.
-- **Appearance:** System, Light and Dark are available from sign-in, Home and Profile. All demo amounts use PKR.
+- **Theme:** choose SpendTrail Classic, Cobalt Fold or Fig Carousel under **Profile → Theme**, then save. Classic is the default. **Appearance** offers System, Light and Dark independently. The app saves both choices on the device. All demo amounts use PKR.
 - **Demo actions:** Send, Request and TopUp have review and confirmation screens. Expenses and demo sends reduce the demo balance; top-ups increase it. Requests remain pending. Editing/deleting activity recalculates balances.
-- **Offline font:** Plus Jakarta Sans and its OFL license are bundled with the app.
+- **Offline fonts:** Plus Jakarta Sans, DM Sans, Space Grotesk, Inter and Outfit are bundled with their OFL licenses.
 
 The initial three cards are sample records; expenses start empty. Add Card supports 16-digit Visa/Mastercard test numbers, checksum and expiry validation. For example, use `4242 4242 4242 4242`, a future expiry and any three-digit test CVV. Duplicate network/last-four combinations are rejected. **Only masked card metadata is saved; full card numbers and CVVs are never persisted.**
 

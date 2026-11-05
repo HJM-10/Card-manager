@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:my_app/main.dart';
 import 'package:my_app/core/theme/app_theme.dart';
+import 'package:my_app/core/theme/wallet_style.dart';
 import 'package:my_app/data/providers.dart';
 import 'package:my_app/data/settings.dart';
 import 'package:my_app/features/shell/app_shell.dart';
@@ -84,6 +85,58 @@ void main() {
       }
     });
   }
+
+  testWidgets('all three wallet designs fit in light and dark mode', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(320, 568));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final backgrounds = <Color>{};
+    for (final style in WalletStyle.values) {
+      for (final brightness in Brightness.values) {
+        final theme = AppTheme.wallet(style, brightness);
+        backgrounds.add(theme.scaffoldBackgroundColor);
+        await tester.pumpWidget(
+          ProviderScope(
+            child: MaterialApp(
+              theme: theme,
+              builder: (context, child) => MediaQuery(
+                data: MediaQuery.of(context).copyWith(
+                  disableAnimations: true,
+                  textScaler: const TextScaler.linear(2),
+                ),
+                child: child!,
+              ),
+              home: AppShell(walletStyle: style),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        expect(find.text('Add Card'), findsOneWidget);
+        expect(find.textContaining('Rs '), findsWidgets);
+      }
+    }
+    expect(backgrounds, hasLength(6));
+  });
+
+  testWidgets('Cobalt Fold brings a rear card to the front', (tester) async {
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: MaterialApp(
+          theme: AppTheme.wallet(WalletStyle.cobaltFold, Brightness.light),
+          home: const AppShell(walletStyle: WalletStyle.cobaltFold),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('•••• 9312'));
+    await tester.pumpAndSettle();
+    expect(container.read(cardsProvider).last.last4, '9312');
+    expect(find.text('Rs 12,480.50'), findsOneWidget);
+  });
   testWidgets('add-card form scrolls above keyboard on a small screen', (
     tester,
   ) async {

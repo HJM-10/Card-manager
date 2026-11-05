@@ -1,8 +1,68 @@
 import 'package:flutter/material.dart';
 
 import 'app_colors.dart';
+import 'wallet_style.dart';
 
 abstract final class AppTheme {
+  static ThemeData wallet(WalletStyle style, Brightness brightness) {
+    final dark = brightness == Brightness.dark;
+    final (background, surface) = switch ((style, dark)) {
+      (WalletStyle.classic, false) => (AppColors.background, AppColors.surface),
+      (WalletStyle.classic, true) => (
+        const Color(0xFF141319),
+        const Color(0xFF211E29),
+      ),
+      (WalletStyle.cobaltFold, false) => (
+        const Color(0xFFEAF2FF),
+        const Color(0xFFFBFDFF),
+      ),
+      (WalletStyle.cobaltFold, true) => (
+        const Color(0xFF101B2C),
+        const Color(0xFF19283F),
+      ),
+      (WalletStyle.figCarousel, false) => (
+        const Color(0xFFF9EFF5),
+        const Color(0xFFFFFAFD),
+      ),
+      (WalletStyle.figCarousel, true) => (
+        const Color(0xFF261923),
+        const Color(0xFF382432),
+      ),
+    };
+    final base = ThemeData(
+      useMaterial3: true,
+      brightness: brightness,
+      fontFamily: style.bodyFont,
+      scaffoldBackgroundColor: background,
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: style.accent,
+        brightness: brightness,
+        surface: surface,
+        onSurface: switch ((style, dark)) {
+          (WalletStyle.cobaltFold, false) => const Color(0xFF142C52),
+          (WalletStyle.figCarousel, true) => const Color(0xFFFFF0F8),
+          _ => null,
+        },
+      ),
+    );
+    return base.copyWith(
+      textTheme: base.textTheme.copyWith(
+        headlineLarge: base.textTheme.headlineLarge?.copyWith(
+          fontFamily: style.displayFont,
+        ),
+        headlineMedium: base.textTheme.headlineMedium?.copyWith(
+          fontFamily: style.displayFont,
+        ),
+        headlineSmall: base.textTheme.headlineSmall?.copyWith(
+          fontFamily: style.displayFont,
+        ),
+        titleLarge: base.textTheme.titleLarge?.copyWith(
+          fontFamily: style.displayFont,
+        ),
+      ),
+    );
+  }
+
   static ThemeData dark() => ThemeData(
     useMaterial3: true,
     brightness: Brightness.dark,

@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/theme/wallet_style.dart';
 import '../../data/settings.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
-  const ProfileScreen({super.key, this.onSignOut});
+  const ProfileScreen({
+    super.key,
+    this.onSignOut,
+    this.showWalletDesign = false,
+  });
   final VoidCallback? onSignOut;
+  final bool showWalletDesign;
   @override
   ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
 }
@@ -15,6 +21,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     text: ref.read(settingsProvider).name,
   );
   late String appearance = ref.read(settingsProvider).appearance;
+  late WalletStyle walletStyle = ref.read(settingsProvider).walletStyle;
   bool saving = false;
   @override
   void dispose() {
@@ -53,6 +60,24 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               padding: EdgeInsets.symmetric(vertical: 12),
               child: Text('Currency · PKR'),
             ),
+            if (widget.showWalletDesign) ...[
+              DropdownButtonFormField<WalletStyle>(
+                isExpanded: true,
+                initialValue: walletStyle,
+                decoration: const InputDecoration(labelText: 'Theme'),
+                items: [
+                  for (final style in WalletStyle.values)
+                    DropdownMenuItem(
+                      value: style,
+                      child: Text(style.label, overflow: TextOverflow.ellipsis),
+                    ),
+                ],
+                onChanged: saving
+                    ? null
+                    : (value) => setState(() => walletStyle = value!),
+              ),
+              const SizedBox(height: 12),
+            ],
             DropdownButtonFormField<String>(
               key: ValueKey(savedAppearance),
               initialValue: appearance,
@@ -77,7 +102,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       try {
                         await ref
                             .read(settingsProvider.notifier)
-                            .save(name: name.text, appearance: appearance);
+                            .save(
+                              name: name.text,
+                              appearance: appearance,
+                              walletStyle: widget.showWalletDesign
+                                  ? walletStyle
+                                  : null,
+                            );
                         if (context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(content: Text('Settings saved')),

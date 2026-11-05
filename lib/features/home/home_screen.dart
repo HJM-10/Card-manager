@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/theme/wallet_style.dart';
 import '../../data/settings.dart';
 import '../../core/widgets/motion.dart';
 import '../../data/models.dart';
@@ -12,9 +13,15 @@ import '../expenses/expenses_screen.dart';
 import '../actions/demo_action_screen.dart';
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key, this.accountName, this.appearanceAction});
+  const HomeScreen({
+    super.key,
+    this.accountName,
+    this.appearanceAction,
+    this.walletStyle,
+  });
   final String? accountName;
   final Widget? appearanceAction;
+  final WalletStyle? walletStyle;
 
   @override
   Widget build(BuildContext context) {
@@ -29,19 +36,24 @@ class HomeScreen extends StatelessWidget {
             child: _Header(
               accountName: accountName,
               appearanceAction: appearanceAction,
+              walletStyle: walletStyle,
             ),
           ),
           const SizedBox(height: 18),
-          const FadeSlideIn(delay: step, child: CardStack()),
-          const SizedBox(height: 14),
-          const FadeSlideIn(
-            delay: Duration(milliseconds: 180),
-            child: _QuickActions(),
+          FadeSlideIn(
+            key: ValueKey(walletStyle),
+            delay: step,
+            child: CardStack(style: walletStyle),
           ),
           const SizedBox(height: 14),
-          const FadeSlideIn(
+          FadeSlideIn(
+            delay: Duration(milliseconds: 180),
+            child: _QuickActions(walletStyle: walletStyle),
+          ),
+          const SizedBox(height: 14),
+          FadeSlideIn(
             delay: Duration(milliseconds: 270),
-            child: _ExpensesSection(),
+            child: _ExpensesSection(walletStyle: walletStyle),
           ),
         ],
       ),
@@ -50,24 +62,44 @@ class HomeScreen extends StatelessWidget {
 }
 
 class _Header extends ConsumerWidget {
-  const _Header({this.accountName, this.appearanceAction});
+  const _Header({this.accountName, this.appearanceAction, this.walletStyle});
   final String? accountName;
   final Widget? appearanceAction;
+  final WalletStyle? walletStyle;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final name = accountName ?? ref.watch(settingsProvider).name;
+    final concept =
+        walletStyle == WalletStyle.cobaltFold ||
+        walletStyle == WalletStyle.figCarousel;
     return Row(
       children: [
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              if (concept)
+                Text(
+                  'SPENDTRAIL',
+                  style:
+                      AppText.tiny(
+                        Theme.of(context).colorScheme.onSurfaceVariant,
+                      ).copyWith(
+                        fontFamily: walletStyle?.bodyFont,
+                        letterSpacing: 1.4,
+                      ),
+                ),
               Text(
-                'Hello ${accountName ?? ref.watch(settingsProvider).name}',
-                style: AppText.title(),
+                concept ? 'Hello, $name' : 'Hello $name',
+                style: AppText.title().copyWith(
+                  fontFamily: walletStyle?.displayFont,
+                ),
               ),
-              const SizedBox(height: 2),
-              Text("Let's save your money.", style: AppText.caption()),
+              if (!concept) ...[
+                const SizedBox(height: 2),
+                Text("Let's save your money.", style: AppText.caption()),
+              ],
             ],
           ),
         ),
@@ -112,7 +144,10 @@ class _Header extends ConsumerWidget {
                     decoration: BoxDecoration(
                       color: AppColors.badge,
                       shape: BoxShape.circle,
-                      border: Border.all(color: AppColors.surface, width: 1.5),
+                      border: Border.all(
+                        color: Theme.of(context).colorScheme.surface,
+                        width: 1.5,
+                      ),
                     ),
                   ),
                 ),
@@ -121,34 +156,57 @@ class _Header extends ConsumerWidget {
           ),
         ),
         const SizedBox(width: 10),
-        ClipOval(
-          child: SizedBox(
-            width: 42,
-            height: 42,
-            // Scaled up slightly to crop the square corners of the source art.
-            child: Transform.scale(
-              scale: 1.12,
-              child: Image.asset('assets/images/avatar.jpg', fit: BoxFit.cover),
+        if (concept)
+          CircleAvatar(
+            radius: 21,
+            backgroundColor: walletStyle!.tileColor(
+              Theme.of(context).colorScheme,
+            ),
+            foregroundColor: Theme.of(context).colorScheme.onSurface,
+            child: Text(
+              name.trim().isEmpty
+                  ? 'S'
+                  : name.trim().characters.first.toUpperCase(),
+            ),
+          )
+        else
+          ClipOval(
+            child: SizedBox(
+              width: 42,
+              height: 42,
+              // Scaled up slightly to crop the square corners of the source art.
+              child: Transform.scale(
+                scale: 1.12,
+                child: Image.asset(
+                  'assets/images/avatar.jpg',
+                  fit: BoxFit.cover,
+                ),
+              ),
             ),
           ),
-        ),
       ],
     );
   }
 }
 
 class _Section extends StatelessWidget {
-  const _Section({required this.child, this.padding});
+  const _Section({required this.child, this.padding, this.walletStyle});
   final Widget child;
   final EdgeInsets? padding;
+  final WalletStyle? walletStyle;
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    final squared = walletStyle == WalletStyle.cobaltFold;
     return Container(
       padding: padding ?? const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(AppRadii.section),
+        color: colors.surface,
+        borderRadius: BorderRadius.circular(squared ? 12 : AppRadii.section),
+        border: walletStyle == WalletStyle.classic
+            ? Border.all(color: colors.outlineVariant.withValues(alpha: .36))
+            : null,
       ),
       child: child,
     );
@@ -156,7 +214,8 @@ class _Section extends StatelessWidget {
 }
 
 class _QuickActions extends ConsumerWidget {
-  const _QuickActions();
+  const _QuickActions({this.walletStyle});
+  final WalletStyle? walletStyle;
 
   static const _items = [
     (Icons.north_east_rounded, 'Send'),
@@ -167,7 +226,10 @@ class _QuickActions extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colors = Theme.of(context).colorScheme;
+    final rounded = walletStyle != WalletStyle.figCarousel;
     return _Section(
+      walletStyle: walletStyle,
       padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -230,15 +292,26 @@ class _QuickActions extends ConsumerWidget {
                       width: 42,
                       height: 42,
                       decoration: BoxDecoration(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.surfaceContainerHighest,
-                        shape: BoxShape.circle,
+                        color:
+                            walletStyle?.tileColor(colors) ??
+                            colors.surfaceContainerHighest,
+                        borderRadius: BorderRadius.circular(rounded ? 999 : 11),
                       ),
-                      child: Icon(icon, size: 19),
+                      child: Icon(
+                        icon,
+                        size: 19,
+                        color: walletStyle == WalletStyle.classic
+                            ? colors.onPrimaryContainer
+                            : colors.onSurface,
+                      ),
                     ),
                     const SizedBox(height: 8),
-                    Text(label, style: AppText.caption()),
+                    Text(
+                      label,
+                      style: AppText.caption().copyWith(
+                        fontFamily: walletStyle?.bodyFont,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -250,18 +323,25 @@ class _QuickActions extends ConsumerWidget {
 }
 
 class _ExpensesSection extends ConsumerWidget {
-  const _ExpensesSection();
+  const _ExpensesSection({this.walletStyle});
+  final WalletStyle? walletStyle;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final expenses = ref.watch(expensesProvider);
     return _Section(
+      walletStyle: walletStyle,
       child: Column(
         children: [
           Row(
             children: [
               Expanded(
-                child: Text('Recent activity', style: AppText.heading()),
+                child: Text(
+                  'Recent activity',
+                  style: AppText.heading().copyWith(
+                    fontFamily: walletStyle?.displayFont,
+                  ),
+                ),
               ),
               TextButton(
                 onPressed: () => Navigator.of(context).push(
@@ -282,7 +362,7 @@ class _ExpensesSection extends ConsumerWidget {
           for (final e in expenses.take(5))
             InkWell(
               onTap: () => showExpenseEditor(context, expense: e),
-              child: _ExpenseRow(expense: e),
+              child: _ExpenseRow(expense: e, walletStyle: walletStyle),
             ),
           TextButton.icon(
             onPressed: () => showExpenseEditor(context),
@@ -296,20 +376,31 @@ class _ExpensesSection extends ConsumerWidget {
 }
 
 class _ExpenseRow extends ConsumerWidget {
-  const _ExpenseRow({required this.expense});
+  const _ExpenseRow({required this.expense, this.walletStyle});
   final Expense expense;
+  final WalletStyle? walletStyle;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+    final colors = Theme.of(context).colorScheme;
+    final banded = walletStyle == WalletStyle.figCarousel;
+    final body = AppText.body().copyWith(fontFamily: walletStyle?.bodyFont);
+    return Container(
+      margin: banded ? const EdgeInsets.only(bottom: 5) : null,
+      padding: EdgeInsets.symmetric(vertical: 8, horizontal: banded ? 8 : 0),
+      decoration: banded
+          ? BoxDecoration(
+              color: WalletStyle.figCarousel.tileColor(colors),
+              borderRadius: BorderRadius.circular(11),
+            )
+          : null,
       child: Row(
         children: [
           Container(
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceContainerHighest,
+              color: banded ? colors.surface : colors.surfaceContainerHighest,
               shape: BoxShape.circle,
             ),
             child: Icon(expense.icon, size: 19),
@@ -319,13 +410,18 @@ class _ExpenseRow extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(expense.title, style: AppText.body()),
+                Text(expense.title, style: body),
                 const SizedBox(height: 2),
-                Text(expense.timestamp, style: AppText.tiny()),
+                Text(
+                  expense.timestamp,
+                  style: AppText.tiny().copyWith(
+                    fontFamily: walletStyle?.bodyFont,
+                  ),
+                ),
               ],
             ),
           ),
-          Text(ref.watch(moneyProvider)(expense.amount), style: AppText.body()),
+          Text(ref.watch(moneyProvider)(expense.amount), style: body),
         ],
       ),
     );

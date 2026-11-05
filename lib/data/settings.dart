@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/utils/card_utils.dart';
+import '../core/theme/wallet_style.dart';
 import 'local_store.dart';
 
 class AppSettings {
   const AppSettings({
     this.name = 'SpendTrail user',
     this.appearance = 'system',
+    this.walletStyle = WalletStyle.classic,
   });
   final String name, appearance;
+  final WalletStyle walletStyle;
   ThemeMode get themeMode => switch (appearance) {
     'dark' => ThemeMode.dark,
     'light' => ThemeMode.light,
@@ -28,12 +31,39 @@ class SettingsNotifier extends Notifier<AppSettings> {
         appearance: ['system', 'light', 'dark'].contains(saved['appearance'])
             ? saved['appearance'] as String
             : 'system',
+        walletStyle:
+            WalletStyle.values
+                .where((style) => style.name == saved['walletStyle'])
+                .firstOrNull ??
+            WalletStyle.classic,
       );
     }
     return const AppSettings();
   }
 
-  Future<void> save({required String name, required String appearance}) async {
+  Future<void> _pending = Future<void>.value();
+
+  Future<void> save({
+    String? name,
+    required String appearance,
+    WalletStyle? walletStyle,
+  }) {
+    final pending = _pending.then(
+      (_) => _save(
+        name ?? state.name,
+        appearance,
+        walletStyle ?? state.walletStyle,
+      ),
+    );
+    _pending = pending.then<void>((_) {}, onError: (Object _) {});
+    return pending;
+  }
+
+  Future<void> _save(
+    String name,
+    String appearance,
+    WalletStyle walletStyle,
+  ) async {
     if (name.trim().isEmpty ||
         name.length > 50 ||
         !['system', 'light', 'dark'].contains(appearance)) {
@@ -42,8 +72,13 @@ class SettingsNotifier extends Notifier<AppSettings> {
     await ref.read(localStoreProvider).write('settings.v1', {
       'name': name.trim(),
       'appearance': appearance,
+      'walletStyle': walletStyle.name,
     });
-    state = AppSettings(name: name.trim(), appearance: appearance);
+    state = AppSettings(
+      name: name.trim(),
+      appearance: appearance,
+      walletStyle: walletStyle,
+    );
   }
 }
 

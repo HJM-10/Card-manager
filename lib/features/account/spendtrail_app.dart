@@ -72,12 +72,18 @@ class _SpendTrailAppState extends ConsumerState<SpendTrailApp> {
   @override
   Widget build(BuildContext context) {
     final account = user;
+    final settings = ref.watch(settingsProvider);
+    final style = settings.walletStyle;
     return MaterialApp(
       title: 'SpendTrail',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.light(),
-      darkTheme: AppTheme.dark(),
-      themeMode: ref.watch(settingsProvider).themeMode,
+      theme: account == null
+          ? AppTheme.light()
+          : AppTheme.wallet(style, Brightness.light),
+      darkTheme: account == null
+          ? AppTheme.dark()
+          : AppTheme.wallet(style, Brightness.dark),
+      themeMode: settings.themeMode,
       home: showingSplash
           ? SplashScreen(
               onComplete: () => setState(() => showingSplash = false),
@@ -89,6 +95,7 @@ class _SpendTrailAppState extends ConsumerState<SpendTrailApp> {
             )
           : Builder(
               builder: (context) => AppShell(
+                walletStyle: style,
                 accountName: account['name'] as String,
                 appearanceAction: const _AppearanceMenu(),
                 onAccountCards: () => openAccountCards(context, account),
@@ -116,9 +123,7 @@ class _AppearanceMenuState extends ConsumerState<_AppearanceMenu> {
     if (settings.appearance == appearance) return;
     setState(() => saving = true);
     try {
-      await ref
-          .read(settingsProvider.notifier)
-          .save(name: settings.name, appearance: appearance);
+      await ref.read(settingsProvider.notifier).save(appearance: appearance);
     } catch (_) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

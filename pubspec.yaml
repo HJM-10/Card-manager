@@ -62,10 +62,26 @@ flutter:
 
   assets:
     - assets/images/
+    - assets/fonts/DMSans-OFL.txt
+    - assets/fonts/SpaceGrotesk-OFL.txt
+    - assets/fonts/Outfit-OFL.txt
+    - assets/fonts/Inter-OFL.txt
   fonts:
     - family: PlusJakartaSans
       fonts:
         - asset: assets/fonts/PlusJakartaSans.ttf
+    - family: DMSans
+      fonts:
+        - asset: assets/fonts/DMSans.ttf
+    - family: SpaceGrotesk
+      fonts:
+        - asset: assets/fonts/SpaceGrotesk.ttf
+    - family: Outfit
+      fonts:
+        - asset: assets/fonts/Outfit.ttf
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter.ttf
 
   # To add assets to your application, add an assets section, like this:
   # assets:

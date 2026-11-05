@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/theme/wallet_style.dart';
 import '../../core/widgets/motion.dart';
 import '../../data/providers.dart';
 import '../home/home_screen.dart';
@@ -19,11 +20,13 @@ class AppShell extends ConsumerWidget {
     this.appearanceAction,
     this.onAccountCards,
     this.onSignOut,
+    this.walletStyle,
   });
 
   final String? accountName;
   final Widget? appearanceAction;
   final VoidCallback? onAccountCards, onSignOut;
+  final WalletStyle? walletStyle;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -36,12 +39,16 @@ class AppShell extends ConsumerWidget {
             index: tab,
             children: [
               HomeScreen(
+                walletStyle: walletStyle,
                 accountName: accountName,
                 appearanceAction: appearanceAction,
               ),
               CardsScreen(onAccountCards: onAccountCards),
               const StatisticsScreen(),
-              ProfileScreen(onSignOut: onSignOut),
+              ProfileScreen(
+                onSignOut: onSignOut,
+                showWalletDesign: walletStyle != null,
+              ),
             ],
           ),
           // Fade content out under the nav bar.
@@ -71,7 +78,7 @@ class AppShell extends ConsumerWidget {
             left: 0,
             right: 0,
             bottom: 16 + MediaQuery.paddingOf(context).bottom,
-            child: const Center(child: FloatingNavBar()),
+            child: Center(child: FloatingNavBar(walletStyle: walletStyle)),
           ),
           Positioned(
             left: 16,
@@ -97,7 +104,9 @@ class AppShell extends ConsumerWidget {
 }
 
 class FloatingNavBar extends ConsumerWidget {
-  const FloatingNavBar({super.key});
+  const FloatingNavBar({super.key, this.walletStyle});
+
+  final WalletStyle? walletStyle;
 
   static const _items = [
     (Icons.home_rounded, 'Home'),
@@ -109,10 +118,13 @@ class FloatingNavBar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final current = ref.watch(tabProvider);
+    final duration = MediaQuery.disableAnimationsOf(context)
+        ? Duration.zero
+        : const Duration(milliseconds: 320);
     return Container(
       padding: const EdgeInsets.all(5),
       decoration: BoxDecoration(
-        color: AppColors.dark,
+        color: walletStyle?.dockColor ?? AppColors.dark,
         borderRadius: BorderRadius.circular(999),
         boxShadow: [
           BoxShadow(
@@ -133,7 +145,7 @@ class FloatingNavBar extends ConsumerWidget {
                 selected: i == current,
                 excludeSemantics: true,
                 child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 320),
+                  duration: duration,
                   curve: Curves.easeOutCubic,
                   height: 44,
                   padding: EdgeInsets.symmetric(
@@ -141,7 +153,7 @@ class FloatingNavBar extends ConsumerWidget {
                   ),
                   decoration: BoxDecoration(
                     color: i == current
-                        ? AppColors.darkSoft
+                        ? Colors.white.withValues(alpha: 0.18)
                         : Colors.transparent,
                     borderRadius: BorderRadius.circular(999),
                   ),
@@ -153,7 +165,7 @@ class FloatingNavBar extends ConsumerWidget {
                         color: i == current ? Colors.white : Colors.white54,
                       ),
                       AnimatedSize(
-                        duration: const Duration(milliseconds: 320),
+                        duration: duration,
                         curve: Curves.easeOutCubic,
                         child:
                             i == current &&
