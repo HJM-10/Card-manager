@@ -32,9 +32,9 @@ Future<void> main() async {
   runApp(
     ProviderScope(
       overrides: [localStoreProvider.overrideWithValue(store)],
-      child: const bool.fromEnvironment('LEGACY_DEMO')
-          ? const MagpieApp()
-          : const SpendTrailApp(),
+      child: const bool.fromEnvironment('SPENDTRAIL_PREVIEW')
+          ? const SpendTrailApp()
+          : const MagpieApp(),
     ),
   );
 }

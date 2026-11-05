@@ -4,9 +4,9 @@ Delivered on 4 November 2026 as the first usable slice of the SpendTrail roadmap
 
 ## Result
 
-The default Flutter launch now opens SpendTrail registration/login. A signed-in user can create, list, edit and archive fictional card profiles through FastAPI and PostgreSQL. Starting a fresh client and signing in again restores the saved profiles. Empty, loading, validation, server-error and retry states are included. Sessions expire after 12 hours and logout revokes the current token. Session tokens are deliberately held in memory, so app restart requires sign-in.
+The milestone introduced a SpendTrail registration/login flow. A signed-in user can create, list, edit and archive fictional card profiles through FastAPI and PostgreSQL. Starting a fresh client and signing in again restores the saved profiles. Empty, loading, validation, server-error and retry states are included. Sessions expire after 12 hours and logout revokes the current token. Session tokens are deliberately held in memory, so app restart requires sign-in.
 
-The new flow uses the proposal's coral/navy/cream palette and PKR context. It does not show a fabricated balance. The earlier Magpie demo remains available with `LEGACY_DEMO=true` while transaction and reporting screens are migrated in later milestones.
+The account preview uses a coral/navy/cream palette and PKR context. The original Magpie interface is the default launch. Use `--dart-define=SPENDTRAIL_PREVIEW=true` to review the account milestone.
 
 ## Evidence
 

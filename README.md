@@ -2,7 +2,7 @@
 
 The next implementation target is **SpendTrail**. See the [project roadmap](docs/ROADMAP.md) for the six-week build plan, ordered backlog and acceptance criteria. The features below describe the existing Magpie demo baseline.
 
-**First SpendTrail milestone implemented:** registration/login and PostgreSQL-backed fictional card profiles. This is now the default launch flow. See [backend setup and API guide](backend/README.md) to run it. Launch with `--dart-define=LEGACY_DEMO=true` to review the earlier local demo.
+**Default launch:** the original animated wallet described below. The SpendTrail registration/login and PostgreSQL-backed card profiles are available as a separate preview with `--dart-define=SPENDTRAIL_PREVIEW=true`. See the [backend setup and API guide](backend/README.md) for preview instructions.
 
 **Magpie** is a local demo wallet and expense tracker built in Flutter, with an animated interface inspired by the reference video.
 

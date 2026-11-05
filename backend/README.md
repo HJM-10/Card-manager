@@ -24,10 +24,10 @@ Migrations are explicit, transactional and versioned; API startup never silently
 Start Flutter in a second terminal:
 
 ```powershell
-flutter run -d chrome --web-port 5173 --dart-define=API_BASE_URL=http://localhost:8000
+flutter run -d chrome --web-port 5173 --dart-define=SPENDTRAIL_PREVIEW=true --dart-define=API_BASE_URL=http://localhost:8000
 ```
 
-Android emulator: use `--dart-define=API_BASE_URL=http://10.0.2.2:8000`. Debug Android builds permit local HTTP. Release builds require an HTTPS API. Physical devices need a reachable server address; development binding/firewall changes must be configured separately. Web origins must be explicitly listed in `CORS_ORIGINS`. The old Magpie demo remains available using `--dart-define=LEGACY_DEMO=true`.
+For the Android emulator, use the same preview flag with `--dart-define=API_BASE_URL=http://10.0.2.2:8000`. Debug Android builds permit local HTTP. Release builds require an HTTPS API. Physical devices need a reachable server address; development binding/firewall changes must be configured separately. Web origins must be explicitly listed in `CORS_ORIGINS`.
 
 ## This Windows workspace
 
