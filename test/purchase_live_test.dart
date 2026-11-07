@@ -108,6 +108,54 @@ void main() {
         throwsA(isA<ApiException>().having((e) => e.statusCode, 'status', 401)),
       );
       await resumed.logout();
+      final importer = SpendTrailApi(baseUrl: liveUrl);
+      addTearDown(importer.close);
+      await importer.authenticate(email: email, password: password);
+      await importer.saveCard({
+        'label': 'CSV card',
+        'network': 'visa',
+        'last4': '9876',
+        'expiry_month': 12,
+        'expiry_year': 2099,
+      });
+      final importCard = (await importer.cards()).single;
+      const csv =
+          'reference,merchant,amount,occurred_at,channel,category\n'
+          'live-csv-1,Bookshop,1599.00,2026-11-07T14:30:00+05:00,pos,Shopping\n'
+          'live-csv-2,Café,550.00,2026-11-07T09:00:00+05:00,pos,Food\n';
+      final preview = await importer.previewCsv(
+        cardId: importCard['id'] as String,
+        fileName: 'live.csv',
+        text: csv,
+      );
+      expect(preview['ready_count'], 2);
+      expect((await importer.purchases()).length, 1);
+      final receipt = await importer.confirmCsv(
+        preview['id'] as String,
+        preview['preview_token'] as String,
+      );
+      expect(receipt['imported_count'], 2);
+      expect(receipt['total_amount'], '2149.00');
+      expect(
+        await importer.confirmCsv(
+          preview['id'] as String,
+          preview['preview_token'] as String,
+        ),
+        receipt,
+      );
+      expect(
+        await importer.previewCsv(
+          cardId: importCard['id'] as String,
+          fileName: 'renamed.csv',
+          text: csv,
+        ),
+        receipt,
+      );
+      expect((await importer.purchases()).length, 3);
+      await expectLater(
+        other.csvImport(preview['id'] as String),
+        throwsA(isA<ApiException>().having((e) => e.statusCode, 'status', 404)),
+      );
     },
     skip: liveUrl.isEmpty ? 'Set LIVE_API_URL to a dedicated test API.' : false,
   );

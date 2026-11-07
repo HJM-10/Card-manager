@@ -1,0 +1,4 @@
+reference,merchant,amount,occurred_at,channel,category
+spendtrail-sample-v1-001,Bookshop,1599.00,2026-11-07T14:30:00+05:00,pos,Shopping
+spendtrail-sample-v1-002,Pharmacy,850.50,2026-11-07T13:15:00+05:00,pos,Other
+spendtrail-sample-v1-003,Internet bill,3200.00,2026-11-06T11:00:00+05:00,online,Bills

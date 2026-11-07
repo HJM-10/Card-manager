@@ -446,6 +446,12 @@ void main() {
             )
             .last,
       );
+      await tester.pumpAndSettle();
+      await Scrollable.ensureVisible(
+        tester.element(find.text('Load more')),
+        alignment: 0.5,
+      );
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Load more'));
       await tester.pumpAndSettle();
       expect(find.text('Try later'), findsOneWidget);

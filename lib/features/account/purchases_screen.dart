@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../data/spendtrail_api.dart';
 import 'purchase_filters.dart';
+import 'csv_import_screen.dart';
 
 String _date(String value) =>
     DateTime.parse(value).toLocal().toString().substring(0, 16);
@@ -127,6 +128,23 @@ class _PurchasesScreenState extends State<PurchasesScreen> {
     if (saved == true && mounted) await load(reset: true);
   }
 
+  Future<void> importCsv() async {
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) =>
+            CsvImportScreen(api: widget.api, onExpired: widget.onExpired),
+      ),
+    );
+    if (mounted) {
+      setState(() {
+        filters = const PurchaseFilters();
+        appliedSearch = '';
+        search.clear();
+      });
+      await load(reset: true);
+    }
+  }
+
   @override
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(
@@ -148,7 +166,7 @@ class _PurchasesScreenState extends State<PurchasesScreen> {
             physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.all(20),
             children: [
-              const Text('Manual purchases saved to your account · PKR'),
+              const Text('Purchases saved to your account · PKR'),
               const SizedBox(height: 12),
               TextField(
                 controller: search,
@@ -198,6 +216,11 @@ class _PurchasesScreenState extends State<PurchasesScreen> {
                 onPressed: loading ? null : add,
                 icon: const Icon(Icons.add),
                 label: const Text('Record purchase'),
+              ),
+              OutlinedButton.icon(
+                onPressed: loading ? null : importCsv,
+                icon: const Icon(Icons.upload_file),
+                label: const Text('Import CSV'),
               ),
               if (!loading && error == null && records.isEmpty)
                 const Padding(

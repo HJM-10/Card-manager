@@ -1,4 +1,6 @@
 import os
+import csv
+import io
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor
 from uuid import uuid4
@@ -418,3 +420,194 @@ def test_concurrent_biometric_replacement_and_logout_cannot_restore_revoked_sess
     if enrolled.status_code == 201:
         assert client.post('/auth/biometric/refresh', json={'refresh_token': enrolled.json()['refresh_token']}).status_code == 401
     assert client.get('/auth/me', headers=headers).status_code == 401
+
+
+def csv_text(rows, category=True):
+    output = io.StringIO(newline='')
+    writer = csv.writer(output)
+    writer.writerow(['reference', 'merchant', 'amount', 'occurred_at', 'channel'] + (['category'] if category else []))
+    writer.writerows(rows)
+    return output.getvalue()
+
+
+def import_setup(client):
+    headers = account(client)
+    card_id = client.post('/cards', headers=headers, json=CARD).json()['id']
+    return headers, card_id
+
+
+def preview_file(client, headers, card_id, text, name='purchases.csv'):
+    return client.post('/imports/preview', headers=headers, json={'card_id': card_id, 'file_name': name, 'csv_text': text})
+
+
+def confirm_file(client, headers, preview):
+    return client.post('/imports/' + preview['id'] + '/confirm', headers=headers, json={'preview_token': preview['preview_token']})
+
+
+CSV_ROW = ['receipt-1', 'Bookshop', '1599.00', '2026-11-07T14:30:00+05:00', 'pos', 'Shopping']
+
+
+def test_csv_preview_confirmation_receipt_and_repeat_import(client):
+    headers, card_id = import_setup(client)
+    text = csv_text([CSV_ROW, ['receipt-2', 'Pharmacy', '850.50', '2026-11-07T13:15:00+05:00', 'pos', 'Other']])
+    result = preview_file(client, headers, card_id, text)
+    assert result.status_code == 200, result.text
+    preview = result.json()
+    assert preview['ready_count'] == 2 and preview['error_count'] == 0 and preview['total_amount'] == '2449.50'
+    assert client.get('/transactions', headers=headers).json() == []
+    with db.connect() as conn:
+        assert conn.execute('SELECT count(*) AS n FROM transaction_outbox').fetchone()['n'] == 0
+    confirmed = confirm_file(client, headers, preview)
+    assert confirmed.status_code == 200, confirmed.text
+    receipt = confirmed.json()
+    assert receipt['status'] == 'confirmed' and receipt['imported_count'] == 2 and receipt['total_amount'] == '2449.50'
+    assert confirm_file(client, headers, preview).json() == receipt
+    assert preview_file(client, headers, card_id, '\ufeff' + text.replace('\r\n', '\n'), name='renamed.csv').json() == receipt
+    assert client.get('/imports/' + preview['id'], headers=headers).json() == receipt
+    login = client.post('/auth/login', json={'email': 'alice@example.com', 'password': PASSWORD})
+    fresh = {'Authorization': 'Bearer ' + login.json()['access_token']}
+    history = client.get('/transactions', headers=fresh).json()
+    assert len(history) == 2 and history[0]['source'] == 'csv' and history[0]['category'] == 'Shopping'
+    with db.connect() as conn:
+        for table in ('spending_transactions', 'transaction_audit_events', 'transaction_outbox'):
+            assert conn.execute(sql.SQL('SELECT count(*) AS n FROM {}').format(sql.Identifier(table))).fetchone()['n'] == 2
+
+
+def test_csv_duplicates_inside_file_reordered_files_and_recategorization(client):
+    headers, card_id = import_setup(client)
+    first = preview_file(client, headers, card_id, csv_text([CSV_ROW, CSV_ROW])).json()
+    assert first['ready_count'] == 1 and first['duplicate_count'] == 1
+    receipt = confirm_file(client, headers, first).json()
+    assert receipt['imported_count'] == 1 and receipt['duplicate_count'] == 1
+    saved = client.get('/transactions', headers=headers).json()[0]
+    assert client.patch('/transactions/' + saved['id'] + '/category', headers=headers, json={'category_id': None}).status_code == 200
+    other = ['receipt-2', 'Coffee', '550.00', '2026-11-06T09:00:00+05:00', 'online', 'Food']
+    preview = preview_file(client, headers, card_id, csv_text([other, CSV_ROW]), name='different.csv').json()
+    assert preview['ready_count'] == 1 and preview['duplicate_count'] == 1 and preview['error_count'] == 0
+    assert confirm_file(client, headers, preview).json()['imported_count'] == 1
+    assert len(client.get('/transactions', headers=headers).json()) == 2
+
+
+def test_csv_row_errors_and_reference_conflicts_block_entire_batch(client):
+    headers, card_id = import_setup(client)
+    bad = ['receipt-2', '', '0.00', '2026-11-07T10:00:00', 'cash', 'Missing category']
+    preview = preview_file(client, headers, card_id, csv_text([CSV_ROW, bad])).json()
+    assert preview['ready_count'] == 1 and preview['error_count'] == 1 and not preview['can_confirm']
+    assert confirm_file(client, headers, preview).status_code == 422
+    assert client.get('/transactions', headers=headers).json() == []
+    conflicting = [*CSV_ROW]
+    conflicting[2] = '1600.00'
+    preview = preview_file(client, headers, card_id, csv_text([CSV_ROW, conflicting])).json()
+    assert preview['error_count'] == 1 and not preview['can_confirm']
+    first = preview_file(client, headers, card_id, csv_text([CSV_ROW])).json()
+    assert confirm_file(client, headers, first).status_code == 200
+    preview = preview_file(client, headers, card_id, csv_text([conflicting])).json()
+    assert preview['error_count'] == 1 and confirm_file(client, headers, preview).status_code == 422
+    assert len(client.get('/transactions', headers=headers).json()) == 1
+
+
+def test_csv_formats_limits_utf8_quoting_and_headers(client):
+    headers, card_id = import_setup(client)
+    row = [*CSV_ROW]
+    row[1] = 'Café, Books & More'
+    row[5] = 'shopping'
+    preview = preview_file(client, headers, card_id, '\ufeff' + csv_text([row])).json()
+    assert preview['ready_count'] == 1 and preview['rows'][0]['merchant'] == 'Café, Books & More'
+    assert preview_file(client, headers, card_id, csv_text([CSV_ROW[:5]], category=False)).json()['rows'][0]['category_id'] is None
+    for text in [
+        '', 'reference,reference\n1,2', 'merchant,amount\nShop,10.00',
+        csv_text([CSV_ROW]).replace('channel,category', 'channel,cvv'),
+        'reference,merchant,amount,occurred_at,channel\n1,"unclosed',
+        csv_text([CSV_ROW] * 501), csv_text([CSV_ROW]).replace('Bookshop', 'Book\x00shop'),
+    ]:
+        assert preview_file(client, headers, card_id, text).status_code == 422
+    assert preview_file(client, headers, card_id, 'é' * 150000).status_code == 413
+    assert preview_file(client, headers, card_id, csv_text([CSV_ROW]), name='purchases.txt').status_code == 422
+    assert preview_file(client, headers, card_id, csv_text([CSV_ROW]), name='../purchases.csv').status_code == 422
+
+
+def test_csv_ownership_archival_stale_preview_and_confirmation_recheck(client):
+    alice, card_id = import_setup(client)
+    bob = account(client, 'bob@example.com')
+    text = csv_text([CSV_ROW])
+    assert preview_file(client, bob, card_id, text).status_code == 404
+    assert client.post('/imports/preview', json={'card_id': card_id, 'file_name': 'p.csv', 'csv_text': text}).status_code == 401
+    preview = preview_file(client, alice, card_id, text).json()
+    assert client.get('/imports/' + preview['id'], headers=bob).status_code == 404
+    assert confirm_file(client, bob, preview).status_code == 404
+    latest = preview_file(client, alice, card_id, text).json()
+    assert latest['id'] == preview['id'] and latest['preview_token'] != preview['preview_token']
+    assert confirm_file(client, alice, preview).status_code == 409
+    assert client.delete('/cards/' + card_id, headers=alice).status_code == 204
+    assert confirm_file(client, alice, latest).status_code == 404
+    assert client.get('/transactions', headers=alice).json() == []
+
+
+def test_csv_concurrent_batches_commit_one_purchase_event_and_recheck_conflicts(client):
+    headers, card_id = import_setup(client)
+    first = preview_file(client, headers, card_id, csv_text([CSV_ROW])).json()
+    second = preview_file(client, headers, card_id, csv_text([CSV_ROW]).replace('Shopping', 'shopping')).json()
+    def confirm(preview):
+        with TestClient(main.app) as api:
+            response = confirm_file(api, headers, preview)
+            assert response.status_code == 200, response.text
+            return response.json()
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        receipts = list(executor.map(confirm, [first, second]))
+    assert sorted(r['imported_count'] for r in receipts) == [0, 1]
+    with db.connect() as conn:
+        for table in ('spending_transactions', 'transaction_audit_events', 'transaction_outbox'):
+            assert conn.execute(sql.SQL('SELECT count(*) AS n FROM {}').format(sql.Identifier(table))).fetchone()['n'] == 1
+    # A reference can change after preview due to a separately committed import.
+    other = ['new-receipt', 'Market', '100.00', '2026-11-07T10:00:00+05:00', 'pos', 'Groceries']
+    original = ['future-ref', 'Cafe', '500.00', '2026-11-07T11:00:00+05:00', 'pos', 'Food']
+    waiting = preview_file(client, headers, card_id, csv_text([other, original])).json()
+    changed = [*original]
+    changed[2] = '501.00'
+    intervening = preview_file(client, headers, card_id, csv_text([changed])).json()
+    assert confirm_file(client, headers, intervening).status_code == 200
+    assert confirm_file(client, headers, waiting).status_code == 409
+    assert len(client.get('/transactions', headers=headers).json()) == 2
+
+
+def test_csv_failure_rolls_back_all_rows_audit_outbox_and_batch(client):
+    headers, card_id = import_setup(client)
+    second = [*CSV_ROW]
+    second[0], second[1] = 'receipt-2', 'Pharmacy'
+    preview = preview_file(client, headers, card_id, csv_text([CSV_ROW, second])).json()
+    with db.connect() as conn:
+        conn.execute('''CREATE FUNCTION fail_second_import_event() RETURNS trigger LANGUAGE plpgsql AS $$
+            BEGIN IF (SELECT count(*) FROM transaction_outbox) >= 1 THEN RAISE EXCEPTION 'simulated event failure'; END IF; RETURN NEW; END; $$''')
+        conn.execute('CREATE TRIGGER fail_import_event BEFORE INSERT ON transaction_outbox FOR EACH ROW EXECUTE FUNCTION fail_second_import_event()')
+    with TestClient(main.app, raise_server_exceptions=False) as api:
+        assert confirm_file(api, headers, preview).status_code == 500
+    with db.connect() as conn:
+        for table in ('merchants', 'spending_transactions', 'transaction_audit_events', 'transaction_outbox'):
+            assert conn.execute(sql.SQL('SELECT count(*) AS n FROM {}').format(sql.Identifier(table))).fetchone()['n'] == 0
+        assert conn.execute('SELECT status FROM import_batches WHERE id = %s', (preview['id'],)).fetchone()['status'] == 'preview'
+        conn.execute('DROP TRIGGER fail_import_event ON transaction_outbox')
+    assert confirm_file(client, headers, preview).json()['imported_count'] == 2
+
+
+def test_csv_database_batch_ownership_is_enforced(client):
+    alice, card_id = import_setup(client)
+    preview = preview_file(client, alice, card_id, csv_text([CSV_ROW])).json()
+    assert confirm_file(client, alice, preview).status_code == 200
+    bob = account(client, 'bob@example.com')
+    bob_card = client.post('/cards', headers=bob, json=CARD).json()['id']
+    foreign_batch = preview_file(client, bob, bob_card, csv_text([CSV_ROW])).json()
+    with pytest.raises(psycopg.errors.ForeignKeyViolation):
+        with db.connect() as conn:
+            conn.execute('UPDATE spending_transactions SET import_batch_id = %s', (foreign_batch['id'],))
+    assert len(client.get('/transactions', headers=alice).json()) == 1
+
+
+def test_csv_maximum_500_rows_import_exactly_once(client):
+    headers, card_id = import_setup(client)
+    rows = [[f'receipt-{i}', 'Market', '1.00', '2026-11-07T10:00:00+05:00', 'pos', 'Groceries'] for i in range(500)]
+    preview = preview_file(client, headers, card_id, csv_text(rows)).json()
+    assert preview['ready_count'] == 500 and preview['total_amount'] == '500.00'
+    receipt = confirm_file(client, headers, preview)
+    assert receipt.status_code == 200, receipt.text
+    assert receipt.json()['imported_count'] == 500 and receipt.json()['total_amount'] == '500.00'
+    assert confirm_file(client, headers, preview).json() == receipt.json()

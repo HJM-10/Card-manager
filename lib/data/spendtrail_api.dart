@@ -176,6 +176,33 @@ class SpendTrailApi {
     _token = null;
   }
 
+  Future<Map<String, dynamic>> previewCsv({
+    required String cardId,
+    required String fileName,
+    required String text,
+  }) async =>
+      await _request('POST', '/imports/preview', {
+            'card_id': cardId,
+            'file_name': fileName,
+            'csv_text': text,
+          })
+          as Map<String, dynamic>;
+
+  Future<Map<String, dynamic>> confirmCsv(
+    String batchId,
+    String previewToken,
+  ) async =>
+      await _request(
+            'POST',
+            '/imports/${Uri.encodeComponent(batchId)}/confirm',
+            {'preview_token': previewToken},
+          )
+          as Map<String, dynamic>;
+
+  Future<Map<String, dynamic>> csvImport(String batchId) async =>
+      await _request('GET', '/imports/${Uri.encodeComponent(batchId)}')
+          as Map<String, dynamic>;
+
   Future<String> enableBiometric() async =>
       (await _request('POST', '/auth/biometric')
               as Map<String, dynamic>)['refresh_token']

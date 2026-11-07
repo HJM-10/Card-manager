@@ -75,6 +75,9 @@ Interactive documentation is available at `/docs` while the API runs.
 | `GET /transactions` | Current user's purchase history, newest first. Optional `limit` (1–100, default 25) and `offset` (default 0) |
 | `GET /transactions/{id}` | Current user's purchase detail; 404 for a missing or inaccessible record |
 | `PATCH /transactions/{id}/category` | `{category_id: UUID or null}` changes or clears the owned purchase's category, including on archived cards |
+| `POST /imports/preview` | `{card_id, file_name, csv_text}` validates a UTF-8 CSV and saves its row preview without creating purchases |
+| `GET /imports/{id}` | Current user's saved preview or confirmed import receipt |
+| `POST /imports/{id}/confirm` | `{preview_token}` atomically creates valid new CSV purchases and returns an idempotent receipt |
 
 Protected endpoints require `Authorization: Bearer <token>`. Unknown body fields are rejected. `network` is `visa` or `mastercard`; `last4` is four ASCII digits; expiry must be current/future, with year at most 2100. Names and labels are trimmed and limited to 50 characters; passwords preserve whitespace and contain 10–128 characters. Email uniqueness is case insensitive. Duplicate profile identity `(user_id, network, last4)` returns 409, including archived profiles. Editing another user's card returns 404. No balances are inferred from a card profile.
 
@@ -141,6 +144,10 @@ Migration `003_categories_history.sql` adds user-owned categories, starter categ
 
 Migration `004_biometric_sessions.sql` adds hashed, user-owned credentials with an absolute 30-day expiry, revocation flag and ownership-enforced links from access sessions. Renewal issues access for up to 12 hours, capped by the credential expiry; it does not extend the 30-day window. Sign-out revokes the linked credential and all its derived accesses. Disabling biometric login detaches and preserves the current access, while other derived accesses become invalid. Separate device credentials are unaffected. Refresh and revocation serialize on the credential row so a concurrent refresh cannot restore a revoked login. Revoked rows remain for later cleanup. Credential responses use `Cache-Control: no-store`.
 
+Migration `005_csv_imports.sql` adds user-owned ImportBatch records with file fingerprints, preview tokens, bounded row outcomes and confirmation receipts. A composite transaction-to-batch foreign key enforces owner/card identity. Manual and CSV purchases use the same validation/write helper in `app/purchases.py`, including audit/outbox triggers. The source is `csv` for imported purchases and `manual` for manual entry.
+
+See [CSV_IMPORT.md](../docs/CSV_IMPORT.md) for exact columns, byte/row limits, duplicates and the all-or-nothing policy. Preview/confirm/get require a bearer session. New previews return 200 and include `id`, `preview_token`, `rows`, `ready_count`, `duplicate_count`, `error_count`, `total_amount` and `can_confirm`. Each row includes its record number, status/message and bounded purchase fields. Confirmation returns 200 with `status=confirmed`, `imported_count`, `duplicate_count` and the exact imported `total_amount`; retries return the same receipt. Any invalid row returns 422 on confirmation. A stale preview or newly conflicting reference returns 409. Foreign imports and unavailable active cards return 404. A new preview of an unconfirmed file replaces its preview token; previously confirmed files keep their receipt. Records that became matching duplicates since preview are safely skipped. An audit/outbox failure rolls back all new purchases and leaves the batch unconfirmed.
+
 The backend trusts possession of the opaque credential; Android enforces biometric access to its encrypted local copy. It receives no biometric image/template or saved password. Release traffic requires HTTPS; local HTTP/USB remains the development setup. See `docs/MILESTONE_04.md` for device behavior and checks.
 
 ## Verification
@@ -169,6 +176,6 @@ For embedded Python, use `backend/run.py pytest backend/tests -q` instead. The b
 
 ## Remaining scope
 
-Budgets, imports, simulated payments, notification dispatch, account recovery and production deployment are future work. A separate runtime database role with restricted audit privileges is also pending. Existing local demo statistics are not yet backed by account purchase reports.
+Budgets, simulated payments, notification dispatch, account recovery and production deployment are future work. A separate runtime database role with restricted audit privileges is also pending. Existing local demo statistics are not yet backed by account purchase reports.
 
 Implementation references: [FastAPI authentication and password hashing](https://fastapi.tiangolo.com/tutorial/security/oauth2-jwt/) and [Psycopg transaction management](https://www.psycopg.org/psycopg3/docs/basic/transactions.html).

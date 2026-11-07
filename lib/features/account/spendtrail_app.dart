@@ -534,11 +534,6 @@ class _SignInState extends State<_SignIn> {
               'Fingerprint is unavailable. Sign in with your password.',
             ),
         ],
-        Text(
-          'Fictional card profiles · PKR',
-          textAlign: TextAlign.center,
-          style: TextStyle(color: colors.onSurfaceVariant),
-        ),
       ],
     ),
   );

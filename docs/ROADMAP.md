@@ -84,9 +84,9 @@ Manual purchases now persist in PostgreSQL and are available through authenticat
 
 Added prerequisite: optional Android fingerprint login, backed by revocable sessions and biometric-bound storage. Implemented before CSV imports; see [biometric login evidence](MILESTONE_04.md).
 
-- [ ] Specify CSV columns, date/decimal formats, size limits and row-error behavior before implementation.
-- [ ] Add ImportBatch tracking and a preview that identifies invalid/duplicate rows before confirmation.
-- [ ] Implement the agreed atomic import policy and repeat-import protection.
+- [x] Specify CSV columns, date/decimal formats, size limits and row-error behavior before implementation.
+- [x] Add ImportBatch tracking and a preview that identifies invalid/duplicate rows before confirmation.
+- [x] Implement the agreed atomic import policy and repeat-import protection.
 - [ ] Replace demo money actions with simulated approved purchases, declines and refunds for online/POS channels.
 - [ ] Link refunds to original purchases and prevent cumulative approved refunds exceeding the approved purchase amount, including concurrent requests.
 - [ ] Verify that declines do not affect spending and approved refunds reduce it exactly once.
