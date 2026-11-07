@@ -10,6 +10,8 @@ All balances and money actions are simulated. No bank connection, payment proces
 
 Choose a saved category when recording a purchase, or open its details and tap **Change category** later. Each account starts with Groceries, Food, Transport, Shopping, Bills and Other; **New category** adds a custom choice. **Search merchants** searches the full account history. **Filters** combines a card (including archived cards), category or Uncategorized, and an inclusive local date range. **Clear search & filters** returns to all purchases.
 
+**Fingerprint login (Android):** sign in with your password, then enable **Profile → Fingerprint login** and complete the phone's biometric prompt. **Lock app**, or restart the app, then choose **Sign in with fingerprint**. Saved login is valid for up to 30 days and requires the backend connection. Sign out or turn the setting off to revoke it. Password login remains available and clears the previous saved fingerprint setup; enable it again afterward if wanted. The setting uses Android Keystore and strong biometrics, with no saved password or fingerprint data. See [verification and behavior](docs/MILESTONE_04.md).
+
 ## Features
 
 - **Animated splash:** coins drop above a cash stack, the illustration collapses into the SpendTrail wordmark, and a progress bar fills.

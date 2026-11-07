@@ -1,6 +1,6 @@
 # SpendTrail backend
 
-The API provides registration/login, revocable 12-hour bearer sessions, user-owned fictional card profiles, and manual PKR purchase recording and history. PostgreSQL is the persistent store. Tokens stay in client memory, so users sign in again after an app restart. Passwords use Argon2, and the database stores session token hashes.
+The API provides registration/login, revocable 12-hour bearer sessions, optional 30-day biometric login credentials, user-owned fictional card profiles, and manual PKR purchase recording and history. PostgreSQL is the persistent store. Access tokens stay in client memory. On Android, opt-in fingerprint login stores a separate credential encrypted with an authentication-bound Keystore key. Passwords use Argon2, and the database stores only hashes of session credentials.
 
 ## Standard local setup
 
@@ -60,6 +60,10 @@ Interactive documentation is available at `/docs` while the API runs.
 | `POST /auth/login` | `{email, password}` → new session token and public user |
 | `GET /auth/me` | Authenticated user's ID, email and name |
 | `DELETE /auth/session` | Revokes the current session; 204 |
+| `POST /auth/biometric` | Authenticated opt-in; creates/replaces a credential for this session and returns `refresh_token` plus `expires_at`; 201 |
+| `POST /auth/biometric/refresh` | `{refresh_token}` returns a fresh access token and its associated user; no password needed |
+| `DELETE /auth/biometric` | Disables the current session's saved login, revokes other associated access sessions, and preserves the current access; 204 |
+| `DELETE /auth/access` | Locks this instance by revoking only its access token; preserves the biometric credential; 204 |
 | `GET /cards` | Current user's active card profiles only |
 | `GET /cards?include_archived=true` | Current user's active and archived profiles for history filters |
 | `GET /categories` | Current user's saved categories |
@@ -134,6 +138,10 @@ SQL migration `001_accounts_cards.sql` defines the checks, foreign keys and uniq
 Migration `002_manual_purchases.sql` adds user-owned merchants and transactions. Composite foreign keys require the card and merchant to belong to the transaction owner. An insert trigger writes one creation audit row and one outbox row in the same database transaction as the purchase.
 
 Migration `003_categories_history.sql` adds user-owned categories, starter categories for existing users, nullable current/original category references, composite ownership foreign keys, an ownership trigger and an index for category history. The existing purchases, amounts, audit events and outbox events are preserved. Run migrations before starting the updated API.
+
+Migration `004_biometric_sessions.sql` adds hashed, user-owned credentials with an absolute 30-day expiry, revocation flag and ownership-enforced links from access sessions. Renewal issues access for up to 12 hours, capped by the credential expiry; it does not extend the 30-day window. Sign-out revokes the linked credential and all its derived accesses. Disabling biometric login detaches and preserves the current access, while other derived accesses become invalid. Separate device credentials are unaffected. Refresh and revocation serialize on the credential row so a concurrent refresh cannot restore a revoked login. Revoked rows remain for later cleanup. Credential responses use `Cache-Control: no-store`.
+
+The backend trusts possession of the opaque credential; Android enforces biometric access to its encrypted local copy. It receives no biometric image/template or saved password. Release traffic requires HTTPS; local HTTP/USB remains the development setup. See `docs/MILESTONE_04.md` for device behavior and checks.
 
 ## Verification
 

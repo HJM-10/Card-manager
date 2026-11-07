@@ -6,13 +6,16 @@ import '../../core/theme/app_theme.dart';
 import '../../data/providers.dart';
 import '../../data/settings.dart';
 import '../../data/spendtrail_api.dart';
+import '../../data/biometric_vault.dart';
 import '../shell/app_shell.dart';
 import '../splash/splash_screen.dart';
 import 'purchases_screen.dart';
+import 'biometric_settings.dart';
 
 class SpendTrailApp extends ConsumerStatefulWidget {
-  const SpendTrailApp({super.key, this.api});
+  const SpendTrailApp({super.key, this.api, this.biometricVault});
   final SpendTrailApi? api;
+  final BiometricVault? biometricVault;
 
   @override
   ConsumerState<SpendTrailApp> createState() => _SpendTrailAppState();
@@ -20,6 +23,7 @@ class SpendTrailApp extends ConsumerStatefulWidget {
 
 class _SpendTrailAppState extends ConsumerState<SpendTrailApp> {
   late final api = widget.api ?? SpendTrailApi();
+  late final vault = widget.biometricVault ?? AndroidBiometricVault();
   Map<String, dynamic>? user;
   bool showingSplash = true;
   bool signingOut = false;
@@ -35,10 +39,21 @@ class _SpendTrailAppState extends ConsumerState<SpendTrailApp> {
     signingOut = true;
     try {
       await api.logout();
+      try {
+        await vault.clear();
+      } on BiometricException {
+        /* Server credential is already revoked. */
+      }
       if (context.mounted) finishSignOut(context);
     } on ApiException catch (error) {
       if (!context.mounted) return;
       if (error.unauthorized) {
+        try {
+          await vault.clear();
+        } on BiometricException {
+          /* Password fallback stays available. */
+        }
+        if (!context.mounted) return;
         finishSignOut(context);
       } else {
         ScaffoldMessenger.of(
@@ -50,12 +65,34 @@ class _SpendTrailAppState extends ConsumerState<SpendTrailApp> {
     }
   }
 
+  Future<void> lock(BuildContext context) async {
+    if (signingOut) return;
+    signingOut = true;
+    try {
+      await api.lock();
+    } on ApiException {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'App locked. Connect to SpendTrail to sign in again.',
+            ),
+          ),
+        );
+      }
+    } finally {
+      if (context.mounted) finishSignOut(context);
+      signingOut = false;
+    }
+  }
+
   void openAccountCards(BuildContext context, Map<String, dynamic> account) {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) => _Wallet(
           api: api,
           user: account,
+          onSignOut: () => signOut(context),
           onSignedOut: () {
             if (context.mounted) finishSignOut(context);
           },
@@ -92,6 +129,7 @@ class _SpendTrailAppState extends ConsumerState<SpendTrailApp> {
           : account == null
           ? _SignIn(
               api: api,
+              vault: vault,
               onAuthenticated: (value) => setState(() => user = value),
             )
           : Builder(
@@ -99,6 +137,14 @@ class _SpendTrailAppState extends ConsumerState<SpendTrailApp> {
                 walletStyle: style,
                 accountName: account['name'] as String,
                 appearanceAction: const _AppearanceMenu(),
+                securitySettings: BiometricSettings(
+                  api: api,
+                  vault: vault,
+                  onLock: () => lock(context),
+                  onExpired: () {
+                    if (context.mounted) finishSignOut(context);
+                  },
+                ),
                 onAccountCards: () => openAccountCards(context, account),
                 onPurchases: () => Navigator.of(context).push(
                   MaterialPageRoute<void>(
@@ -174,8 +220,13 @@ class _AppearanceMenuState extends ConsumerState<_AppearanceMenu> {
 }
 
 class _SignIn extends StatefulWidget {
-  const _SignIn({required this.api, required this.onAuthenticated});
+  const _SignIn({
+    required this.api,
+    required this.vault,
+    required this.onAuthenticated,
+  });
   final SpendTrailApi api;
+  final BiometricVault vault;
   final ValueChanged<Map<String, dynamic>> onAuthenticated;
   @override
   State<_SignIn> createState() => _SignInState();
@@ -189,6 +240,51 @@ class _SignInState extends State<_SignIn> {
   bool registering = false, busy = false;
   bool hidePassword = true;
   String? error;
+  BiometricStatus biometric = const BiometricStatus();
+  @override
+  void initState() {
+    super.initState();
+    checkBiometric();
+  }
+
+  Future<void> checkBiometric() async {
+    try {
+      final result = await widget.vault.status();
+      if (mounted) setState(() => biometric = result);
+    } on BiometricException catch (e) {
+      if (mounted) setState(() => error = e.message);
+    }
+  }
+
+  Future<void> fingerprintSignIn() async {
+    if (busy) return;
+    setState(() {
+      busy = true;
+      error = null;
+    });
+    try {
+      final token = await widget.vault.unlock(widget.api.baseUrl);
+      final account = await widget.api.biometricLogin(token);
+      if (mounted) widget.onAuthenticated(account);
+    } on BiometricException catch (e) {
+      if (mounted) setState(() => error = e.message);
+    } on ApiException catch (e) {
+      if (e.unauthorized) {
+        try {
+          await widget.vault.clear();
+        } on BiometricException {
+          /* Server credential is invalid. */
+        }
+      }
+      if (mounted) setState(() => error = e.message);
+    } finally {
+      if (mounted) {
+        await checkBiometric();
+        if (mounted) setState(() => busy = false);
+      }
+    }
+  }
+
   @override
   void dispose() {
     name.dispose();
@@ -209,9 +305,13 @@ class _SignInState extends State<_SignIn> {
         password: password.text,
         name: registering ? name.text : null,
       );
+      // Password login deliberately forgets any previous saved account.
+      await widget.vault.clear();
       password.clear();
       if (mounted) widget.onAuthenticated(user);
     } on ApiException catch (e) {
+      if (mounted) setState(() => error = e.message);
+    } on BiometricException catch (e) {
       if (mounted) setState(() => error = e.message);
     } finally {
       if (mounted) setState(() => busy = false);
@@ -423,6 +523,17 @@ class _SignInState extends State<_SignIn> {
                 : 'New here? Create account',
           ),
         ),
+        if (!registering && biometric.saved) ...[
+          OutlinedButton.icon(
+            onPressed: busy || !biometric.available ? null : fingerprintSignIn,
+            icon: const Icon(Icons.fingerprint),
+            label: const Text('Sign in with fingerprint'),
+          ),
+          if (!biometric.available)
+            const Text(
+              'Fingerprint is unavailable. Sign in with your password.',
+            ),
+        ],
         Text(
           'Fictional card profiles · PKR',
           textAlign: TextAlign.center,
@@ -519,17 +630,19 @@ class _Wallet extends StatefulWidget {
     required this.api,
     required this.user,
     required this.onSignedOut,
+    required this.onSignOut,
   });
   final SpendTrailApi api;
   final Map<String, dynamic> user;
   final VoidCallback onSignedOut;
+  final VoidCallback onSignOut;
   @override
   State<_Wallet> createState() => _WalletState();
 }
 
 class _WalletState extends State<_Wallet> {
   List<Map<String, dynamic>> cards = [];
-  bool loading = true, signingOut = false;
+  bool loading = true;
   String? error;
   @override
   void initState() {
@@ -608,25 +721,7 @@ class _WalletState extends State<_Wallet> {
       title: const Text('Account cards'),
       actions: [
         const _AppearanceMenu(),
-        TextButton(
-          onPressed: signingOut
-              ? null
-              : () async {
-                  setState(() {
-                    signingOut = true;
-                    error = null;
-                  });
-                  try {
-                    await widget.api.logout();
-                    if (mounted) widget.onSignedOut();
-                  } on ApiException catch (e) {
-                    handle(e);
-                  } finally {
-                    if (mounted) setState(() => signingOut = false);
-                  }
-                },
-          child: Text(signingOut ? 'Signing out…' : 'Sign out'),
-        ),
+        TextButton(onPressed: widget.onSignOut, child: const Text('Sign out')),
       ],
     ),
     body: Center(

@@ -82,6 +82,8 @@ Manual purchases now persist in PostgreSQL and are available through authenticat
 
 ### 4. Add imports and payment simulation
 
+Added prerequisite: optional Android fingerprint login, backed by revocable sessions and biometric-bound storage. Implemented before CSV imports; see [biometric login evidence](MILESTONE_04.md).
+
 - [ ] Specify CSV columns, date/decimal formats, size limits and row-error behavior before implementation.
 - [ ] Add ImportBatch tracking and a preview that identifies invalid/duplicate rows before confirmation.
 - [ ] Implement the agreed atomic import policy and repeat-import protection.

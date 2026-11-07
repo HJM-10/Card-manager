@@ -16,7 +16,8 @@ class ApiException implements Exception {
   String toString() => message;
 }
 
-/// Session tokens live only in memory. Restarting requires another sign-in.
+/// Access tokens live only in memory. Biometric credentials are handled by
+/// the separate platform vault, never by shared preferences.
 class SpendTrailApi {
   SpendTrailApi({http.Client? client, String? baseUrl})
     : _client = client ?? http.Client(),
@@ -173,6 +174,35 @@ class SpendTrailApi {
   Future<void> logout() async {
     await _request('DELETE', '/auth/session');
     _token = null;
+  }
+
+  Future<String> enableBiometric() async =>
+      (await _request('POST', '/auth/biometric')
+              as Map<String, dynamic>)['refresh_token']
+          as String;
+
+  Future<void> disableBiometric() async {
+    await _request('DELETE', '/auth/biometric');
+  }
+
+  Future<Map<String, dynamic>> biometricLogin(String token) async {
+    final data =
+        await _request('POST', '/auth/biometric/refresh', {
+              'refresh_token': token,
+            })
+            as Map<String, dynamic>;
+    _token = data['access_token'] as String;
+    return data['user'] as Map<String, dynamic>;
+  }
+
+  Future<void> lock() async {
+    try {
+      await _request('DELETE', '/auth/access');
+    } on ApiException catch (e) {
+      if (!e.unauthorized) rethrow;
+    } finally {
+      _token = null;
+    }
   }
 
   void close() => _client.close();

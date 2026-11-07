@@ -326,3 +326,95 @@ def test_category_migration_keeps_existing_user_and_purchase_data(client):
     finally:
         with psycopg.connect(url) as conn:
             conn.execute(sql.SQL('DROP SCHEMA {} CASCADE').format(sql.Identifier(schema)))
+
+
+def test_biometric_login_after_access_expiry_and_absolute_expiration(client):
+    headers = account(client)
+    enrolled = client.post('/auth/biometric', headers=headers)
+    assert enrolled.status_code == 201 and enrolled.headers['cache-control'] == 'no-store'
+    credential = enrolled.json()['refresh_token']
+    with db.connect() as conn:
+        saved = conn.execute('SELECT token_hash, expires_at > now() AS valid, expires_at <= now() + interval \'30 days\' AS bounded FROM biometric_sessions').fetchone()
+        assert saved['token_hash'] == main.digest(credential) and saved['token_hash'] != credential
+        assert saved['valid'] and saved['bounded']
+        conn.execute("UPDATE sessions SET expires_at = now() - interval '1 second'")
+    assert client.get('/auth/me', headers=headers).status_code == 401
+    assert client.get('/auth/me', headers={'Authorization': 'Bearer ' + credential}).status_code == 401
+    with TestClient(main.app) as restarted:
+        resumed = restarted.post('/auth/biometric/refresh', json={'refresh_token': credential})
+        assert resumed.status_code == 200 and resumed.headers['cache-control'] == 'no-store'
+        fresh = {'Authorization': 'Bearer ' + resumed.json()['access_token']}
+        assert restarted.get('/auth/me', headers=fresh).json()['email'] == 'alice@example.com'
+        assert restarted.delete('/auth/access', headers=fresh).status_code == 204
+        assert restarted.get('/auth/me', headers=fresh).status_code == 401
+        resumed = restarted.post('/auth/biometric/refresh', json={'refresh_token': credential})
+        assert resumed.status_code == 200
+        fresh = {'Authorization': 'Bearer ' + resumed.json()['access_token']}
+        with db.connect() as conn:
+            conn.execute("UPDATE biometric_sessions SET expires_at = now() - interval '1 second'")
+        assert restarted.get('/auth/me', headers=fresh).status_code == 401
+        assert restarted.post('/auth/biometric/refresh', json={'refresh_token': credential}).status_code == 401
+
+
+def test_disabling_and_replacing_biometric_login_revokes_family(client):
+    headers = account(client)
+    first = client.post('/auth/biometric', headers=headers).json()['refresh_token']
+    sibling = client.post('/auth/biometric/refresh', json={'refresh_token': first}).json()['access_token']
+    assert client.delete('/auth/biometric', headers=headers).status_code == 204
+    assert client.get('/auth/me', headers=headers).status_code == 200
+    assert client.get('/auth/me', headers={'Authorization': 'Bearer ' + sibling}).status_code == 401
+    assert client.post('/auth/biometric/refresh', json={'refresh_token': first}).status_code == 401
+    second = client.post('/auth/biometric', headers=headers).json()['refresh_token']
+    third = client.post('/auth/biometric', headers=headers).json()['refresh_token']
+    assert client.post('/auth/biometric/refresh', json={'refresh_token': second}).status_code == 401
+    assert client.post('/auth/biometric/refresh', json={'refresh_token': third}).status_code == 200
+    assert client.delete('/auth/session', headers=headers).status_code == 204
+    assert client.post('/auth/biometric/refresh', json={'refresh_token': third}).status_code == 401
+    assert client.get('/auth/me', headers=headers).status_code == 401
+
+
+def test_biometric_credentials_validation_and_user_isolation(client):
+    alice, bob = account(client), account(client, 'bob@example.com')
+    assert client.post('/auth/biometric').status_code == 401
+    assert client.delete('/auth/biometric').status_code == 401
+    for invalid in [{}, {'refresh_token': 'short'}, {'refresh_token': 'x' * 129}, {'refresh_token': 'x' * 48, 'user_id': str(uuid4())}]:
+        assert client.post('/auth/biometric/refresh', json=invalid).status_code == 422
+    assert client.post('/auth/biometric/refresh', json={'refresh_token': 'x' * 48}).status_code == 401
+    credential = client.post('/auth/biometric', headers=alice).json()['refresh_token']
+    assert client.delete('/auth/session', headers=bob).status_code == 204
+    result = client.post('/auth/biometric/refresh', json={'refresh_token': credential})
+    assert result.status_code == 200 and result.json()['user']['email'] == 'alice@example.com'
+
+
+def test_concurrent_biometric_refresh_and_logout_cannot_restore_revoked_session(client):
+    headers = account(client)
+    credential = client.post('/auth/biometric', headers=headers).json()['refresh_token']
+    def operation(action):
+        with TestClient(main.app) as api:
+            if action == 'refresh':
+                return api.post('/auth/biometric/refresh', json={'refresh_token': credential})
+            return api.delete('/auth/session', headers=headers)
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        refreshed, logged_out = executor.map(operation, ['refresh', 'logout'])
+    assert refreshed.status_code in (200, 401)
+    assert logged_out.status_code == 204
+    assert client.post('/auth/biometric/refresh', json={'refresh_token': credential}).status_code == 401
+    if refreshed.status_code == 200:
+        assert client.get('/auth/me', headers={'Authorization': 'Bearer ' + refreshed.json()['access_token']}).status_code == 401
+
+
+def test_concurrent_biometric_replacement_and_logout_cannot_restore_revoked_session(client):
+    headers = account(client)
+    client.post('/auth/biometric', headers=headers).raise_for_status()
+    def operation(action):
+        with TestClient(main.app) as api:
+            if action == 'enable':
+                return api.post('/auth/biometric', headers=headers)
+            return api.delete('/auth/session', headers=headers)
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        enrolled, logged_out = executor.map(operation, ['enable', 'logout'])
+    assert enrolled.status_code in (201, 401)
+    assert logged_out.status_code == 204
+    if enrolled.status_code == 201:
+        assert client.post('/auth/biometric/refresh', json={'refresh_token': enrolled.json()['refresh_token']}).status_code == 401
+    assert client.get('/auth/me', headers=headers).status_code == 401

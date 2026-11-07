@@ -22,10 +22,12 @@ class AppShell extends ConsumerWidget {
     this.onPurchases,
     this.onSignOut,
     this.walletStyle,
+    this.securitySettings,
   });
 
   final String? accountName;
   final Widget? appearanceAction;
+  final Widget? securitySettings;
   final VoidCallback? onAccountCards, onSignOut, onPurchases;
   final WalletStyle? walletStyle;
 
@@ -50,6 +52,7 @@ class AppShell extends ConsumerWidget {
               ProfileScreen(
                 onSignOut: onSignOut,
                 showWalletDesign: walletStyle != null,
+                securitySettings: securitySettings,
               ),
             ],
           ),

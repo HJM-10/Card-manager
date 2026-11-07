@@ -93,6 +93,21 @@ void main() {
       );
       await restarted.archiveCard(card['id'] as String);
       expect((await restarted.purchases()).single['id'], saved['id']);
+      final biometricCredential = await restarted.enableBiometric();
+      await restarted.lock();
+      final resumed = SpendTrailApi(baseUrl: liveUrl);
+      addTearDown(resumed.close);
+      expect(
+        (await resumed.biometricLogin(biometricCredential))['email'],
+        email,
+      );
+      expect((await resumed.purchases()).single['id'], saved['id']);
+      await resumed.disableBiometric();
+      await expectLater(
+        restarted.biometricLogin(biometricCredential),
+        throwsA(isA<ApiException>().having((e) => e.statusCode, 'status', 401)),
+      );
+      await resumed.logout();
     },
     skip: liveUrl.isEmpty ? 'Set LIVE_API_URL to a dedicated test API.' : false,
   );

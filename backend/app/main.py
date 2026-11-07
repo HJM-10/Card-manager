@@ -50,6 +50,10 @@ class Register(Login):
         return value.strip()
 
 
+class BiometricCredential(Input):
+    refresh_token: str = Field(min_length=32, max_length=128)
+
+
 class CardInput(Input):
     label: str = Field(min_length=1, max_length=50)
     network: Literal['visa', 'mastercard']
@@ -121,9 +125,12 @@ def current_session(credentials: HTTPAuthorizationCredentials | None = Depends(b
         raise HTTPException(401, 'Please sign in', headers={'WWW-Authenticate': 'Bearer'})
     with connect() as db:
         user = db.execute(
-            '''SELECT u.id, u.email, u.name, s.token_hash FROM sessions s
+            '''SELECT u.id, u.email, u.name, s.token_hash, s.biometric_session_id FROM sessions s
                JOIN users u ON u.id = s.user_id
-               WHERE s.token_hash = %s AND s.expires_at > now()''',
+               WHERE s.token_hash = %s AND s.expires_at > now()
+                 AND (s.biometric_session_id IS NULL OR EXISTS (
+                     SELECT 1 FROM biometric_sessions b WHERE b.id = s.biometric_session_id
+                       AND NOT b.revoked AND b.expires_at > now()))''',
             (digest(credentials.credentials),),
         ).fetchone()
     if not user:
@@ -135,11 +142,13 @@ def public_user(user):
     return {key: user[key] for key in ('id', 'email', 'name')}
 
 
-def issue_session(db, user):
+def issue_session(db, user, biometric_id=None):
     token = secrets.token_urlsafe(32)
     db.execute(
-        "INSERT INTO sessions (token_hash, user_id, expires_at) VALUES (%s, %s, now() + interval '12 hours')",
-        (digest(token), user['id']),
+        """INSERT INTO sessions (token_hash, user_id, expires_at, biometric_session_id)
+           VALUES (%s, %s, LEAST(now() + interval '12 hours',
+               (SELECT expires_at FROM biometric_sessions WHERE id = %s)), %s)""",
+        (digest(token), user['id'], biometric_id, biometric_id),
     )
     return {'access_token': token, 'token_type': 'bearer', 'user': public_user(user)}
 
@@ -188,7 +197,62 @@ def me(user=Depends(current_session)):
 @app.delete('/auth/session', status_code=204)
 def logout(user=Depends(current_session)):
     with connect() as db:
+        current = db.execute('SELECT biometric_session_id FROM sessions WHERE token_hash = %s FOR UPDATE', (user['token_hash'],)).fetchone()
+        if current is None:
+            return
+        if current['biometric_session_id'] is not None:
+            db.execute('UPDATE biometric_sessions SET revoked = true WHERE user_id = %s AND id = %s', (user['id'], current['biometric_session_id']))
+        else:
+            db.execute('DELETE FROM sessions WHERE token_hash = %s', (user['token_hash'],))
+
+
+@app.delete('/auth/access', status_code=204)
+def lock_access(user=Depends(current_session)):
+    # Lock this app instance without revoking its biometric credential.
+    with connect() as db:
         db.execute('DELETE FROM sessions WHERE token_hash = %s', (user['token_hash'],))
+
+
+def detach_biometric(db, user):
+    current = db.execute('SELECT biometric_session_id FROM sessions WHERE token_hash = %s AND expires_at > now() FOR UPDATE', (user['token_hash'],)).fetchone()
+    if current is None:
+        raise HTTPException(401, 'Please sign in again')
+    if current['biometric_session_id'] is not None:
+        active = db.execute('SELECT id FROM biometric_sessions WHERE id = %s AND NOT revoked AND expires_at > now() FOR UPDATE', (current['biometric_session_id'],)).fetchone()
+        if active is None:
+            raise HTTPException(401, 'Please sign in again')
+    db.execute('UPDATE sessions SET biometric_session_id = NULL WHERE token_hash = %s', (user['token_hash'],))
+    if current['biometric_session_id'] is not None:
+        db.execute('UPDATE biometric_sessions SET revoked = true WHERE user_id = %s AND id = %s', (user['id'], current['biometric_session_id']))
+
+
+@app.post('/auth/biometric', status_code=201)
+def enable_biometric(response: Response, user=Depends(current_session)):
+    response.headers['Cache-Control'] = 'no-store'
+    token, biometric_id = secrets.token_urlsafe(48), uuid4()
+    with connect() as db:
+        detach_biometric(db, user)
+        saved = db.execute("INSERT INTO biometric_sessions (id, user_id, token_hash, expires_at) VALUES (%s, %s, %s, now() + interval '30 days') RETURNING expires_at", (biometric_id, user['id'], digest(token))).fetchone()
+        db.execute('UPDATE sessions SET biometric_session_id = %s WHERE token_hash = %s', (biometric_id, user['token_hash']))
+    return {'refresh_token': token, 'expires_at': saved['expires_at']}
+
+
+@app.delete('/auth/biometric', status_code=204)
+def disable_biometric(user=Depends(current_session)):
+    with connect() as db:
+        detach_biometric(db, user)
+
+
+@app.post('/auth/biometric/refresh')
+def biometric_login(body: BiometricCredential, response: Response):
+    response.headers['Cache-Control'] = 'no-store'
+    with connect() as db:
+        user = db.execute('''SELECT u.id, u.email, u.name, b.id AS biometric_id
+            FROM biometric_sessions b JOIN users u ON u.id = b.user_id
+            WHERE b.token_hash = %s AND NOT b.revoked AND b.expires_at > now() FOR UPDATE OF b''', (digest(body.refresh_token),)).fetchone()
+        if user is None:
+            raise HTTPException(401, 'Fingerprint login has expired. Please sign in with your password.')
+        return issue_session(db, user, user['biometric_id'])
 
 
 CARD_COLUMNS = 'id, label, network, last4, expiry_month, expiry_year, archived'

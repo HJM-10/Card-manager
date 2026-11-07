@@ -8,9 +8,11 @@ class ProfileScreen extends ConsumerStatefulWidget {
     super.key,
     this.onSignOut,
     this.showWalletDesign = false,
+    this.securitySettings,
   });
   final VoidCallback? onSignOut;
   final bool showWalletDesign;
+  final Widget? securitySettings;
   @override
   ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
 }
@@ -131,6 +133,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               child: Text(saving ? 'Saving…' : 'Save settings'),
             ),
             const SizedBox(height: 24),
+            if (widget.securitySettings != null) widget.securitySettings!,
             const ListTile(
               contentPadding: EdgeInsets.zero,
               leading: Icon(Icons.info_outline),
