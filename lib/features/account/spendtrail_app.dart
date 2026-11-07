@@ -8,6 +8,7 @@ import '../../data/settings.dart';
 import '../../data/spendtrail_api.dart';
 import '../shell/app_shell.dart';
 import '../splash/splash_screen.dart';
+import 'purchases_screen.dart';
 
 class SpendTrailApp extends ConsumerStatefulWidget {
   const SpendTrailApp({super.key, this.api});
@@ -99,6 +100,16 @@ class _SpendTrailAppState extends ConsumerState<SpendTrailApp> {
                 accountName: account['name'] as String,
                 appearanceAction: const _AppearanceMenu(),
                 onAccountCards: () => openAccountCards(context, account),
+                onPurchases: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => PurchasesScreen(
+                      api: api,
+                      onExpired: () {
+                        if (context.mounted) finishSignOut(context);
+                      },
+                    ),
+                  ),
+                ),
                 onSignOut: () => signOut(context),
               ),
             ),
@@ -633,6 +644,18 @@ class _WalletState extends State<_Wallet> {
               ),
               const SizedBox(height: 8),
               const Text('Fictional card profiles · PKR'),
+              TextButton.icon(
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => PurchasesScreen(
+                      api: widget.api,
+                      onExpired: widget.onSignedOut,
+                    ),
+                  ),
+                ),
+                icon: const Icon(Icons.receipt_long),
+                label: const Text('Account purchases'),
+              ),
               const SizedBox(height: 24),
               if (loading) const Center(child: CircularProgressIndicator()),
               if (error != null) ...[

@@ -4,9 +4,14 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class ApiException implements Exception {
-  const ApiException(this.message, {this.unauthorized = false});
+  const ApiException(
+    this.message, {
+    this.unauthorized = false,
+    this.statusCode,
+  });
   final String message;
   final bool unauthorized;
+  final int? statusCode;
   @override
   String toString() => message;
 }
@@ -47,6 +52,7 @@ class SpendTrailApi {
         throw ApiException(
           detail is String ? detail : 'Check the details and try again.',
           unauthorized: response.statusCode == 401,
+          statusCode: response.statusCode,
         );
       }
       return data;
@@ -95,6 +101,23 @@ class SpendTrailApi {
   Future<void> archiveCard(String id) async {
     await _request('DELETE', '/cards/$id');
   }
+
+  Future<Map<String, dynamic>> recordPurchase(
+    Map<String, dynamic> purchase,
+  ) async =>
+      await _request('POST', '/transactions', purchase) as Map<String, dynamic>;
+
+  Future<List<Map<String, dynamic>>> purchases({
+    int limit = 25,
+    int offset = 0,
+  }) async =>
+      (await _request('GET', '/transactions?limit=$limit&offset=$offset')
+              as List)
+          .cast<Map<String, dynamic>>();
+
+  Future<Map<String, dynamic>> purchase(String id) async =>
+      await _request('GET', '/transactions/${Uri.encodeComponent(id)}')
+          as Map<String, dynamic>;
 
   Future<void> logout() async {
     await _request('DELETE', '/auth/session');

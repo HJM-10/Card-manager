@@ -6,6 +6,8 @@ See the [project roadmap](docs/ROADMAP.md) for the six-week build plan, ordered 
 
 All balances and money actions are simulated. No bank connection, payment processing, or messages to recipients.
 
+**Account purchases:** open **Home → Account purchases** or **Cards → Account card profiles → Account purchases**. Record a manual PKR purchase against an active account card, then browse paginated history and open transaction details. Purchases persist in PostgreSQL and return after signing in again. The entry form accepts a merchant, exact decimal amount, date/time and online/POS channel. Failed saves retain the same request for safe retry while the form stays open. Account purchases are separate from the existing local demo expenses and statistics.
+
 ## Features
 
 - **Animated splash:** coins drop above a cash stack, the illustration collapses into the SpendTrail wordmark, and a progress bar fills.

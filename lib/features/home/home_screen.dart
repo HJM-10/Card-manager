@@ -18,10 +18,12 @@ class HomeScreen extends StatelessWidget {
     this.accountName,
     this.appearanceAction,
     this.walletStyle,
+    this.onPurchases,
   });
   final String? accountName;
   final Widget? appearanceAction;
   final WalletStyle? walletStyle;
+  final VoidCallback? onPurchases;
 
   @override
   Widget build(BuildContext context) {
@@ -40,6 +42,15 @@ class HomeScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 18),
+          if (onPurchases != null)
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.receipt_long_outlined),
+              title: const Text('Account purchases'),
+              subtitle: const Text('Record purchases and view saved history'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: onPurchases,
+            ),
           FadeSlideIn(
             key: ValueKey(walletStyle),
             delay: step,

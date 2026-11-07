@@ -19,13 +19,14 @@ class AppShell extends ConsumerWidget {
     this.accountName,
     this.appearanceAction,
     this.onAccountCards,
+    this.onPurchases,
     this.onSignOut,
     this.walletStyle,
   });
 
   final String? accountName;
   final Widget? appearanceAction;
-  final VoidCallback? onAccountCards, onSignOut;
+  final VoidCallback? onAccountCards, onSignOut, onPurchases;
   final WalletStyle? walletStyle;
 
   @override
@@ -42,6 +43,7 @@ class AppShell extends ConsumerWidget {
                 walletStyle: walletStyle,
                 accountName: accountName,
                 appearanceAction: appearanceAction,
+                onPurchases: onPurchases,
               ),
               CardsScreen(onAccountCards: onAccountCards),
               const StatisticsScreen(),

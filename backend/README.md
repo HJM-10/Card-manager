@@ -31,6 +31,8 @@ For the Android emulator, use `--dart-define=API_BASE_URL=http://10.0.2.2:8000`.
 
 The **Appearance** menu on sign-in and Home offers System, Light and Dark. The app saves the choice on the device. After sign-in, **Cards → Account card profiles** opens the PostgreSQL-backed wallet profiles.
 
+**Home → Account purchases** opens PostgreSQL-backed purchase entry, history and detail. It is also available from Account card profiles. Create an active account card first. History includes purchases on archived cards; archived cards cannot be used for new purchases. The form uses UTC timestamps and decimal strings, retaining its UUID and complete payload for ambiguous-save retries. Local demo expenses and statistics remain separate.
+
 ## This Windows workspace
 
 The machine has pgAdmin's embedded Python rather than a normal Python installation. Packages were installed under ignored `backend/.local/packages`. The optional `run.py` launcher adds that directory to the Python path.
@@ -135,10 +137,18 @@ flutter test
 flutter build web --release
 ```
 
+To exercise the actual Flutter HTTP client against a dedicated running test API (creates synthetic accounts and purchases):
+
+```powershell
+flutter test --no-pub --dart-define=LIVE_API_URL=http://127.0.0.1:8000 test/purchase_live_test.dart
+```
+
+The live test checks save/retry, fresh-client login/history/detail, exact amounts, pagination, user isolation and archived-card history. It is skipped in ordinary offline test runs. Widget tests in `test/purchases_test.dart` separately cover entry, validation, pagination/retry, small screens and expired sessions.
+
 For embedded Python, use `backend/run.py pytest backend/tests -q` instead. The backend tests cover fresh-session persistence, two-user isolation, card archival, validation, concurrent retries, migration reruns and rollback when a purchase's outbox write fails. Flutter tests cover the registration/card/login journey and recoverable authentication errors.
 
 ## Remaining scope
 
-Flutter purchase entry and history, categories, budgets, imports, simulated payments, notification dispatch, account recovery and production deployment are future work. A separate runtime database role with restricted audit privileges is also pending.
+Categories, budgets, imports, simulated payments, notification dispatch, account recovery and production deployment are future work. A separate runtime database role with restricted audit privileges is also pending. Existing local demo statistics are not yet backed by account purchase reports.
 
 Implementation references: [FastAPI authentication and password hashing](https://fastapi.tiangolo.com/tutorial/security/oauth2-jwt/) and [Psycopg transaction management](https://www.psycopg.org/psycopg3/docs/basic/transactions.html).

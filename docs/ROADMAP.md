@@ -68,14 +68,14 @@ Weeks are sequential working blocks, not promised calendar dates. Week 4 has the
 
 ### 3. Build the transaction core
 
-Manual purchases now persist in PostgreSQL and are available through authenticated history and detail endpoints. The 5 November 2026 backend run passed all nine tests against PostgreSQL 15, including concurrent retries, ownership, archived-card history and rollback when an outbox write fails. The next step is Flutter purchase entry and history. The remaining transaction sources and category rules expand this foundation.
+Manual purchases now persist in PostgreSQL and are available through authenticated history and detail endpoints. Flutter entry, paginated history and transaction details are connected under Home → Account purchases. The 7 November 2026 checks passed 37 Flutter tests, a separate live Flutter HTTP integration test, and nine PostgreSQL backend tests. See [purchase integration evidence](MILESTONE_02.md). The remaining transaction sources, filters and category rules expand this foundation.
 
 - [ ] Add Merchant, Category and SpendingTransaction records with required references and constraints.
 - [ ] Define purchase/refund types, approved/declined states and source/channel values explicitly.
 - [x] Require a non-null source reference and enforce unique `(card_id, source, source_reference)` at the database level.
 - [x] Save the transaction, creation audit record and notification outbox event atomically.
 - [ ] Add history/detail APIs, pagination, date/card/category/status filters and search.
-- [ ] Connect manual entry and history screens to the API.
+- [x] Connect manual entry and history screens to the API.
 - [ ] Enforce ownership on reads and writes, including a database trigger rejecting cross-user categories.
 - [ ] Protect audit history from modification by the application role.
 
