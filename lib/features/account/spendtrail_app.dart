@@ -553,12 +553,10 @@ class _LoginHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Stack(
     children: [
-      const Positioned.fill(child: CustomPaint(painter: _LoginStreak())),
-      const Positioned(top: 0, right: 10, child: _AppearanceMenu(onDark: true)),
       Container(
         constraints: BoxConstraints(minHeight: minHeight),
         alignment: Alignment.center,
-        padding: const EdgeInsets.fromLTRB(48, 42, 48, 20),
+        padding: const EdgeInsets.fromLTRB(24, 16, 24, 20),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -571,13 +569,21 @@ class _LoginHeader extends StatelessWidget {
                 letterSpacing: 1.3,
               ),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 4),
+            Image.asset(
+              'assets/images/login_wallet_hero.png',
+              height: (minHeight * .46).clamp(64.0, 134.0),
+              width: 280,
+              fit: BoxFit.contain,
+              excludeFromSemantics: true,
+              filterQuality: FilterQuality.medium,
+            ),
+            const SizedBox(height: 6),
             Text(
               registering ? 'Create your account.' : 'Welcome back.',
               textAlign: TextAlign.center,
               style: const TextStyle(
                 color: Colors.white,
-                fontStyle: FontStyle.italic,
                 fontSize: 32,
                 fontWeight: FontWeight.w700,
                 height: 1.1,
@@ -592,37 +598,9 @@ class _LoginHeader extends StatelessWidget {
           ],
         ),
       ),
+      const Positioned(top: 0, right: 10, child: _AppearanceMenu(onDark: true)),
     ],
   );
-}
-
-class _LoginStreak extends CustomPainter {
-  const _LoginStreak();
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final streak = Path()
-      ..moveTo(size.width * .73, 0)
-      ..lineTo(size.width * .60, size.height * .34)
-      ..lineTo(size.width * .67, size.height * .39)
-      ..lineTo(size.width * .54, size.height * .63)
-      ..lineTo(size.width * .57, size.height * .68)
-      ..lineTo(size.width * .43, size.height);
-    final paint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 7
-      ..color = const Color(0x88518DEE)
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 16);
-    canvas.drawPath(streak, paint);
-    paint
-      ..strokeWidth = 1.25
-      ..color = const Color(0x5578AEFF)
-      ..maskFilter = null;
-    canvas.drawPath(streak, paint);
-  }
-
-  @override
-  bool shouldRepaint(_LoginStreak oldDelegate) => false;
 }
 
 class _Wallet extends StatefulWidget {

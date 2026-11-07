@@ -1,0 +1,7 @@
+# Login header illustration
+
+Asset: `assets/images/login_wallet_hero.png`. Generated with the built-in image generation tool with a transparent background on 7 November 2026. Used on both sign-in and registration; page text is rendered separately by Flutter for accessibility and responsive layout.
+
+## Generation prompt
+
+Use case: stylized-concept. Asset type: production illustration asset for SpendTrail, a mobile personal spending and card management app's login header. Create one premium, polished 3D editorial illustration of a small sculptural midnight-blue wallet holding two floating frosted powder-blue and soft periwinkle payment cards, accompanied by three restrained champagne-gold coins and a subtle flowing pale-blue ribbon suggesting a spending trail. Friendly, refined financial product art, rounded tactile materials, soft studio lighting and elegant shadows. Landscape composition, main artwork centered, clean readable silhouette at small mobile size, generous clear margin, approximately 3:2 aspect ratio. Render as an isolated cutout on genuinely transparent background; it will sit over a very dark navy #10131D header. Use luminous blue edges so it remains legible on navy. Cards have only a small metallic chip and abstract embossed short lines; no readable numbers, letters, words, logos or currency symbols. No people, no phone mockup, no app UI, no graphs, no watermark. This is the illustration only, not a screenshot or whole page.
