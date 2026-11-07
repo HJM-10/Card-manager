@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 import '../../data/spendtrail_api.dart';
+import 'purchase_filters.dart';
 
 String _date(String value) =>
     DateTime.parse(value).toLocal().toString().substring(0, 16);
@@ -26,6 +27,51 @@ class _PurchasesScreenState extends State<PurchasesScreen> {
   bool loading = false, more = true;
   bool retryReset = true;
   String? error;
+  final search = TextEditingController();
+  String appliedSearch = '';
+  PurchaseFilters filters = const PurchaseFilters();
+
+  @override
+  void dispose() {
+    search.dispose();
+    super.dispose();
+  }
+
+  Future<void> filter() async {
+    final result = await showModalBottomSheet<PurchaseFilters>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      builder: (_) => PurchaseFiltersSheet(
+        api: widget.api,
+        initial: filters,
+        onExpired: widget.onExpired,
+      ),
+    );
+    if (result != null && mounted) {
+      setState(() => filters = result);
+      await load(reset: true);
+    }
+  }
+
+  void applySearch() {
+    if (loading) return;
+    appliedSearch = search.text.trim();
+    load(reset: true);
+  }
+
+  Future<void> detail(Map<String, dynamic> record) async {
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => _PurchaseDetail(
+          api: widget.api,
+          id: record['id'] as String,
+          onExpired: widget.onExpired,
+        ),
+      ),
+    );
+    if (mounted) await load(reset: true);
+  }
 
   @override
   void initState() {
@@ -39,10 +85,19 @@ class _PurchasesScreenState extends State<PurchasesScreen> {
     setState(() {
       loading = true;
       error = null;
+      if (reset) records.clear();
     });
     try {
       final page = await widget.api.purchases(
         offset: reset ? 0 : records.length,
+        search: appliedSearch,
+        cardId: filters.cardId,
+        categoryId: filters.category == uncategorizedValue
+            ? null
+            : filters.category,
+        uncategorized: filters.category == uncategorizedValue,
+        occurredFrom: filters.dates?.start,
+        occurredBefore: filters.before,
       );
       if (!mounted) return;
       setState(() {
@@ -95,6 +150,50 @@ class _PurchasesScreenState extends State<PurchasesScreen> {
             children: [
               const Text('Manual purchases saved to your account · PKR'),
               const SizedBox(height: 12),
+              TextField(
+                controller: search,
+                enabled: !loading,
+                maxLength: 100,
+                decoration: InputDecoration(
+                  labelText: 'Search merchants',
+                  counterText: '',
+                  suffixIcon: IconButton(
+                    tooltip: 'Search purchases',
+                    onPressed: loading ? null : applySearch,
+                    icon: const Icon(Icons.search),
+                  ),
+                ),
+                textInputAction: TextInputAction.search,
+                onSubmitted: (_) => applySearch(),
+              ),
+              Wrap(
+                spacing: 8,
+                children: [
+                  TextButton.icon(
+                    onPressed: loading ? null : filter,
+                    icon: const Icon(Icons.filter_list),
+                    label: Text(filters.active ? 'Filters applied' : 'Filters'),
+                  ),
+                  if (filters.active || appliedSearch.isNotEmpty)
+                    TextButton(
+                      onPressed: loading
+                          ? null
+                          : () {
+                              setState(() {
+                                filters = const PurchaseFilters();
+                                appliedSearch = '';
+                                search.clear();
+                              });
+                              load(reset: true);
+                            },
+                      child: const Text('Clear search & filters'),
+                    ),
+                ],
+              ),
+              if (filters.dates != null)
+                Text(
+                  'Dates: ${calendarDate(filters.dates!.start)} to ${calendarDate(filters.dates!.end)}',
+                ),
               FilledButton.icon(
                 onPressed: loading ? null : add,
                 icon: const Icon(Icons.add),
@@ -104,7 +203,8 @@ class _PurchasesScreenState extends State<PurchasesScreen> {
                 const Padding(
                   padding: EdgeInsets.all(24),
                   child: Text(
-                    'No account purchases yet. Record your first purchase.',
+                    // Applied filters can legitimately return an empty page.
+                    'No account purchases match. Clear filters or record a purchase.',
                   ),
                 ),
               for (final record in records)
@@ -112,18 +212,10 @@ class _PurchasesScreenState extends State<PurchasesScreen> {
                   child: ListTile(
                     title: Text(record['merchant'] as String),
                     subtitle: Text(
-                      '${_date(record['occurred_at'] as String)} · ${record['channel']}',
+                      '${_date(record['occurred_at'] as String)} · ${record['channel']}\n${record['category'] ?? 'Uncategorized'}',
                     ),
                     trailing: Text('PKR ${record['amount']}'),
-                    onTap: () => Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                        builder: (_) => _PurchaseDetail(
-                          api: widget.api,
-                          id: record['id'] as String,
-                          onExpired: widget.onExpired,
-                        ),
-                      ),
-                    ),
+                    onTap: () => detail(record),
                   ),
                 ),
               if (loading) const Center(child: CircularProgressIndicator()),
@@ -158,6 +250,8 @@ class _PurchaseEditorState extends State<_PurchaseEditor> {
   final form = GlobalKey<FormState>();
   final merchant = TextEditingController(), amount = TextEditingController();
   List<Map<String, dynamic>> cards = [];
+  List<Map<String, dynamic>> categories = [];
+  String? categoryId;
   String? cardId, error;
   String channel = 'pos';
   DateTime occurredAt = DateTime.now();
@@ -187,10 +281,14 @@ class _PurchaseEditorState extends State<_PurchaseEditor> {
       error = null;
     });
     try {
-      final result = await widget.api.cards();
+      final result = await Future.wait([
+        widget.api.cards(),
+        widget.api.categories(),
+      ]);
       if (mounted) {
         setState(() {
-          cards = result;
+          cards = result[0];
+          categories = result[1];
           cardId = cards.isEmpty ? null : cards.first['id'] as String;
         });
       }
@@ -217,6 +315,7 @@ class _PurchaseEditorState extends State<_PurchaseEditor> {
             '${parts[0]}.${(parts.length == 1 ? '' : parts[1]).padRight(2, '0')}',
         'occurred_at': occurredAt.toUtc().toIso8601String(),
         'channel': channel,
+        'category_id': categoryId,
         'source_reference':
             '${hex.substring(0, 8)}-${hex.substring(8, 12)}-${hex.substring(12, 16)}-${hex.substring(16, 20)}-${hex.substring(20)}',
       };
@@ -352,6 +451,28 @@ class _PurchaseEditorState extends State<_PurchaseEditor> {
                       },
                     ),
                     const SizedBox(height: 16),
+                    CategorySelector(
+                      categories: categories,
+                      value: categoryId,
+                      onChanged: editable
+                          ? (v) => setState(() => categoryId = v)
+                          : null,
+                      onCreate: editable
+                          ? () async {
+                              final result = await showNewCategory(
+                                context,
+                                widget.api,
+                                widget.onExpired,
+                              );
+                              if (result != null && mounted) {
+                                setState(() {
+                                  categories.add(result);
+                                  categoryId = result['id'] as String;
+                                });
+                              }
+                            }
+                          : null,
+                    ),
                     DropdownButtonFormField<String>(
                       initialValue: channel,
                       decoration: const InputDecoration(labelText: 'Channel'),
@@ -426,6 +547,20 @@ class _PurchaseDetailState extends State<_PurchaseDetail> {
   Map<String, dynamic>? record;
   String? error;
   bool loading = true;
+  Future<void> editCategory() async {
+    final result = await showModalBottomSheet<Map<String, dynamic>>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      builder: (_) => _CategoryEditor(
+        api: widget.api,
+        record: record!,
+        onExpired: widget.onExpired,
+      ),
+    );
+    if (result != null && mounted) setState(() => record = result);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -473,6 +608,13 @@ class _PurchaseDetailState extends State<_PurchaseDetail> {
             style: Theme.of(context).textTheme.titleLarge,
           ),
           Text(_date(record!['occurred_at'] as String)),
+          const SizedBox(height: 12),
+          Text('Category: ${record!['category'] ?? 'Uncategorized'}'),
+          TextButton.icon(
+            onPressed: editCategory,
+            icon: const Icon(Icons.category_outlined),
+            label: const Text('Change category'),
+          ),
           for (final (key, label) in [
             ('status', 'Status'),
             ('channel', 'Channel'),
@@ -485,6 +627,132 @@ class _PurchaseDetailState extends State<_PurchaseDetail> {
             ),
         ],
       ],
+    ),
+  );
+}
+
+class _CategoryEditor extends StatefulWidget {
+  const _CategoryEditor({
+    required this.api,
+    required this.record,
+    required this.onExpired,
+  });
+  final SpendTrailApi api;
+  final Map<String, dynamic> record;
+  final VoidCallback onExpired;
+  @override
+  State<_CategoryEditor> createState() => _CategoryEditorState();
+}
+
+class _CategoryEditorState extends State<_CategoryEditor> {
+  List<Map<String, dynamic>> categories = [];
+  late String? selected = widget.record['category_id'] as String?;
+  bool loading = true, busy = false;
+  String? error;
+  @override
+  void initState() {
+    super.initState();
+    load();
+  }
+
+  void handle(ApiException e) {
+    if (!mounted) return;
+    if (e.unauthorized) {
+      widget.onExpired();
+      return;
+    }
+    setState(() => error = e.message);
+  }
+
+  Future<void> load() async {
+    setState(() {
+      loading = true;
+      error = null;
+    });
+    try {
+      final result = await widget.api.categories();
+      if (mounted) setState(() => categories = result);
+    } on ApiException catch (e) {
+      handle(e);
+    } finally {
+      if (mounted) setState(() => loading = false);
+    }
+  }
+
+  Future<void> save() async {
+    if (busy) return;
+    setState(() {
+      busy = true;
+      error = null;
+    });
+    try {
+      final result = await widget.api.categorizePurchase(
+        widget.record['id'] as String,
+        selected,
+      );
+      if (mounted) Navigator.pop(context, result);
+    } on ApiException catch (e) {
+      handle(e);
+    } finally {
+      if (mounted) setState(() => busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => PopScope(
+    canPop: !busy,
+    child: SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                'Change category',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              const SizedBox(height: 16),
+              if (loading)
+                const Center(child: CircularProgressIndicator())
+              else if (categories.isEmpty && error != null)
+                TextButton(onPressed: load, child: const Text('Retry'))
+              else ...[
+                CategorySelector(
+                  categories: categories,
+                  value: selected,
+                  onChanged: busy ? null : (v) => setState(() => selected = v),
+                  onCreate: busy
+                      ? null
+                      : () async {
+                          final result = await showNewCategory(
+                            context,
+                            widget.api,
+                            widget.onExpired,
+                          );
+                          if (result != null && mounted) {
+                            setState(() {
+                              categories.add(result);
+                              selected = result['id'] as String;
+                            });
+                          }
+                        },
+                ),
+                FilledButton(
+                  onPressed: busy ? null : save,
+                  child: Text(busy ? 'Saving…' : 'Save category'),
+                ),
+              ],
+              if (error != null)
+                Text(
+                  error!,
+                  style: TextStyle(color: Theme.of(context).colorScheme.error),
+                ),
+            ],
+          ),
+        ),
+      ),
     ),
   );
 }

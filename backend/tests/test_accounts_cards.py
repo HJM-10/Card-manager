@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor
 from uuid import uuid4
 
@@ -205,3 +206,123 @@ def test_outbox_failure_rolls_back_purchase_and_audit(client):
         for table in ('merchants', 'spending_transactions', 'transaction_audit_events', 'transaction_outbox'):
             count = conn.execute(sql.SQL('SELECT count(*) AS n FROM {}').format(sql.Identifier(table))).fetchone()
             assert count['n'] == 0
+
+
+def test_categories_are_owned_validated_and_case_insensitive(client):
+    alice, bob = account(client), account(client, 'bob@example.com')
+    categories = client.get('/categories', headers=alice).json()
+    assert {c['name'] for c in categories} == set(main.DEFAULT_CATEGORIES)
+    assert {c['id'] for c in categories}.isdisjoint(c['id'] for c in client.get('/categories', headers=bob).json())
+    created = client.post('/categories', headers=alice, json={'name': '  Health  '})
+    assert created.status_code == 201
+    assert created.json()['name'] == 'Health'
+    assert client.post('/categories', headers=alice, json={'name': 'health'}).status_code == 409
+    assert client.post('/categories', headers=bob, json={'name': 'Health'}).status_code == 201
+    for body in [{'name': ' '}, {'name': 'x' * 51}, {'name': 'Health', 'user_id': str(uuid4())}]:
+        assert client.post('/categories', headers=alice, json=body).status_code == 422
+    assert client.get('/categories').status_code == 401
+    assert client.post('/categories', json={'name': 'Health'}).status_code == 401
+
+
+def test_categorization_persists_and_preserves_creation_retry(client):
+    alice, bob = account(client), account(client, 'bob@example.com')
+    categories = client.get('/categories', headers=alice).json()
+    first, second = categories[:2]
+    purchase = {**purchase_payload(client, alice), 'category_id': first['id']}
+    saved = client.post('/transactions', headers=alice, json=purchase).json()
+    assert saved['category_id'] == first['id'] and saved['category'] == first['name']
+    path = '/transactions/' + saved['id']
+    assert client.patch(path + '/category', headers=bob, json={'category_id': None}).status_code == 404
+    foreign = client.get('/categories', headers=bob).json()[0]['id']
+    assert client.patch(path + '/category', headers=alice, json={'category_id': foreign}).status_code == 404
+    assert client.post('/transactions', headers=alice, json={**purchase, 'source_reference': str(uuid4()), 'category_id': foreign}).status_code == 404
+    assert client.patch(path + '/category', headers=alice, json={}).status_code == 422
+    changed = client.patch(path + '/category', headers=alice, json={'category_id': second['id']})
+    assert changed.status_code == 200 and changed.json()['category'] == second['name']
+    # A retry of the original creation request must not undo recategorization.
+    replay = client.post('/transactions', headers=alice, json=purchase)
+    assert replay.status_code == 200 and replay.json() == changed.json()
+    assert client.post('/transactions', headers=alice, json={**purchase, 'category_id': second['id']}).status_code == 409
+    login = client.post('/auth/login', json={'email': 'alice@example.com', 'password': PASSWORD})
+    fresh = {'Authorization': 'Bearer ' + login.json()['access_token']}
+    assert client.get(path, headers=fresh).json()['category_id'] == second['id']
+    assert client.delete('/cards/' + purchase['card_id'], headers=alice).status_code == 204
+    assert client.patch(path + '/category', headers=fresh, json={'category_id': None}).json()['category'] is None
+    assert client.get('/transactions', headers=fresh, params={'uncategorized': True}).json()[0]['id'] == saved['id']
+    with db.connect() as conn:
+        for table in ('spending_transactions', 'transaction_audit_events', 'transaction_outbox'):
+            assert conn.execute(sql.SQL('SELECT count(*) AS n FROM {}').format(sql.Identifier(table))).fetchone()['n'] == 1
+
+
+def test_history_combines_literal_search_card_category_dates_and_pagination(client):
+    alice, bob = account(client), account(client, 'bob@example.com')
+    purchase = purchase_payload(client, alice)
+    category = client.get('/categories', headers=alice).json()[0]['id']
+    other_card = client.post('/cards', headers=alice, json={**CARD, 'last4': '5678'}).json()['id']
+    rows = []
+    for merchant, occurred_at, card_id, category_id in [
+        ('Market 100%_special', '2026-11-04T23:59:59+05:00', purchase['card_id'], category),
+        ('Market 100%_special', '2026-11-05T00:00:00+05:00', purchase['card_id'], category),
+        ('MARKET 100%_special', '2026-11-05T23:59:59+05:00', purchase['card_id'], category),
+        ('Market 100%_special', '2026-11-06T00:00:00+05:00', purchase['card_id'], category),
+        ('Another store', '2026-11-05T12:00:00+05:00', other_card, None),
+    ]:
+        result = client.post('/transactions', headers=alice, json={**purchase, 'source_reference': str(uuid4()), 'merchant': merchant, 'occurred_at': occurred_at, 'card_id': card_id, 'category_id': category_id})
+        assert result.status_code == 201, result.text
+        rows.append(result.json())
+    filters = {'search': '  market 100%_  ', 'card_id': purchase['card_id'], 'category_id': category,
+               'occurred_from': '2026-11-05T00:00:00+05:00', 'occurred_before': '2026-11-06T00:00:00+05:00'}
+    assert client.get('/transactions', headers=alice, params=filters).json() == [rows[2], rows[1]]
+    assert client.get('/transactions', headers=alice, params={**filters, 'limit': 1, 'offset': 1}).json() == [rows[1]]
+    assert client.get('/transactions', headers=alice, params={'card_id': other_card, 'uncategorized': True}).json() == [rows[4]]
+    assert client.get('/transactions', headers=alice, params={'search': "' OR true --"}).json() == []
+    assert client.get('/transactions', headers=bob, params=filters).json() == []
+    assert client.delete('/cards/' + purchase['card_id'], headers=alice).status_code == 204
+    assert len(client.get('/cards', headers=alice).json()) == 1
+    assert len(client.get('/cards?include_archived=true', headers=alice).json()) == 2
+    assert client.get('/transactions', headers=alice, params=filters).json() == [rows[2], rows[1]]
+    for invalid in [
+        {'card_id': 'invalid'}, {'category_id': 'invalid'}, {'search': 'x' * 101},
+        {'occurred_from': '2026-11-05T00:00:00'},
+        {'occurred_from': filters['occurred_before'], 'occurred_before': filters['occurred_from']},
+        {'category_id': category, 'uncategorized': True},
+    ]:
+        assert client.get('/transactions', headers=alice, params=invalid).status_code == 422
+
+
+def test_database_trigger_blocks_cross_user_category_assignment(client):
+    alice, bob = account(client), account(client, 'bob@example.com')
+    purchase = client.post('/transactions', headers=alice, json=purchase_payload(client, alice)).json()
+    foreign = client.get('/categories', headers=bob).json()[0]['id']
+    for column in ('category_id', 'recorded_category_id'):
+        with pytest.raises(psycopg.errors.CheckViolation):
+            with db.connect() as conn:
+                conn.execute(sql.SQL('UPDATE spending_transactions SET {} = %s WHERE id = %s').format(sql.Identifier(column)), (foreign, purchase['id']))
+    assert client.get('/transactions/' + purchase['id'], headers=alice).json()['category_id'] is None
+
+
+def test_category_migration_keeps_existing_user_and_purchase_data(client):
+    # Exercise upgrading a populated pre-category schema, not only fresh setup.
+    schema = 'upgrade_' + uuid4().hex
+    url = os.environ['TEST_DATABASE_URL']
+    migrations = Path(db.__file__).resolve().parents[1] / 'migrations'
+    with psycopg.connect(url) as conn:
+        conn.execute(sql.SQL('CREATE SCHEMA {}').format(sql.Identifier(schema)))
+    try:
+        with psycopg.connect(url, options=f'-csearch_path={schema}', row_factory=dict_row) as conn:
+            for name in ('001_accounts_cards.sql', '002_manual_purchases.sql'):
+                conn.execute((migrations / name).read_text())
+            user_id, card_id, merchant_id, transaction_id = [uuid4() for _ in range(4)]
+            conn.execute("INSERT INTO users (id, email, name, password_hash) VALUES (%s, 'upgrade@example.com', 'Upgrade', 'test-hash')", (user_id,))
+            conn.execute("INSERT INTO card_profiles (id, user_id, label, network, last4, expiry_month, expiry_year) VALUES (%s, %s, 'Card', 'visa', '4242', 12, 2099)", (card_id, user_id))
+            conn.execute("INSERT INTO merchants (id, user_id, name) VALUES (%s, %s, 'Market')", (merchant_id, user_id))
+            conn.execute("INSERT INTO spending_transactions (id, user_id, card_id, merchant_id, amount, occurred_at, source, source_reference, kind, status, channel) VALUES (%s, %s, %s, %s, 1250.05, '2026-11-05T10:30:00+05:00', 'manual', 'upgrade', 'purchase', 'approved', 'pos')", (transaction_id, user_id, card_id, merchant_id))
+            conn.execute((migrations / '003_categories_history.sql').read_text())
+            saved = conn.execute('SELECT id, amount, category_id, recorded_category_id FROM spending_transactions').fetchone()
+            assert str(saved['amount']) == '1250.05' and saved['id'] == transaction_id
+            assert saved['category_id'] is None and saved['recorded_category_id'] is None
+            assert conn.execute('SELECT count(*) AS n FROM categories WHERE user_id = %s', (user_id,)).fetchone()['n'] == 6
+            assert conn.execute('SELECT count(*) AS n FROM transaction_audit_events').fetchone()['n'] == 1
+    finally:
+        with psycopg.connect(url) as conn:
+            conn.execute(sql.SQL('DROP SCHEMA {} CASCADE').format(sql.Identifier(schema)))

@@ -87,8 +87,34 @@ class SpendTrailApi {
     return data['user'] as Map<String, dynamic>;
   }
 
-  Future<List<Map<String, dynamic>>> cards() async =>
-      (await _request('GET', '/cards') as List).cast<Map<String, dynamic>>();
+  Future<List<Map<String, dynamic>>> cards({
+    bool includeArchived = false,
+  }) async =>
+      (await _request(
+                'GET',
+                includeArchived ? '/cards?include_archived=true' : '/cards',
+              )
+              as List)
+          .cast<Map<String, dynamic>>();
+
+  Future<List<Map<String, dynamic>>> categories() async =>
+      (await _request('GET', '/categories') as List)
+          .cast<Map<String, dynamic>>();
+
+  Future<Map<String, dynamic>> createCategory(String name) async =>
+      await _request('POST', '/categories', {'name': name.trim()})
+          as Map<String, dynamic>;
+
+  Future<Map<String, dynamic>> categorizePurchase(
+    String id,
+    String? categoryId,
+  ) async =>
+      await _request(
+            'PATCH',
+            '/transactions/${Uri.encodeComponent(id)}/category',
+            {'category_id': categoryId},
+          )
+          as Map<String, dynamic>;
 
   Future<void> saveCard(Map<String, dynamic> card, {String? id}) async {
     await _request(
@@ -110,8 +136,33 @@ class SpendTrailApi {
   Future<List<Map<String, dynamic>>> purchases({
     int limit = 25,
     int offset = 0,
+    String search = '',
+    String? cardId,
+    String? categoryId,
+    bool uncategorized = false,
+    DateTime? occurredFrom,
+    DateTime? occurredBefore,
   }) async =>
-      (await _request('GET', '/transactions?limit=$limit&offset=$offset')
+      (await _request(
+                'GET',
+                Uri(
+                  path: '/transactions',
+                  queryParameters: {
+                    'limit': '$limit',
+                    'offset': '$offset',
+                    if (search.trim().isNotEmpty) 'search': search.trim(),
+                    if (cardId != null) 'card_id': cardId,
+                    if (categoryId != null) 'category_id': categoryId,
+                    if (uncategorized) 'uncategorized': 'true',
+                    if (occurredFrom != null)
+                      'occurred_from': occurredFrom.toUtc().toIso8601String(),
+                    if (occurredBefore != null)
+                      'occurred_before': occurredBefore
+                          .toUtc()
+                          .toIso8601String(),
+                  },
+                ).toString(),
+              )
               as List)
           .cast<Map<String, dynamic>>();
 

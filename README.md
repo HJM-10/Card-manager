@@ -8,6 +8,8 @@ All balances and money actions are simulated. No bank connection, payment proces
 
 **Account purchases:** open **Home → Account purchases** or **Cards → Account card profiles → Account purchases**. Record a manual PKR purchase against an active account card, then browse paginated history and open transaction details. Purchases persist in PostgreSQL and return after signing in again. The entry form accepts a merchant, exact decimal amount, date/time and online/POS channel. Failed saves retain the same request for safe retry while the form stays open. Account purchases are separate from the existing local demo expenses and statistics.
 
+Choose a saved category when recording a purchase, or open its details and tap **Change category** later. Each account starts with Groceries, Food, Transport, Shopping, Bills and Other; **New category** adds a custom choice. **Search merchants** searches the full account history. **Filters** combines a card (including archived cards), category or Uncategorized, and an inclusive local date range. **Clear search & filters** returns to all purchases.
+
 ## Features
 
 - **Animated splash:** coins drop above a cash stack, the illustration collapses into the SpendTrail wordmark, and a progress bar fills.

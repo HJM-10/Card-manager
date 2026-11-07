@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:my_app/data/spendtrail_api.dart';
 import 'package:my_app/features/account/purchases_screen.dart';
+import 'package:my_app/features/account/purchase_filters.dart';
 
 const card = {'id': 'card-1', 'label': 'Daily', 'last4': '4242'};
 Map<String, dynamic> purchase(String id) => {
@@ -32,6 +33,15 @@ Future<SpendTrailApi> authenticated(
         );
       }
       expect(request.headers['Authorization'], 'Bearer alice-token');
+      if (request.url.path == '/categories' && request.method == 'GET') {
+        return http.Response(
+          jsonEncode([
+            {'id': 'groceries', 'name': 'Groceries'},
+            {'id': 'food', 'name': 'Food'},
+          ]),
+          200,
+        );
+      }
       return handler(request);
     }),
   );
@@ -54,6 +64,184 @@ Future<void> open(
 }
 
 void main() {
+  testWidgets(
+    'search and combined card/category filters reach server and clear resets them',
+    (tester) async {
+      final queries = <Map<String, String>>[];
+      final api = await authenticated((request) async {
+        if (request.url.path == '/cards') {
+          expect(request.url.queryParameters['include_archived'], 'true');
+          return http.Response(
+            jsonEncode([
+              {...card, 'archived': true},
+            ]),
+            200,
+          );
+        }
+        queries.add(request.url.queryParameters);
+        return http.Response(jsonEncode([purchase('filtered')]), 200);
+      });
+      await open(tester, api);
+      await tester.enterText(find.byType(TextField).first, 'Corner & Market');
+      await tester.tap(find.byTooltip('Search purchases'));
+      await tester.pumpAndSettle();
+      expect(queries.last['search'], 'Corner & Market');
+      await tester.tap(find.text('Filters'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(DropdownButtonFormField<String>).at(0));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Daily •••• 4242 (archived)').last);
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(DropdownButtonFormField<String>).at(1));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Groceries').last);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Apply filters'));
+      await tester.pumpAndSettle();
+      expect(queries.last, containsPair('search', 'Corner & Market'));
+      expect(queries.last, containsPair('card_id', 'card-1'));
+      expect(queries.last, containsPair('category_id', 'groceries'));
+      expect(queries.last['offset'], '0');
+      await tester.tap(find.text('Clear search & filters'));
+      await tester.pumpAndSettle();
+      expect(queries.last, {'limit': '25', 'offset': '0'});
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets('existing purchase category can change, retry and clear', (
+    tester,
+  ) async {
+    var saved = purchase('one');
+    var attempts = 0;
+    final api = await authenticated((request) async {
+      if (request.method == 'PATCH') {
+        attempts++;
+        if (attempts == 1) {
+          return http.Response('{"detail":"Please retry"}', 503);
+        }
+        final category = jsonDecode(request.body)['category_id'];
+        saved = {
+          ...saved,
+          'category_id': category,
+          'category': category == null ? null : 'Food',
+        };
+        return http.Response(jsonEncode(saved), 200);
+      }
+      return http.Response(
+        jsonEncode(request.url.path == '/transactions' ? [saved] : saved),
+        200,
+      );
+    });
+    await open(tester, api);
+    await tester.tap(find.text('Market one'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Change category'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(DropdownButtonFormField<String>));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Food').last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Save category'));
+    await tester.pumpAndSettle();
+    expect(find.text('Please retry'), findsOneWidget);
+    await tester.tap(find.text('Save category'));
+    await tester.pumpAndSettle();
+    expect(find.text('Category: Food'), findsOneWidget);
+    await tester.tap(find.text('Change category'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(DropdownButtonFormField<String>));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Uncategorized').last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Save category'));
+    await tester.pumpAndSettle();
+    expect(find.text('Category: Uncategorized'), findsOneWidget);
+    expect(saved['category_id'], isNull);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('custom category is selected and submitted with new purchase', (
+    tester,
+  ) async {
+    Map<String, dynamic>? submitted;
+    final api = await authenticated((request) async {
+      if (request.url.path == '/cards') {
+        return http.Response(jsonEncode([card]), 200);
+      }
+      if (request.url.path == '/categories' && request.method == 'POST') {
+        expect(jsonDecode(request.body)['name'], 'Health');
+        return http.Response('{"id":"health","name":"Health"}', 201);
+      }
+      if (request.method == 'POST') {
+        submitted = jsonDecode(request.body) as Map<String, dynamic>;
+        return http.Response(
+          jsonEncode({...purchase('new'), ...submitted!}),
+          201,
+        );
+      }
+      return http.Response('[]', 200);
+    });
+    await open(tester, api);
+    await tester.tap(find.text('Record purchase'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextFormField).at(0), 'Pharmacy');
+    await tester.enterText(find.byType(TextFormField).at(1), '120.05');
+    await tester.ensureVisible(find.text('New category'));
+    await tester.tap(find.text('New category'));
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byType(TextFormField).last, 'Health');
+    await tester.tap(find.text('Create category'));
+    await tester.pumpAndSettle();
+    expect(find.text('Health'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('Save purchase'),
+      180,
+      scrollable: find
+          .byWidgetPredicate(
+            (w) => w is Scrollable && w.axisDirection == AxisDirection.down,
+          )
+          .last,
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Save purchase'));
+    await tester.pumpAndSettle();
+    expect(submitted!['category_id'], 'health');
+    expect(tester.takeException(), isNull);
+  });
+
+  test(
+    'date filters use local day boundaries, exact query encoding and exclusive end',
+    () async {
+      final filters = PurchaseFilters(
+        dates: DateTimeRange(
+          start: DateTime(2026, 10, 31),
+          end: DateTime(2026, 11, 1),
+        ),
+      );
+      expect(filters.before, DateTime(2026, 11, 2));
+      final api = await authenticated((request) async {
+        expect(request.url.queryParameters['search'], '100% & café');
+        expect(request.url.queryParameters['uncategorized'], 'true');
+        expect(
+          request.url.queryParameters['occurred_from'],
+          filters.dates!.start.toUtc().toIso8601String(),
+        );
+        expect(
+          request.url.queryParameters['occurred_before'],
+          filters.before!.toUtc().toIso8601String(),
+        );
+        return http.Response('[]', 200);
+      });
+      await api.purchases(
+        search: '100% & café',
+        uncategorized: true,
+        occurredFrom: filters.dates!.start,
+        occurredBefore: filters.before,
+      );
+    },
+  );
+
   testWidgets(
     'small screen validates precision and permits correction after rejection',
     (tester) async {
@@ -79,13 +267,51 @@ void main() {
       );
       for (final value in ['0', '-1', '1.234', '1000000000000']) {
         await tester.enterText(find.byType(TextFormField).at(1), value);
-        await tester.ensureVisible(find.text('Save purchase'));
+        await tester.scrollUntilVisible(
+          find.text('Save purchase'),
+          180,
+          scrollable: find
+              .byWidgetPredicate(
+                (w) => w is Scrollable && w.axisDirection == AxisDirection.down,
+              )
+              .last,
+        );
+        await tester.pumpAndSettle();
+        await tester.scrollUntilVisible(
+          find.text('Save purchase'),
+          180,
+          scrollable: find
+              .byWidgetPredicate(
+                (w) => w is Scrollable && w.axisDirection == AxisDirection.down,
+              )
+              .last,
+        );
+        await tester.pumpAndSettle();
         await tester.tap(find.text('Save purchase'));
         await tester.pumpAndSettle();
         expect(attempts, 0);
       }
       await tester.enterText(find.byType(TextFormField).at(1), '10.5');
-      await tester.ensureVisible(find.text('Save purchase'));
+      await tester.scrollUntilVisible(
+        find.text('Save purchase'),
+        180,
+        scrollable: find
+            .byWidgetPredicate(
+              (w) => w is Scrollable && w.axisDirection == AxisDirection.down,
+            )
+            .last,
+      );
+      await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(
+        find.text('Save purchase'),
+        180,
+        scrollable: find
+            .byWidgetPredicate(
+              (w) => w is Scrollable && w.axisDirection == AxisDirection.down,
+            )
+            .last,
+      );
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Save purchase'));
       await tester.pumpAndSettle();
       expect(attempts, 1);
@@ -127,16 +353,36 @@ void main() {
         return http.Response(jsonEncode(records), 200);
       });
       await open(tester, api);
-      expect(find.textContaining('No account purchases yet'), findsOneWidget);
+      expect(find.textContaining('No account purchases match'), findsOneWidget);
       await tester.tap(find.text('Record purchase'));
       await tester.pumpAndSettle();
       await tester.enterText(find.byType(TextFormField).at(0), 'Corner Market');
       await tester.enterText(find.byType(TextFormField).at(1), '0.00');
+      await tester.scrollUntilVisible(
+        find.text('Save purchase'),
+        180,
+        scrollable: find
+            .byWidgetPredicate(
+              (w) => w is Scrollable && w.axisDirection == AxisDirection.down,
+            )
+            .last,
+      );
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Save purchase'));
       await tester.pumpAndSettle();
       expect(find.textContaining('Enter a positive amount'), findsOneWidget);
       expect(bodies, isEmpty);
       await tester.enterText(find.byType(TextFormField).at(1), '1250.05');
+      await tester.scrollUntilVisible(
+        find.text('Save purchase'),
+        180,
+        scrollable: find
+            .byWidgetPredicate(
+              (w) => w is Scrollable && w.axisDirection == AxisDirection.down,
+            )
+            .last,
+      );
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Save purchase'));
       await tester.pumpAndSettle();
       expect(find.text('Retry save'), findsOneWidget);
@@ -191,7 +437,15 @@ void main() {
         );
       });
       await open(tester, api);
-      await tester.scrollUntilVisible(find.text('Load more'), 500);
+      await tester.scrollUntilVisible(
+        find.text('Load more'),
+        500,
+        scrollable: find
+            .byWidgetPredicate(
+              (w) => w is Scrollable && w.axisDirection == AxisDirection.down,
+            )
+            .last,
+      );
       await tester.tap(find.text('Load more'));
       await tester.pumpAndSettle();
       expect(find.text('Try later'), findsOneWidget);
@@ -263,6 +517,16 @@ void main() {
       if (stage == 'save') {
         await tester.enterText(find.byType(TextFormField).at(0), 'Market');
         await tester.enterText(find.byType(TextFormField).at(1), '10');
+        await tester.scrollUntilVisible(
+          find.text('Save purchase'),
+          180,
+          scrollable: find
+              .byWidgetPredicate(
+                (w) => w is Scrollable && w.axisDirection == AxisDirection.down,
+              )
+              .last,
+        );
+        await tester.pumpAndSettle();
         await tester.tap(find.text('Save purchase'));
         await tester.pumpAndSettle();
       }

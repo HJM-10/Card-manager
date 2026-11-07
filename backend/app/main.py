@@ -68,6 +68,7 @@ class PurchaseInput(Input):
     )
     channel: Literal['online', 'pos']
     source_reference: UUID
+    category_id: UUID | None = None
 
     @field_validator('amount')
     @classmethod
@@ -96,6 +97,19 @@ class TransactionRecord(BaseModel):
     kind: str
     status: str
     channel: str
+    category_id: UUID | None = None
+    category: str | None = None
+
+
+class CategoryInput(Input):
+    name: str = Field(min_length=1, max_length=50)
+
+
+class CategoryAssignment(Input):
+    category_id: UUID | None
+
+
+DEFAULT_CATEGORIES = ('Groceries', 'Food', 'Transport', 'Shopping', 'Bills', 'Other')
 
 
 def digest(token):
@@ -146,6 +160,10 @@ def register(body: Register, response: Response):
                 'INSERT INTO users (id, email, name, password_hash) VALUES (%s, %s, %s, %s) RETURNING id, email, name',
                 (uuid4(), str(body.email).lower(), body.name, password_hash.hash(body.password)),
             ).fetchone()
+            db.cursor().executemany(
+                'INSERT INTO categories (id, user_id, name) VALUES (%s, %s, %s)',
+                [(uuid4(), user['id'], name) for name in DEFAULT_CATEGORIES],
+            )
             return issue_session(db, user)
     except UniqueViolation:
         raise HTTPException(409, 'An account with this email already exists') from None
@@ -177,9 +195,9 @@ CARD_COLUMNS = 'id, label, network, last4, expiry_month, expiry_year, archived'
 
 
 @app.get('/cards')
-def cards(user=Depends(current_session)):
+def cards(include_archived: bool = False, user=Depends(current_session)):
     with connect() as db:
-        return db.execute(f'SELECT {CARD_COLUMNS} FROM card_profiles WHERE user_id = %s AND NOT archived ORDER BY created_at, id', (user['id'],)).fetchall()
+        return db.execute(f'SELECT {CARD_COLUMNS} FROM card_profiles WHERE user_id = %s AND (%s OR NOT archived) ORDER BY created_at, id', (user['id'], include_archived)).fetchall()
 
 
 def save_card(body, user, card_id=None):
@@ -225,10 +243,34 @@ def archive_card(card_id: UUID, user=Depends(current_session)):
 
 TRANSACTION_SELECT = '''
     SELECT t.id, t.card_id, m.name AS merchant, t.amount, t.occurred_at,
-           t.source, t.source_reference, t.kind, t.status, t.channel
+           t.source, t.source_reference, t.kind, t.status, t.channel,
+           t.category_id, t.recorded_category_id, c.name AS category
     FROM spending_transactions t
     JOIN merchants m ON (m.user_id, m.id) = (t.user_id, t.merchant_id)
+    LEFT JOIN categories c ON (c.user_id, c.id) = (t.user_id, t.category_id)
 '''
+
+
+@app.get('/categories')
+def categories(user=Depends(current_session)):
+    with connect() as db:
+        return db.execute('SELECT id, name FROM categories WHERE user_id = %s ORDER BY lower(name), id', (user['id'],)).fetchall()
+
+
+@app.post('/categories', status_code=201)
+def create_category(body: CategoryInput, user=Depends(current_session)):
+    try:
+        with connect() as db:
+            return db.execute('INSERT INTO categories (id, user_id, name) VALUES (%s, %s, %s) RETURNING id, name', (uuid4(), user['id'], body.name)).fetchone()
+    except UniqueViolation:
+        raise HTTPException(409, 'A category with this name already exists') from None
+
+
+def require_category(db, user_id, category_id):
+    if category_id is not None and not db.execute(
+        'SELECT id FROM categories WHERE user_id = %s AND id = %s', (user_id, category_id)
+    ).fetchone():
+        raise HTTPException(404, 'Category not found')
 
 
 @app.post('/transactions', status_code=201, response_model=TransactionRecord,
@@ -254,13 +296,15 @@ def record_purchase(body: PurchaseInput, response: Response, user=Depends(curren
             (user_id, body.card_id, reference),
         ).fetchone()
         if existing is not None:
-            saved_values = (existing['merchant'], existing['amount'], existing['occurred_at'], existing['channel'])
-            if saved_values != (body.merchant, amount, body.occurred_at, body.channel):
+            saved_values = (existing['merchant'], existing['amount'], existing['occurred_at'], existing['channel'], existing['recorded_category_id'])
+            if saved_values != (body.merchant, amount, body.occurred_at, body.channel, body.category_id):
                 raise HTTPException(409, 'This purchase reference is already in use')
             response.status_code = 200
             return existing
         if card['archived']:
             raise HTTPException(404, 'Card not found')
+
+        require_category(db, user_id, body.category_id)
 
         db.execute(
             'INSERT INTO merchants (id, user_id, name) VALUES (%s, %s, %s) ON CONFLICT (user_id, name) DO NOTHING',
@@ -270,11 +314,11 @@ def record_purchase(body: PurchaseInput, response: Response, user=Depends(curren
         db.execute(
             '''
             INSERT INTO spending_transactions
-                (id, user_id, card_id, merchant_id, amount, occurred_at, source, source_reference, kind, status, channel)
-            SELECT %s, user_id, %s, id, %s, %s, 'manual', %s, 'purchase', 'approved', %s
+                (id, user_id, card_id, merchant_id, amount, occurred_at, source, source_reference, kind, status, channel, category_id, recorded_category_id)
+            SELECT %s, user_id, %s, id, %s, %s, 'manual', %s, 'purchase', 'approved', %s, %s, %s
             FROM merchants WHERE user_id = %s AND name = %s
             ''',
-            (transaction_id, body.card_id, amount, body.occurred_at, reference, body.channel, user_id, body.merchant),
+            (transaction_id, body.card_id, amount, body.occurred_at, reference, body.channel, body.category_id, body.category_id, user_id, body.merchant),
         )
         return db.execute(
             TRANSACTION_SELECT + ' WHERE t.user_id = %s AND t.id = %s',
@@ -286,13 +330,53 @@ def record_purchase(body: PurchaseInput, response: Response, user=Depends(curren
 def transaction_history(
     limit: Annotated[int, Query(ge=1, le=100)] = 25,
     offset: Annotated[int, Query(ge=0, le=2_147_483_647)] = 0,
+    search: Annotated[str, Query(max_length=100)] = '',
+    card_id: UUID | None = None,
+    category_id: UUID | None = None,
+    uncategorized: bool = False,
+    occurred_from: AwareDatetime | None = None,
+    occurred_before: AwareDatetime | None = None,
     user=Depends(current_session),
 ):
+    if occurred_from and occurred_before and occurred_from >= occurred_before:
+        raise HTTPException(422, 'The end date must follow the start date')
+    if category_id is not None and uncategorized:
+        raise HTTPException(422, 'Choose a category or uncategorized, not both')
+    conditions = ['t.user_id = %s']
+    values = [user['id']]
+    if search.strip():
+        conditions.append('strpos(lower(m.name), lower(%s)) > 0')
+        values.append(search.strip())
+    for column, value in [('card_id', card_id), ('category_id', category_id)]:
+        if value is not None:
+            conditions.append(f't.{column} = %s')
+            values.append(value)
+    if uncategorized:
+        conditions.append('t.category_id IS NULL')
+    if occurred_from is not None:
+        conditions.append('t.occurred_at >= %s')
+        values.append(occurred_from)
+    if occurred_before is not None:
+        conditions.append('t.occurred_at < %s')
+        values.append(occurred_before)
     with connect() as db:
         return db.execute(
-            TRANSACTION_SELECT + ' WHERE t.user_id = %s ORDER BY t.occurred_at DESC, t.id DESC LIMIT %s OFFSET %s',
-            (user['id'], limit, offset),
+            TRANSACTION_SELECT + ' WHERE ' + ' AND '.join(conditions) + ' ORDER BY t.occurred_at DESC, t.id DESC LIMIT %s OFFSET %s',
+            (*values, limit, offset),
         ).fetchall()
+
+
+@app.patch('/transactions/{transaction_id}/category', response_model=TransactionRecord)
+def categorize_transaction(transaction_id: UUID, body: CategoryAssignment, user=Depends(current_session)):
+    with connect() as db:
+        require_category(db, user['id'], body.category_id)
+        updated = db.execute(
+            'UPDATE spending_transactions SET category_id = %s WHERE user_id = %s AND id = %s RETURNING id',
+            (body.category_id, user['id'], transaction_id),
+        ).fetchone()
+        if updated is None:
+            raise HTTPException(404, 'Transaction not found')
+        return db.execute(TRANSACTION_SELECT + ' WHERE t.user_id = %s AND t.id = %s', (user['id'], transaction_id)).fetchone()
 
 
 @app.get('/transactions/{transaction_id}', response_model=TransactionRecord)
