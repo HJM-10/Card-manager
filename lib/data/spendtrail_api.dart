@@ -106,6 +106,41 @@ class SpendTrailApi {
       await _request('POST', '/categories', {'name': name.trim()})
           as Map<String, dynamic>;
 
+  Future<Map<String, dynamic>> monthlyReport(
+    String month, {
+    String? cardId,
+  }) async =>
+      await _request(
+            'GET',
+            Uri(
+              path: '/reports/monthly',
+              queryParameters: {
+                'month': month,
+                if (cardId != null) 'card_id': cardId,
+              },
+            ).toString(),
+          )
+          as Map<String, dynamic>;
+
+  Future<void> saveBudget(
+    String month,
+    String categoryId,
+    String amount,
+  ) async {
+    await _request(
+      'PUT',
+      '/budgets/${Uri.encodeComponent(month)}/${Uri.encodeComponent(categoryId)}',
+      {'amount': amount},
+    );
+  }
+
+  Future<void> removeBudget(String month, String categoryId) async {
+    await _request(
+      'DELETE',
+      '/budgets/${Uri.encodeComponent(month)}/${Uri.encodeComponent(categoryId)}',
+    );
+  }
+
   Future<Map<String, dynamic>> categorizePurchase(
     String id,
     String? categoryId,

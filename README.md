@@ -16,13 +16,22 @@ Choose a saved category when recording a purchase, or open its details and tap *
 
 ## Features
 
+**Monthly budgeting:** after signing in, open **Statistics → Set category
+budget**. Choose a month and category, enter a PKR limit, then review spending,
+remaining money and progress across all your cards. Edit or remove a limit from
+its budget card. Previous/Next month selects past or future budgets; limits do
+not roll over. Card filtering shows that card's monthly spending; choose All
+cards to edit the account-wide budgets. Totals come from saved account purchases
+less refunds, exclude declines, and follow Pakistan calendar months. Refresh or
+return to Statistics to reload changes. See [verification](docs/MILESTONE_07.md).
+
 **Payment simulation:** open **Account purchases → Simulate purchase**, choose
 an active account card, online/POS channel and Approved or Declined outcome.
 Open an approved purchase's details to **Simulate refund**, including partial
 refunds. Refund details link back to the original purchase; total refunds cannot
 exceed its amount. History shows type/status and supports both filters. Account
 Home replaces the old money shortcuts with this route; legacy demo mode keeps
-its local actions. No money moves. Server reports and budgets are still pending.
+its local actions. No money moves. Signed-in Statistics includes server reports and budgets.
 See [verification](docs/MILESTONE_06.md) and [design contracts](docs/DESIGN.md).
 
 - **Animated splash:** coins drop above a cash stack, the illustration collapses into the SpendTrail wordmark, and a progress bar fills.
@@ -33,7 +42,7 @@ See [verification](docs/MILESTONE_06.md) and [design contracts](docs/DESIGN.md).
 - **Floating dark nav bar:** the active tab expands to show its label.
 - **Saved wallet:** card display details and ordering survive restarts. View details, choose a default card, or remove cards.
 - **Expenses & activity:** add, edit, delete, search and filter records by category or card. Dates and exact cents are saved locally.
-- **Statistics:** monthly spending totals, category breakdowns and a six-month trend based on your records. Requests and top-ups are excluded from spending.
+- **Statistics:** signed-in monthly account totals, card/category breakdowns and category budgets. Legacy demo mode retains local statistics and its six-month trend.
 - **Theme:** choose SpendTrail Classic, Cobalt Fold or Fig Carousel under **Profile → Theme**, then save. Classic is the default. **Appearance** offers System, Light and Dark independently. The app saves both choices on the device. All demo amounts use PKR.
 - **Demo actions:** Send, Request and TopUp have review and confirmation screens. Expenses and demo sends reduce the demo balance; top-ups increase it. Requests remain pending. Editing/deleting activity recalculates balances.
 - **Offline fonts:** Plus Jakarta Sans, DM Sans, Space Grotesk, Inter and Outfit are bundled with their OFL licenses.

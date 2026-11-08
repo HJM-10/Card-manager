@@ -45,11 +45,11 @@ Weeks are sequential working blocks, not promised calendar dates. Week 4 has the
 
 ## Ordered implementation backlog
 
-Progress as of 8 November 2026: **27 of 47 checklist items complete (57%)**,
-with 20 remaining (43%). This is an item count, not an estimate of effort or
+Progress as of 8 November 2026: **32 of 47 checklist items complete (68%)**,
+with 15 remaining (32%). This is an item count, not an estimate of effort or
 remaining calendar time. See [design and acceptance contracts](DESIGN.md) and
-[simulation verification](MILESTONE_06.md). Next feature: monthly budgets and
-server reports. The outstanding runtime audit-role restriction remains a
+[budget/report verification](MILESTONE_07.md). Next feature: notifications.
+The outstanding runtime audit-role restriction remains a
 database hardening task.
 
 ### 1. Establish the foundation
@@ -100,11 +100,11 @@ Added prerequisite: optional Android fingerprint login, backed by revocable sess
 
 ### 5. Deliver budgets and reports
 
-- [ ] Add user-owned monthly category budgets, unique per user/category/month.
-- [ ] Implement per-card and combined histories, monthly totals, category totals and budget comparisons through SQL joins, aggregates and views.
-- [ ] Use approved purchases less approved refunds for PKR spending calculations.
-- [ ] Connect the existing statistics UI to server reports and add budget editing/progress.
-- [ ] Verify totals against the fixed examples, including month boundaries, declines and partial refunds.
+- [x] Add user-owned monthly category budgets, unique per user/category/month.
+- [x] Implement per-card and combined histories, monthly totals, category totals and budget comparisons through SQL joins, aggregates and views.
+- [x] Use approved purchases less approved refunds for PKR spending calculations.
+- [x] Connect the existing statistics UI to server reports and add budget editing/progress.
+- [x] Verify totals against the fixed examples, including month boundaries, declines and partial refunds.
 
 ### 6. Deliver notifications
 

@@ -11,6 +11,7 @@ import '../shell/app_shell.dart';
 import '../splash/splash_screen.dart';
 import 'purchases_screen.dart';
 import 'biometric_settings.dart';
+import 'monthly_budget_screen.dart';
 
 class SpendTrailApp extends ConsumerStatefulWidget {
   const SpendTrailApp({super.key, this.api, this.biometricVault});
@@ -134,6 +135,14 @@ class _SpendTrailAppState extends ConsumerState<SpendTrailApp> {
             )
           : Builder(
               builder: (context) => AppShell(
+                statisticsScreen: MonthlyBudgetScreen(
+                  key: ValueKey(account['id'] ?? account['name']),
+                  api: api,
+                  active: ref.watch(tabProvider) == 2,
+                  onExpired: () {
+                    if (context.mounted) finishSignOut(context);
+                  },
+                ),
                 walletStyle: style,
                 accountName: account['name'] as String,
                 appearanceAction: const _AppearanceMenu(),

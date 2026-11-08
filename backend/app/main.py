@@ -15,12 +15,13 @@ from pwdlib import PasswordHash
 from .db import connect
 from .purchases import PurchaseInput, SimulationInput, RefundInput, TransactionRecord, TRANSACTION_SELECT, require_category, save_purchase, save_refund
 from .csv_imports import CsvPreviewInput, CsvConfirmation, preview_import, confirm_import, public_batch
+from .budgets import BudgetInput, reporting_month, save_budget, monthly_report
 
 app = FastAPI(title='SpendTrail API', version='0.1.0')
 app.add_middleware(
     CORSMiddleware,
     allow_origins=os.getenv('CORS_ORIGINS', 'http://localhost:5173').split(','),
-    allow_methods=['GET', 'POST', 'PATCH', 'DELETE'],
+    allow_methods=['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
     allow_headers=['Authorization', 'Content-Type'],
 )
 password_hash = PasswordHash.recommended()
@@ -276,6 +277,29 @@ def create_category(body: CategoryInput, user=Depends(current_session)):
             return db.execute('INSERT INTO categories (id, user_id, name) VALUES (%s, %s, %s) RETURNING id, name', (uuid4(), user['id'], body.name)).fetchone()
     except UniqueViolation:
         raise HTTPException(409, 'A category with this name already exists') from None
+
+
+@app.get('/reports/monthly')
+def report_monthly(month: str, card_id: UUID | None = None, user=Depends(current_session)):
+    selected_month = reporting_month(month)
+    with connect() as db:
+        return monthly_report(db, user['id'], selected_month, card_id)
+
+
+@app.put('/budgets/{month}/{category_id}')
+def put_budget(month: str, category_id: UUID, body: BudgetInput, user=Depends(current_session)):
+    selected_month = reporting_month(month)
+    with connect() as db:
+        return save_budget(db, user['id'], category_id, selected_month, body.amount)
+
+
+@app.delete('/budgets/{month}/{category_id}', status_code=204)
+def delete_budget(month: str, category_id: UUID, user=Depends(current_session)):
+    selected_month = reporting_month(month)
+    with connect() as db:
+        require_category(db, user['id'], category_id)
+        db.execute('DELETE FROM budgets WHERE user_id = %s AND category_id = %s AND month = %s',
+                   (user['id'], category_id, selected_month))
 
 
 @app.post('/transactions', status_code=201, response_model=TransactionRecord,

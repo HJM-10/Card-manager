@@ -177,6 +177,80 @@ void main() {
     );
   });
 
+  testWidgets(
+    'signed-in Statistics loads and refreshes account budgets then handles expiry',
+    (tester) async {
+      var reports = 0;
+      var expire = false;
+      final api = SpendTrailApi(
+        client: MockClient((request) async {
+          if (request.url.path == '/auth/login') {
+            return http.Response(
+              '{"access_token":"test-token","user":{"id":"alice","name":"Alice"}}',
+              200,
+            );
+          }
+          if (request.url.path == '/reports/monthly') {
+            reports++;
+            if (expire) {
+              return http.Response('{"detail":"Session expired"}', 401);
+            }
+            return http.Response(
+              jsonEncode({
+                'month': request.url.queryParameters['month'],
+                'spent': '42.00',
+                'purchases': '42.00',
+                'refunds': '0.00',
+                'transaction_count': 1,
+                'categories': [],
+                'cards': [],
+                'budgets': [],
+              }),
+              200,
+            );
+          }
+          return http.Response('', 204);
+        }),
+      );
+      addTearDown(api.close);
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: SpendTrailApp(api: api),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.byType(TextFormField).at(0),
+        'alice@example.com',
+      );
+      await tester.enterText(
+        find.byType(TextFormField).at(1),
+        'synthetic-password',
+      );
+      await tester.tap(find.text('Sign in'));
+      await tester.pumpAndSettle();
+      expect(reports, 0);
+      container.read(tabProvider.notifier).select(2);
+      await tester.pumpAndSettle();
+      expect(reports, 1);
+      expect(find.text('PKR 42.00'), findsOneWidget);
+      container.read(tabProvider.notifier).select(0);
+      await tester.pumpAndSettle();
+      container.read(tabProvider.notifier).select(2);
+      await tester.pumpAndSettle();
+      expect(reports, 2);
+      expire = true;
+      await tester.tap(find.byTooltip('Refresh account spending'));
+      await tester.pumpAndSettle();
+      expect(find.text('Sign in'), findsOneWidget);
+      expect(find.text('PKR 42.00'), findsNothing);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
   testWidgets('appearance persists and sign-up fits a small screen', (
     tester,
   ) async {

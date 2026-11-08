@@ -66,6 +66,9 @@ Interactive documentation is available at `/docs` while the API runs.
 | `DELETE /auth/access` | Locks this instance by revoking only its access token; preserves the biometric credential; 204 |
 | `GET /cards` | Current user's active card profiles only |
 | `GET /cards?include_archived=true` | Current user's active and archived profiles for history filters |
+| `GET /reports/monthly?month=YYYY-MM` | Exact monthly account spending, categories, cards and all-card budget comparisons; optional owned `card_id` filters spending |
+| `PUT /budgets/{month}/{category_id}` | `{amount: "1500.00"}` sets or replaces the owned category/month limit; 200, stable budget ID on retries |
+| `DELETE /budgets/{month}/{category_id}` | Removes only that owned category's monthly limit; idempotent 204 |
 | `GET /categories` | Current user's saved categories |
 | `POST /categories` | `{name}` creates a user-owned category; 201, or 409 for a case-insensitive duplicate |
 | `POST /cards` | `{label, network, last4, expiry_month, expiry_year}`; 201 |
@@ -207,6 +210,41 @@ zero. This is a foundation for the pending report/budget APIs.
 See [design and fixed acceptance examples](../docs/DESIGN.md) and
 [verification evidence](../docs/MILESTONE_06.md).
 
-Budgets, notification dispatch, account recovery and production deployment are future work. A separate runtime database role with restricted audit privileges is also pending. Existing local demo statistics are not yet backed by account purchase reports.
+Notification dispatch, account recovery and production deployment are future work. A separate runtime database role with restricted audit privileges is also pending. Signed-in Statistics now uses account spending and budgets; explicit legacy demo mode retains local statistics.
+
+### Monthly budgets and reports (migration 007)
+
+Run migrations before loading the updated Statistics tab. Migration 007 adds
+owned monthly category budgets, a unique owner/category/month constraint and
+`monthly_category_spending`, a SQL aggregate view over exact signed transactions.
+Reporting uses Asia/Karachi calendar months independently of the server's local
+timezone. Refunds affect their own occurrence month and current category;
+declines contribute zero. Archived cards remain included.
+
+`month` must be `YYYY-MM`, from 2000-01 through 2100-12. Budget `amount` is a
+positive decimal string with exactly two fractional digits and at most twelve
+whole digits. Invalid months/amounts/unknown body fields return 422. Foreign or
+missing categories/cards return 404. Bearer authentication is required.
+
+PUT upserts one limit for the account/category/month. Retrying does not add a
+second budget; simultaneous updates serialize on its unique constraint, with
+the last committed update taking effect. DELETE is idempotent and changes no
+transactions. Limits do not roll over or prevent transaction recording.
+
+The monthly report returns `month`, `timezone`, `currency`, selected `card_id`,
+exact string `spent`, `purchases`, `refunds`, `transaction_count`, `categories`,
+`cards` and `budgets`. Category rows include zero-spend owned categories plus
+Uncategorized (null ID). Card rows include active/archived profiles and their
+totals. Record counts include declines. Monetary values remain strings.
+
+Optional `card_id` filters headline/category totals. **Budgets always compare
+all cards**, identified by `budget_scope=all_cards`. Each budget contains
+`category_id`, `category`, `amount`, `spent`, `remaining`, signed `percent`
+(two decimals, half-up) and `over_budget`. Negative net spending is retained,
+including negative percentages and remaining funds greater than the limit.
+One repeatable-read snapshot keeps each response's components aligned.
+
+See [design examples](../docs/DESIGN.md) and
+[verification evidence](../docs/MILESTONE_07.md).
 
 Implementation references: [FastAPI authentication and password hashing](https://fastapi.tiangolo.com/tutorial/security/oauth2-jwt/) and [Psycopg transaction management](https://www.psycopg.org/psycopg3/docs/basic/transactions.html).

@@ -23,11 +23,13 @@ class AppShell extends ConsumerWidget {
     this.onSignOut,
     this.walletStyle,
     this.securitySettings,
+    this.statisticsScreen,
   });
 
   final String? accountName;
   final Widget? appearanceAction;
   final Widget? securitySettings;
+  final Widget? statisticsScreen;
   final VoidCallback? onAccountCards, onSignOut, onPurchases;
   final WalletStyle? walletStyle;
 
@@ -48,7 +50,7 @@ class AppShell extends ConsumerWidget {
                 onPurchases: onPurchases,
               ),
               CardsScreen(onAccountCards: onAccountCards),
-              const StatisticsScreen(),
+              statisticsScreen ?? const StatisticsScreen(),
               ProfileScreen(
                 onSignOut: onSignOut,
                 showWalletDesign: walletStyle != null,

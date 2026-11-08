@@ -195,6 +195,39 @@ void main() {
         other.csvImport(preview['id'] as String),
         throwsA(isA<ApiException>().having((e) => e.statusCode, 'status', 404)),
       );
+      await importer.saveBudget('2026-11', food['id'] as String, '2000.00');
+      await importer.saveBudget('2026-11', food['id'] as String, '2000.00');
+      final monthly = await importer.monthlyReport('2026-11');
+      expect(monthly['spent'], '3149.00');
+      final budget =
+          (monthly['budgets'] as List).single as Map<String, dynamic>;
+      expect(budget['spent'], '1550.00');
+      expect(budget['remaining'], '450.00');
+      expect(budget['percent'], '77.50');
+      expect(
+        (await importer.monthlyReport(
+          '2026-11',
+          cardId: card['id'] as String,
+        ))['spent'],
+        '1000.00',
+      );
+      await expectLater(
+        other.saveBudget('2026-11', food['id'] as String, '100.00'),
+        throwsA(isA<ApiException>().having((e) => e.statusCode, 'status', 404)),
+      );
+      await importer.saveBudget('2026-11', food['id'] as String, '1500.00');
+      final budgetRestart = SpendTrailApi(baseUrl: liveUrl);
+      addTearDown(budgetRestart.close);
+      await budgetRestart.authenticate(email: email, password: password);
+      final restored =
+          (await budgetRestart.monthlyReport('2026-11'))['budgets'] as List;
+      expect(restored.single['remaining'], '-50.00');
+      expect(restored.single['over_budget'], isTrue);
+      await budgetRestart.removeBudget('2026-11', food['id'] as String);
+      expect(
+        (await budgetRestart.monthlyReport('2026-11'))['budgets'],
+        isEmpty,
+      );
     },
     skip: liveUrl.isEmpty ? 'Set LIVE_API_URL to a dedicated test API.' : false,
   );
