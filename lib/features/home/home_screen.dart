@@ -19,11 +19,13 @@ class HomeScreen extends StatelessWidget {
     this.appearanceAction,
     this.walletStyle,
     this.onPurchases,
+    this.onNotifications,
   });
   final String? accountName;
   final Widget? appearanceAction;
   final WalletStyle? walletStyle;
   final VoidCallback? onPurchases;
+  final VoidCallback? onNotifications;
 
   @override
   Widget build(BuildContext context) {
@@ -36,6 +38,7 @@ class HomeScreen extends StatelessWidget {
         children: [
           FadeSlideIn(
             child: _Header(
+              onNotifications: onNotifications,
               accountName: accountName,
               appearanceAction: appearanceAction,
               walletStyle: walletStyle,
@@ -79,7 +82,13 @@ class HomeScreen extends StatelessWidget {
 }
 
 class _Header extends ConsumerWidget {
-  const _Header({this.accountName, this.appearanceAction, this.walletStyle});
+  const _Header({
+    this.accountName,
+    this.appearanceAction,
+    this.walletStyle,
+    this.onNotifications,
+  });
+  final VoidCallback? onNotifications;
   final String? accountName;
   final Widget? appearanceAction;
   final WalletStyle? walletStyle;
@@ -122,21 +131,23 @@ class _Header extends ConsumerWidget {
         ),
         if (appearanceAction != null) appearanceAction!,
         Pressable(
-          onTap: () => showDialog<void>(
-            context: context,
-            builder: (context) => AlertDialog(
-              title: const Text('Notifications'),
-              content: const Text(
-                'You are all caught up. View your recorded activity in Expenses.',
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('Done'),
+          onTap:
+              onNotifications ??
+              () => showDialog<void>(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: const Text('Notifications'),
+                  content: const Text(
+                    'You are all caught up. View your recorded activity in Expenses.',
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('Done'),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ),
+              ),
           child: Container(
             width: 42,
             height: 42,

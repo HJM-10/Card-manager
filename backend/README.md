@@ -179,6 +179,14 @@ For embedded Python, use `backend/run.py pytest backend/tests -q` instead. The b
 
 ## Remaining scope
 
+The transaction notification APIs and separate retrying FCM worker are
+implemented and verified with actual Firebase acceptance and phone receipt,
+including cold-start transaction opening after fingerprint sign-in. See
+[NOTIFICATIONS.md](../docs/NOTIFICATIONS.md) for the setup, API contract,
+retry/lease behavior and distinct acceptance/receipt evidence. Migration 008
+must be applied before the updated API is started. Worker credentials are kept
+outside the app and repository.
+
 ### Payment simulation (migration 006)
 
 Run the migration command before using the updated API. It preserves existing
@@ -210,7 +218,7 @@ zero. This is a foundation for the pending report/budget APIs.
 See [design and fixed acceptance examples](../docs/DESIGN.md) and
 [verification evidence](../docs/MILESTONE_06.md).
 
-Notification dispatch, account recovery and production deployment are future work. A separate runtime database role with restricted audit privileges is also pending. Signed-in Statistics now uses account spending and budgets; explicit legacy demo mode retains local statistics.
+Account recovery and production deployment are future work. A separate runtime database role with restricted audit privileges is also pending. Signed-in Statistics now uses account spending and budgets; explicit legacy demo mode retains local statistics.
 
 ### Monthly budgets and reports (migration 007)
 

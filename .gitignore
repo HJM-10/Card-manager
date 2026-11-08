@@ -9,6 +9,9 @@ __pycache__/
 .env.*
 !.env.example
 backend/.local/
+android/app/google-services.json
+firebase-config.json
+*-service-account.json
 *.swp
 .DS_Store
 .atom/
@@ -50,3 +53,6 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Generated Firebase server credentials
+*-firebase-adminsdk-*.json

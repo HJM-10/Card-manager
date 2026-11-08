@@ -45,10 +45,10 @@ Weeks are sequential working blocks, not promised calendar dates. Week 4 has the
 
 ## Ordered implementation backlog
 
-Progress as of 8 November 2026: **32 of 47 checklist items complete (68%)**,
-with 15 remaining (32%). This is an item count, not an estimate of effort or
+Progress as of 8 November 2026: **38 of 47 checklist items complete (81%)**,
+with 9 remaining (19%). This is an item count, not an estimate of effort or
 remaining calendar time. See [design and acceptance contracts](DESIGN.md) and
-[budget/report verification](MILESTONE_07.md). Next feature: notifications.
+[budget/report verification](MILESTONE_07.md). Next work: audit-role hardening, then database evaluation and delivery.
 The outstanding runtime audit-role restriction remains a
 database hardening task.
 
@@ -108,12 +108,17 @@ Added prerequisite: optional Android fingerprint login, backed by revocable sess
 
 ### 6. Deliver notifications
 
-- [ ] Add DeviceRegistration and NotificationEvent persistence and device-token lifecycle handling.
-- [ ] Dispatch committed outbox events through Firebase Cloud Messaging with bounded retry/backoff and observable failure states.
-- [ ] Prevent duplicate event creation; use event IDs to suppress repeated client handling.
-- [ ] Request notification permission and handle denial without blocking transaction saving.
-- [ ] Open the associated transaction on notification tap, checking the active user's access.
-- [ ] Test worker interruption/retry and record FCM acceptance separately from observed device receipt.
+The device APIs, retrying worker, permission controls and authorized alert links
+are implemented. Real FCM acceptance, phone receipt and cold-start opening after
+fingerprint sign-in were verified on the Samsung SM-A725F on 8 November 2026.
+See [verification evidence](MILESTONE_08.md) and [Firebase setup](NOTIFICATIONS.md).
+
+- [x] Add DeviceRegistration and NotificationEvent persistence and device-token lifecycle handling.
+- [x] Dispatch committed outbox events through Firebase Cloud Messaging with bounded retry/backoff and observable failure states.
+- [x] Prevent duplicate event creation; use event IDs to suppress repeated client handling.
+- [x] Request notification permission and handle denial without blocking transaction saving.
+- [x] Open the associated transaction on notification tap, checking the active user's access.
+- [x] Test worker interruption/retry and record FCM acceptance separately from observed device receipt.
 
 ### 7. Evaluate and package
 

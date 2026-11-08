@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:my_app/data/settings.dart';
-import 'package:my_app/data/local_store.dart';
-import 'package:my_app/core/theme/wallet_style.dart';
+import 'package:spendtrail/data/settings.dart';
+import 'package:spendtrail/data/local_store.dart';
+import 'package:spendtrail/core/theme/wallet_style.dart';
 
 void main() {
   test(

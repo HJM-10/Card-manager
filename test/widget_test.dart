@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:my_app/core/utils/card_utils.dart';
+import 'package:spendtrail/core/utils/card_utils.dart';
 
 void main() {
   group('card utils', () {

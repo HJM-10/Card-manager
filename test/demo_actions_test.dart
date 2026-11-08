@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:my_app/data/providers.dart';
-import 'package:my_app/features/actions/demo_action_screen.dart';
+import 'package:spendtrail/data/providers.dart';
+import 'package:spendtrail/features/actions/demo_action_screen.dart';
 
 void main() {
   for (final action in ['Send', 'Request', 'TopUp']) {

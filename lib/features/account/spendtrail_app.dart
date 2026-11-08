@@ -1,35 +1,125 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme/app_theme.dart';
+import '../../core/theme/wallet_style.dart';
 import '../../data/providers.dart';
 import '../../data/settings.dart';
 import '../../data/spendtrail_api.dart';
 import '../../data/biometric_vault.dart';
+import '../../data/transaction_notifications.dart';
 import '../shell/app_shell.dart';
 import '../splash/splash_screen.dart';
 import 'purchases_screen.dart';
 import 'biometric_settings.dart';
 import 'monthly_budget_screen.dart';
+import 'notification_settings.dart';
 
 class SpendTrailApp extends ConsumerStatefulWidget {
-  const SpendTrailApp({super.key, this.api, this.biometricVault});
+  const SpendTrailApp({
+    super.key,
+    this.api,
+    this.biometricVault,
+    this.alertGateway,
+  });
   final SpendTrailApi? api;
   final BiometricVault? biometricVault;
+  final AlertGateway? alertGateway;
 
   @override
   ConsumerState<SpendTrailApp> createState() => _SpendTrailAppState();
 }
 
-class _SpendTrailAppState extends ConsumerState<SpendTrailApp> {
+class _SpendTrailAppState extends ConsumerState<SpendTrailApp>
+    with WidgetsBindingObserver {
   late final api = widget.api ?? SpendTrailApi();
   late final vault = widget.biometricVault ?? AndroidBiometricVault();
   Map<String, dynamic>? user;
   bool showingSplash = true;
   bool signingOut = false;
+  final navigatorKey = GlobalKey<NavigatorState>();
+  late final TransactionNotifications alerts;
+  final List<StreamSubscription<TransactionAlert>> alertSubscriptions = [];
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    alerts = TransactionNotifications(
+      api: api,
+      gateway: widget.alertGateway ?? FirebaseAlertGateway(),
+      onExpired: expireAlertSession,
+    );
+    alertSubscriptions.add(
+      alerts.opens.listen((alert) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted || user?['id'] != alert.userId) return;
+          navigatorKey.currentState?.push(
+            MaterialPageRoute<void>(
+              builder: (_) => PurchaseDetailScreen(
+                api: api,
+                id: alert.transactionId,
+                onExpired: expireAlertSession,
+              ),
+            ),
+          );
+        });
+        WidgetsBinding.instance.scheduleFrame();
+      }),
+    );
+    alertSubscriptions.add(
+      alerts.banners.listen((alert) {
+        final context = navigatorKey.currentContext;
+        if (!mounted ||
+            context == null ||
+            !context.mounted ||
+            user?['id'] != alert.userId) {
+          return;
+        }
+        ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+          SnackBar(
+            content: const Text('New account activity'),
+            action: SnackBarAction(
+              label: 'View',
+              onPressed: () => alerts.open(alert),
+            ),
+          ),
+        );
+      }),
+    );
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && alerts.enabled && user != null) {
+      unawaited(alerts.synchronize());
+    }
+  }
+
+  void expireAlertSession() {
+    final context = navigatorKey.currentContext;
+    if (mounted && context != null && user != null) finishSignOut(context);
+  }
+
+  void authenticated(Map<String, dynamic> value) {
+    setState(() => user = value);
+    unawaited(alerts.setUser(value['id'] as String?));
+  }
+
+  void openAlerts(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) =>
+            NotificationHistoryScreen(api: api, onExpired: expireAlertSession),
+      ),
+    );
+  }
 
   void finishSignOut(BuildContext context) {
+    unawaited(alerts.setUser(null));
     Navigator.of(context).popUntil((route) => route.isFirst);
     ref.read(tabProvider.notifier).select(0);
     setState(() => user = null);
@@ -104,6 +194,11 @@ class _SpendTrailAppState extends ConsumerState<SpendTrailApp> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    for (final subscription in alertSubscriptions) {
+      unawaited(subscription.cancel());
+    }
+    alerts.dispose();
     if (widget.api == null) api.close();
     super.dispose();
   }
@@ -114,14 +209,11 @@ class _SpendTrailAppState extends ConsumerState<SpendTrailApp> {
     final settings = ref.watch(settingsProvider);
     final style = settings.walletStyle;
     return MaterialApp(
+      navigatorKey: navigatorKey,
       title: 'SpendTrail',
       debugShowCheckedModeBanner: false,
-      theme: account == null
-          ? AppTheme.light()
-          : AppTheme.wallet(style, Brightness.light),
-      darkTheme: account == null
-          ? AppTheme.dark()
-          : AppTheme.wallet(style, Brightness.dark),
+      theme: AppTheme.wallet(style, Brightness.light),
+      darkTheme: AppTheme.wallet(style, Brightness.dark),
       themeMode: settings.themeMode,
       home: showingSplash
           ? SplashScreen(
@@ -131,10 +223,12 @@ class _SpendTrailAppState extends ConsumerState<SpendTrailApp> {
           ? _SignIn(
               api: api,
               vault: vault,
-              onAuthenticated: (value) => setState(() => user = value),
+              walletStyle: style,
+              onAuthenticated: authenticated,
             )
           : Builder(
               builder: (context) => AppShell(
+                onNotifications: () => openAlerts(context),
                 statisticsScreen: MonthlyBudgetScreen(
                   key: ValueKey(account['id'] ?? account['name']),
                   api: api,
@@ -146,13 +240,22 @@ class _SpendTrailAppState extends ConsumerState<SpendTrailApp> {
                 walletStyle: style,
                 accountName: account['name'] as String,
                 appearanceAction: const _AppearanceMenu(),
-                securitySettings: BiometricSettings(
-                  api: api,
-                  vault: vault,
-                  onLock: () => lock(context),
-                  onExpired: () {
-                    if (context.mounted) finishSignOut(context);
-                  },
+                securitySettings: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    BiometricSettings(
+                      api: api,
+                      vault: vault,
+                      onLock: () => lock(context),
+                      onExpired: () {
+                        if (context.mounted) finishSignOut(context);
+                      },
+                    ),
+                    NotificationSettings(
+                      alerts: alerts,
+                      onHistory: () => openAlerts(context),
+                    ),
+                  ],
                 ),
                 onAccountCards: () => openAccountCards(context, account),
                 onPurchases: () => Navigator.of(context).push(
@@ -230,6 +333,7 @@ class _AppearanceMenuState extends ConsumerState<_AppearanceMenu> {
 
 class _SignIn extends StatefulWidget {
   const _SignIn({
+    required this.walletStyle,
     required this.api,
     required this.vault,
     required this.onAuthenticated,
@@ -237,6 +341,7 @@ class _SignIn extends StatefulWidget {
   final SpendTrailApi api;
   final BiometricVault vault;
   final ValueChanged<Map<String, dynamic>> onAuthenticated;
+  final WalletStyle walletStyle;
   @override
   State<_SignIn> createState() => _SignInState();
 }
@@ -338,17 +443,11 @@ class _SignInState extends State<_SignIn> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final light = theme.brightness == Brightness.light;
-    final colors = ColorScheme.fromSeed(
-      seedColor: const Color(0xFF2269CD),
-      brightness: theme.brightness,
-    );
-    final action = light ? const Color(0xFF2269CD) : const Color(0xFFABCFFF);
-    final fieldFill = light
-        ? const Color(0xFFF1F2F6)
-        : colors.surfaceContainerHighest;
+    final colors = theme.colorScheme;
+    final action = colors.primary;
+    final fieldFill = colors.surfaceContainerHighest;
     return Scaffold(
-      backgroundColor: const Color(0xFF10131D),
+      backgroundColor: widget.walletStyle.dockColor,
       body: SafeArea(
         bottom: false,
         child: Center(
@@ -365,6 +464,7 @@ class _SignInState extends State<_SignIn> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       _LoginHeader(
+                        walletStyle: widget.walletStyle,
                         registering: registering,
                         minHeight: headerHeight,
                       ),
@@ -376,9 +476,13 @@ class _SignInState extends State<_SignIn> {
                           ),
                         ),
                         decoration: BoxDecoration(
-                          color: light ? Colors.white : colors.surface,
-                          borderRadius: const BorderRadius.vertical(
-                            top: Radius.circular(28),
+                          color: colors.surface,
+                          borderRadius: BorderRadius.vertical(
+                            top: Radius.circular(switch (widget.walletStyle) {
+                              WalletStyle.classic => 28,
+                              WalletStyle.cobaltFold => 18,
+                              WalletStyle.figCarousel => 36,
+                            }),
                           ),
                         ),
                         child: SafeArea(
@@ -430,8 +534,8 @@ class _SignInState extends State<_SignIn> {
           showSelectedIcon: false,
           style: SegmentedButton.styleFrom(
             backgroundColor: fieldFill,
-            selectedBackgroundColor: colors.inverseSurface,
-            selectedForegroundColor: colors.onInverseSurface,
+            selectedBackgroundColor: colors.primaryContainer,
+            selectedForegroundColor: colors.onPrimaryContainer,
             side: BorderSide.none,
           ),
         ),
@@ -507,9 +611,7 @@ class _SignInState extends State<_SignIn> {
           onPressed: busy ? null : submit,
           style: FilledButton.styleFrom(
             backgroundColor: action,
-            foregroundColor: colors.brightness == Brightness.light
-                ? Colors.white
-                : const Color(0xFF102735),
+            foregroundColor: colors.onPrimary,
             minimumSize: const Size.fromHeight(48),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(14),
@@ -549,44 +651,67 @@ class _SignInState extends State<_SignIn> {
 }
 
 class _LoginHeader extends StatelessWidget {
-  const _LoginHeader({required this.registering, required this.minHeight});
+  const _LoginHeader({
+    required this.registering,
+    required this.minHeight,
+    required this.walletStyle,
+  });
 
   final bool registering;
   final double minHeight;
+  final WalletStyle walletStyle;
 
   @override
   Widget build(BuildContext context) => Stack(
     children: [
       Container(
         constraints: BoxConstraints(minHeight: minHeight),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Color.lerp(walletStyle.dockColor, Colors.black, .28)!,
+              walletStyle.dockColor,
+            ],
+          ),
+        ),
         alignment: Alignment.center,
         padding: const EdgeInsets.fromLTRB(24, 16, 24, 20),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
+            Text(
               'SpendTrail',
               style: TextStyle(
-                color: Color(0xFFBBD6FF),
+                fontFamily: walletStyle.displayFont,
+                color: Color.lerp(walletStyle.accent, Colors.white, .72),
                 fontSize: 14,
                 fontWeight: FontWeight.w800,
                 letterSpacing: 1.3,
               ),
             ),
             const SizedBox(height: 4),
-            Image.asset(
-              'assets/images/login_wallet_hero.png',
-              height: (minHeight * .46).clamp(64.0, 134.0),
-              width: 280,
-              fit: BoxFit.contain,
-              excludeFromSemantics: true,
-              filterQuality: FilterQuality.medium,
+            ColorFiltered(
+              colorFilter: ColorFilter.mode(
+                walletStyle.accent.withValues(alpha: .3),
+                BlendMode.srcATop,
+              ),
+              child: Image.asset(
+                'assets/images/login_wallet_hero.png',
+                height: (minHeight * .46).clamp(64.0, 134.0),
+                width: 280,
+                fit: BoxFit.contain,
+                excludeFromSemantics: true,
+                filterQuality: FilterQuality.medium,
+              ),
             ),
             const SizedBox(height: 6),
             Text(
               registering ? 'Create your account.' : 'Welcome back.',
               textAlign: TextAlign.center,
-              style: const TextStyle(
+              style: TextStyle(
+                fontFamily: walletStyle.displayFont,
                 color: Colors.white,
                 fontSize: 32,
                 fontWeight: FontWeight.w700,
@@ -597,7 +722,7 @@ class _LoginHeader extends StatelessWidget {
             const Text(
               'Your cards. Your spending. One clear picture.',
               textAlign: TextAlign.center,
-              style: TextStyle(color: Color(0xFFC2CAD8), fontSize: 13),
+              style: TextStyle(color: Colors.white70, fontSize: 13),
             ),
           ],
         ),

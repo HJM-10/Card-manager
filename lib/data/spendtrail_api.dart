@@ -106,6 +106,33 @@ class SpendTrailApi {
       await _request('POST', '/categories', {'name': name.trim()})
           as Map<String, dynamic>;
 
+  Future<void> registerDevice(String id, String token) async {
+    await _request('PUT', '/devices/${Uri.encodeComponent(id)}', {
+      'token': token,
+      'platform': 'android',
+    });
+  }
+
+  Future<void> disableDevice(String id) async {
+    await _request('DELETE', '/devices/${Uri.encodeComponent(id)}');
+  }
+
+  Future<List<Map<String, dynamic>>> notifications({int offset = 0}) async =>
+      (await _request('GET', '/notifications?limit=25&offset=$offset') as List)
+          .cast<Map<String, dynamic>>();
+
+  Future<Map<String, dynamic>> notification(String id) async =>
+      await _request('GET', '/notifications/${Uri.encodeComponent(id)}')
+          as Map<String, dynamic>;
+
+  Future<void> observeNotification(String id, String action) async {
+    await _request(
+      'POST',
+      '/notifications/${Uri.encodeComponent(id)}/observations',
+      {'action': action},
+    );
+  }
+
   Future<Map<String, dynamic>> monthlyReport(
     String month, {
     String? cardId,

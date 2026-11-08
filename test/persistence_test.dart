@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:my_app/data/local_store.dart';
-import 'package:my_app/data/providers.dart';
+import 'package:spendtrail/data/local_store.dart';
+import 'package:spendtrail/data/providers.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

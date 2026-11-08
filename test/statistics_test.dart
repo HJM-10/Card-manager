@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:my_app/data/models.dart';
-import 'package:my_app/data/statistics.dart';
+import 'package:spendtrail/data/models.dart';
+import 'package:spendtrail/data/statistics.dart';
 
 void main() {
   test('statistics group spending and cross year boundaries', () {

@@ -5,12 +5,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
-import 'package:my_app/data/local_store.dart';
-import 'package:my_app/core/theme/wallet_style.dart';
-import 'package:my_app/data/providers.dart';
-import 'package:my_app/data/settings.dart';
-import 'package:my_app/data/spendtrail_api.dart';
-import 'package:my_app/features/account/spendtrail_app.dart';
+import 'package:spendtrail/data/local_store.dart';
+import 'package:spendtrail/core/theme/wallet_style.dart';
+import 'package:spendtrail/data/providers.dart';
+import 'package:spendtrail/data/settings.dart';
+import 'package:spendtrail/data/spendtrail_api.dart';
+import 'package:spendtrail/features/account/spendtrail_app.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -129,6 +129,20 @@ void main() {
     expect(find.text('Daily spending'), findsOneWidget);
     await tester.tap(find.text('Sign out'));
     await tester.pumpAndSettle();
+    // The saved wallet design must survive the transition back to sign-in.
+    final signInTheme = Theme.of(tester.element(find.text('Welcome back.')));
+    expect(
+      signInTheme.textTheme.bodyMedium!.fontFamily,
+      WalletStyle.figCarousel.bodyFont,
+    );
+    expect(
+      signInTheme.colorScheme.primary,
+      tester
+          .widget<MaterialApp>(find.byType(MaterialApp))
+          .darkTheme!
+          .colorScheme
+          .primary,
+    );
     await tester.enterText(
       find.byType(TextFormField).at(0),
       'alice@example.com',

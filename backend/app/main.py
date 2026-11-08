@@ -16,6 +16,7 @@ from .db import connect
 from .purchases import PurchaseInput, SimulationInput, RefundInput, TransactionRecord, TRANSACTION_SELECT, require_category, save_purchase, save_refund
 from .csv_imports import CsvPreviewInput, CsvConfirmation, preview_import, confirm_import, public_batch
 from .budgets import BudgetInput, reporting_month, save_budget, monthly_report
+from .notifications import DeviceInput, ObservationInput, register_device, cancel_devices, EVENT_SELECT
 
 app = FastAPI(title='SpendTrail API', version='0.1.0')
 app.add_middleware(
@@ -161,7 +162,10 @@ def logout(user=Depends(current_session)):
             return
         if current['biometric_session_id'] is not None:
             db.execute('UPDATE biometric_sessions SET revoked = true WHERE user_id = %s AND id = %s', (user['id'], current['biometric_session_id']))
+            hashes = [row['token_hash'] for row in db.execute('SELECT token_hash FROM sessions WHERE biometric_session_id = %s', (current['biometric_session_id'],)).fetchall()]
+            cancel_devices(db, user['id'], session_hashes=hashes)
         else:
+            cancel_devices(db, user['id'], session_hashes=[user['token_hash']])
             db.execute('DELETE FROM sessions WHERE token_hash = %s', (user['token_hash'],))
 
 
@@ -169,6 +173,8 @@ def logout(user=Depends(current_session)):
 def lock_access(user=Depends(current_session)):
     # Lock this app instance without revoking its biometric credential.
     with connect() as db:
+        db.execute('SELECT token_hash FROM sessions WHERE token_hash = %s FOR UPDATE', (user['token_hash'],))
+        cancel_devices(db, user['id'], session_hashes=[user['token_hash']])
         db.execute('DELETE FROM sessions WHERE token_hash = %s', (user['token_hash'],))
 
 
@@ -180,6 +186,8 @@ def detach_biometric(db, user):
         active = db.execute('SELECT id FROM biometric_sessions WHERE id = %s AND NOT revoked AND expires_at > now() FOR UPDATE', (current['biometric_session_id'],)).fetchone()
         if active is None:
             raise HTTPException(401, 'Please sign in again')
+        revoked_hashes = [row['token_hash'] for row in db.execute('SELECT token_hash FROM sessions WHERE biometric_session_id = %s AND token_hash <> %s', (current['biometric_session_id'], user['token_hash'])).fetchall()]
+        cancel_devices(db, user['id'], session_hashes=revoked_hashes)
     db.execute('UPDATE sessions SET biometric_session_id = NULL WHERE token_hash = %s', (user['token_hash'],))
     if current['biometric_session_id'] is not None:
         db.execute('UPDATE biometric_sessions SET revoked = true WHERE user_id = %s AND id = %s', (user['id'], current['biometric_session_id']))
@@ -277,6 +285,55 @@ def create_category(body: CategoryInput, user=Depends(current_session)):
             return db.execute('INSERT INTO categories (id, user_id, name) VALUES (%s, %s, %s) RETURNING id, name', (uuid4(), user['id'], body.name)).fetchone()
     except UniqueViolation:
         raise HTTPException(409, 'A category with this name already exists') from None
+
+
+@app.put('/devices/{device_id}')
+def put_device(device_id: UUID, body: DeviceInput, user=Depends(current_session)):
+    with connect() as db:
+        return register_device(db, user, device_id, body)
+
+
+@app.get('/devices/{device_id}')
+def get_device(device_id: UUID, user=Depends(current_session)):
+    with connect() as db:
+        device = db.execute('SELECT id, enabled, platform FROM device_registrations WHERE id = %s AND user_id = %s', (device_id, user['id'])).fetchone()
+    if device is None:
+        raise HTTPException(404, 'Device not found')
+    return device
+
+
+@app.delete('/devices/{device_id}', status_code=204)
+def remove_device(device_id: UUID, user=Depends(current_session)):
+    with connect() as db:
+        if not db.execute('SELECT id FROM device_registrations WHERE id = %s AND user_id = %s', (device_id, user['id'])).fetchone():
+            raise HTTPException(404, 'Device not found')
+        cancel_devices(db, user['id'], device_id=device_id)
+
+
+@app.get('/notifications')
+def list_notifications(limit: Annotated[int, Query(ge=1, le=100)] = 25,
+                       offset: Annotated[int, Query(ge=0, le=2_147_483_647)] = 0,
+                       user=Depends(current_session)):
+    with connect() as db:
+        return db.execute(EVENT_SELECT + ' WHERE user_id = %s ORDER BY created_at DESC, id DESC LIMIT %s OFFSET %s', (user['id'], limit, offset)).fetchall()
+
+
+@app.get('/notifications/{event_id}')
+def get_notification(event_id: UUID, user=Depends(current_session)):
+    with connect() as db:
+        event = db.execute(EVENT_SELECT + ' WHERE user_id = %s AND id = %s', (user['id'], event_id)).fetchone()
+    if event is None:
+        raise HTTPException(404, 'Notification not found')
+    return event
+
+
+@app.post('/notifications/{event_id}/observations', status_code=204)
+def observe_notification(event_id: UUID, body: ObservationInput, user=Depends(current_session)):
+    column = 'opened_at' if body.action == 'opened' else 'received_at'
+    with connect() as db:
+        row = db.execute(f'UPDATE notification_events SET {column} = COALESCE({column}, now()), received_at = COALESCE(received_at, now()) WHERE user_id = %s AND id = %s RETURNING id' if column == 'opened_at' else 'UPDATE notification_events SET received_at = COALESCE(received_at, now()) WHERE user_id = %s AND id = %s RETURNING id', (user['id'], event_id)).fetchone()
+        if row is None:
+            raise HTTPException(404, 'Notification not found')
 
 
 @app.get('/reports/monthly')

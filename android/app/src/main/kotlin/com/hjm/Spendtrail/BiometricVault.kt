@@ -1,4 +1,4 @@
-package com.example.my_app
+package com.hjm.Spendtrail
 
 import android.os.Build
 import android.security.keystore.KeyGenParameterSpec

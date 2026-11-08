@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
-import 'package:my_app/data/spendtrail_api.dart';
-import 'package:my_app/features/account/purchases_screen.dart';
-import 'package:my_app/features/account/purchase_filters.dart';
+import 'package:spendtrail/data/spendtrail_api.dart';
+import 'package:spendtrail/features/account/purchases_screen.dart';
+import 'package:spendtrail/features/account/purchase_filters.dart';
 
 const card = {'id': 'card-1', 'label': 'Daily', 'last4': '4242'};
 Map<String, dynamic> purchase(String id) => {

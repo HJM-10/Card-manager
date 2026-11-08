@@ -6,3 +6,4 @@ email-validator==2.2.0
 python-dotenv==1.1.0
 httpx==0.28.1
 pytest==8.3.5
+google-auth[requests]==2.62.1

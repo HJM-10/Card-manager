@@ -1,5 +1,8 @@
 # SpendTrail
 
+Project folder: Spendtrail. Flutter package: spendtrail. Android application
+ID: com.hjm.Spendtrail, matching the registered Firebase Android app.
+
 See the [project roadmap](docs/ROADMAP.md) for the six-week build plan, ordered backlog and acceptance criteria.
 
 **Default launch:** the animated SpendTrail splash, sign-in or registration, then the original wallet layout. Open **Cards → Account card profiles** to manage server-backed fictional cards. See the [backend setup and API guide](backend/README.md) to run the API. Use `--dart-define=LEGACY_DEMO=true` for a local-only review of the wallet.
@@ -15,6 +18,13 @@ Choose a saved category when recording a purchase, or open its details and tap *
 **Fingerprint login (Android):** sign in with your password, then enable **Profile → Fingerprint login** and complete the phone's biometric prompt. **Lock app**, or restart the app, then choose **Sign in with fingerprint**. Saved login is valid for up to 30 days and requires the backend connection. Sign out or turn the setting off to revoke it. Password login remains available and clears the previous saved fingerprint setup; enable it again afterward if wanted. The setting uses Android Keystore and strong biometrics, with no saved password or fingerprint data. See [verification and behavior](docs/MILESTONE_04.md).
 
 ## Features
+
+**Transaction alerts:** notification delivery is being connected to Firebase.
+The implementation includes **Profile → Transaction alerts**, owned alert
+history from the Home bell, permission handling, generic foreground banners and
+authenticated transaction links. Builds without Firebase configuration keep
+purchases usable and show that alerts are not connected. See
+[setup and behavior](docs/NOTIFICATIONS.md) and [verification status](docs/MILESTONE_08.md).
 
 **Monthly budgeting:** after signing in, open **Statistics → Set category
 budget**. Choose a month and category, enter a PKR limit, then review spending,
@@ -43,7 +53,7 @@ See [verification](docs/MILESTONE_06.md) and [design contracts](docs/DESIGN.md).
 - **Saved wallet:** card display details and ordering survive restarts. View details, choose a default card, or remove cards.
 - **Expenses & activity:** add, edit, delete, search and filter records by category or card. Dates and exact cents are saved locally.
 - **Statistics:** signed-in monthly account totals, card/category breakdowns and category budgets. Legacy demo mode retains local statistics and its six-month trend.
-- **Theme:** choose SpendTrail Classic, Cobalt Fold or Fig Carousel under **Profile → Theme**, then save. Classic is the default. **Appearance** offers System, Light and Dark independently. The app saves both choices on the device. All demo amounts use PKR.
+- **Theme:** choose SpendTrail Classic, Cobalt Fold or Fig Carousel under **Profile → Theme**, then save. Classic is the default. **Appearance** offers System, Light and Dark independently. The app saves both choices on the device. Login and registration use the selected design too, including after sign-out, lock and restart. All demo amounts use PKR.
 - **Demo actions:** Send, Request and TopUp have review and confirmation screens. Expenses and demo sends reduce the demo balance; top-ups increase it. Requests remain pending. Editing/deleting activity recalculates balances.
 - **Offline fonts:** Plus Jakarta Sans, DM Sans, Space Grotesk, Inter and Outfit are bundled with their OFL licenses.
 

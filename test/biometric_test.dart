@@ -6,10 +6,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
-import 'package:my_app/data/biometric_vault.dart';
-import 'package:my_app/data/providers.dart';
-import 'package:my_app/data/spendtrail_api.dart';
-import 'package:my_app/features/account/spendtrail_app.dart';
+import 'package:spendtrail/data/biometric_vault.dart';
+import 'package:spendtrail/data/providers.dart';
+import 'package:spendtrail/data/spendtrail_api.dart';
+import 'package:spendtrail/features/account/spendtrail_app.dart';
 
 class FakeVault implements BiometricVault {
   bool available = true, saved = false;

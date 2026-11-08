@@ -64,7 +64,7 @@ class _PurchasesScreenState extends State<PurchasesScreen> {
   Future<void> detail(Map<String, dynamic> record) async {
     await Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (_) => _PurchaseDetail(
+        builder: (_) => PurchaseDetailScreen(
           api: widget.api,
           id: record['id'] as String,
           onExpired: widget.onExpired,
@@ -643,8 +643,9 @@ class _PurchaseEditorState extends State<_PurchaseEditor> {
   }
 }
 
-class _PurchaseDetail extends StatefulWidget {
-  const _PurchaseDetail({
+class PurchaseDetailScreen extends StatefulWidget {
+  const PurchaseDetailScreen({
+    super.key,
     required this.api,
     required this.id,
     required this.onExpired,
@@ -653,10 +654,10 @@ class _PurchaseDetail extends StatefulWidget {
   final String id;
   final VoidCallback onExpired;
   @override
-  State<_PurchaseDetail> createState() => _PurchaseDetailState();
+  State<PurchaseDetailScreen> createState() => _PurchaseDetailState();
 }
 
-class _PurchaseDetailState extends State<_PurchaseDetail> {
+class _PurchaseDetailState extends State<PurchaseDetailScreen> {
   Map<String, dynamic>? record;
   String? error;
   bool loading = true;
@@ -744,7 +745,7 @@ class _PurchaseDetailState extends State<_PurchaseDetail> {
             TextButton(
               onPressed: () => Navigator.of(context).push(
                 MaterialPageRoute<void>(
-                  builder: (_) => _PurchaseDetail(
+                  builder: (_) => PurchaseDetailScreen(
                     api: widget.api,
                     id: record!['original_purchase_id'] as String,
                     onExpired: widget.onExpired,

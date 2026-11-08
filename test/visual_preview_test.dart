@@ -5,10 +5,10 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:my_app/core/theme/app_theme.dart';
-import 'package:my_app/data/models.dart';
-import 'package:my_app/data/providers.dart';
-import 'package:my_app/features/shell/app_shell.dart';
+import 'package:spendtrail/core/theme/app_theme.dart';
+import 'package:spendtrail/data/models.dart';
+import 'package:spendtrail/data/providers.dart';
+import 'package:spendtrail/features/shell/app_shell.dart';
 
 /// Regenerates local review images; these are outputs, not golden baselines.
 void main() {

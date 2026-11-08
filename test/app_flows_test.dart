@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:my_app/main.dart';
-import 'package:my_app/core/theme/app_theme.dart';
-import 'package:my_app/core/theme/wallet_style.dart';
-import 'package:my_app/data/providers.dart';
-import 'package:my_app/data/settings.dart';
-import 'package:my_app/features/shell/app_shell.dart';
-import 'package:my_app/features/add_card/add_card_sheet.dart';
+import 'package:spendtrail/main.dart';
+import 'package:spendtrail/core/theme/app_theme.dart';
+import 'package:spendtrail/core/theme/wallet_style.dart';
+import 'package:spendtrail/data/providers.dart';
+import 'package:spendtrail/data/settings.dart';
+import 'package:spendtrail/features/shell/app_shell.dart';
+import 'package:spendtrail/features/add_card/add_card_sheet.dart';
 
 void main() {
   testWidgets('splash reaches home, then add card completes', (tester) async {

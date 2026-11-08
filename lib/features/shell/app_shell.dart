@@ -24,6 +24,7 @@ class AppShell extends ConsumerWidget {
     this.walletStyle,
     this.securitySettings,
     this.statisticsScreen,
+    this.onNotifications,
   });
 
   final String? accountName;
@@ -31,6 +32,7 @@ class AppShell extends ConsumerWidget {
   final Widget? securitySettings;
   final Widget? statisticsScreen;
   final VoidCallback? onAccountCards, onSignOut, onPurchases;
+  final VoidCallback? onNotifications;
   final WalletStyle? walletStyle;
 
   @override
@@ -44,6 +46,7 @@ class AppShell extends ConsumerWidget {
             index: tab,
             children: [
               HomeScreen(
+                onNotifications: onNotifications,
                 walletStyle: walletStyle,
                 accountName: accountName,
                 appearanceAction: appearanceAction,

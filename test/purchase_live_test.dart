@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:my_app/data/spendtrail_api.dart';
+import 'package:spendtrail/data/spendtrail_api.dart';
 
 // Opt in against a dedicated test API: creates synthetic accounts and records.
 const liveUrl = String.fromEnvironment('LIVE_API_URL');
@@ -228,6 +228,16 @@ void main() {
         (await budgetRestart.monthlyReport('2026-11'))['budgets'],
         isEmpty,
       );
+      const alertDevice = 'f9751543-b4cb-427c-9336-8a0d32193005';
+      const alertToken = 'synthetic-token-for-real-http-client-check';
+      await budgetRestart.registerDevice(alertDevice, alertToken);
+      await budgetRestart.registerDevice(alertDevice, '$alertToken-rotated');
+      expect(await budgetRestart.notifications(), isEmpty);
+      await expectLater(
+        other.registerDevice(alertDevice, alertToken),
+        throwsA(isA<ApiException>().having((e) => e.statusCode, 'status', 404)),
+      );
+      await budgetRestart.disableDevice(alertDevice);
     },
     skip: liveUrl.isEmpty ? 'Set LIVE_API_URL to a dedicated test API.' : false,
   );
