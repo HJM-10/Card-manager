@@ -212,8 +212,12 @@ class _SpendTrailAppState extends ConsumerState<SpendTrailApp>
       navigatorKey: navigatorKey,
       title: 'SpendTrail',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.wallet(style, Brightness.light),
-      darkTheme: AppTheme.wallet(style, Brightness.dark),
+      theme: account == null
+          ? AppTheme.light()
+          : AppTheme.wallet(style, Brightness.light),
+      darkTheme: account == null
+          ? AppTheme.dark()
+          : AppTheme.wallet(style, Brightness.dark),
       themeMode: settings.themeMode,
       home: showingSplash
           ? SplashScreen(
@@ -442,12 +446,15 @@ class _SignInState extends State<_SignIn> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final theme = AppTheme.wallet(
+      widget.walletStyle,
+      Theme.of(context).brightness,
+    );
     final colors = theme.colorScheme;
     final action = colors.primary;
     final fieldFill = colors.surfaceContainerHighest;
     return Scaffold(
-      backgroundColor: widget.walletStyle.dockColor,
+      backgroundColor: const Color(0xFF10131D),
       body: SafeArea(
         bottom: false,
         child: Center(
@@ -464,7 +471,6 @@ class _SignInState extends State<_SignIn> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       _LoginHeader(
-                        walletStyle: widget.walletStyle,
                         registering: registering,
                         minHeight: headerHeight,
                       ),
@@ -477,12 +483,8 @@ class _SignInState extends State<_SignIn> {
                         ),
                         decoration: BoxDecoration(
                           color: colors.surface,
-                          borderRadius: BorderRadius.vertical(
-                            top: Radius.circular(switch (widget.walletStyle) {
-                              WalletStyle.classic => 28,
-                              WalletStyle.cobaltFold => 18,
-                              WalletStyle.figCarousel => 36,
-                            }),
+                          borderRadius: const BorderRadius.vertical(
+                            top: Radius.circular(28),
                           ),
                         ),
                         child: SafeArea(
@@ -651,67 +653,44 @@ class _SignInState extends State<_SignIn> {
 }
 
 class _LoginHeader extends StatelessWidget {
-  const _LoginHeader({
-    required this.registering,
-    required this.minHeight,
-    required this.walletStyle,
-  });
+  const _LoginHeader({required this.registering, required this.minHeight});
 
   final bool registering;
   final double minHeight;
-  final WalletStyle walletStyle;
 
   @override
   Widget build(BuildContext context) => Stack(
     children: [
       Container(
         constraints: BoxConstraints(minHeight: minHeight),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Color.lerp(walletStyle.dockColor, Colors.black, .28)!,
-              walletStyle.dockColor,
-            ],
-          ),
-        ),
         alignment: Alignment.center,
         padding: const EdgeInsets.fromLTRB(24, 16, 24, 20),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
+            const Text(
               'SpendTrail',
               style: TextStyle(
-                fontFamily: walletStyle.displayFont,
-                color: Color.lerp(walletStyle.accent, Colors.white, .72),
+                color: Color(0xFFBBD6FF),
                 fontSize: 14,
                 fontWeight: FontWeight.w800,
                 letterSpacing: 1.3,
               ),
             ),
             const SizedBox(height: 4),
-            ColorFiltered(
-              colorFilter: ColorFilter.mode(
-                walletStyle.accent.withValues(alpha: .3),
-                BlendMode.srcATop,
-              ),
-              child: Image.asset(
-                'assets/images/login_wallet_hero.png',
-                height: (minHeight * .46).clamp(64.0, 134.0),
-                width: 280,
-                fit: BoxFit.contain,
-                excludeFromSemantics: true,
-                filterQuality: FilterQuality.medium,
-              ),
+            Image.asset(
+              'assets/images/login_wallet_hero.png',
+              height: (minHeight * .46).clamp(64.0, 134.0),
+              width: 280,
+              fit: BoxFit.contain,
+              excludeFromSemantics: true,
+              filterQuality: FilterQuality.medium,
             ),
             const SizedBox(height: 6),
             Text(
               registering ? 'Create your account.' : 'Welcome back.',
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontFamily: walletStyle.displayFont,
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 32,
                 fontWeight: FontWeight.w700,
@@ -722,7 +701,7 @@ class _LoginHeader extends StatelessWidget {
             const Text(
               'Your cards. Your spending. One clear picture.',
               textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.white70, fontSize: 13),
+              style: TextStyle(color: Color(0xFFC2CAD8), fontSize: 13),
             ),
           ],
         ),

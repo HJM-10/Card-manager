@@ -53,7 +53,7 @@ See [verification](docs/MILESTONE_06.md) and [design contracts](docs/DESIGN.md).
 - **Saved wallet:** card display details and ordering survive restarts. View details, choose a default card, or remove cards.
 - **Expenses & activity:** add, edit, delete, search and filter records by category or card. Dates and exact cents are saved locally.
 - **Statistics:** signed-in monthly account totals, card/category breakdowns and category budgets. Legacy demo mode retains local statistics and its six-month trend.
-- **Theme:** choose SpendTrail Classic, Cobalt Fold or Fig Carousel under **Profile → Theme**, then save. Classic is the default. **Appearance** offers System, Light and Dark independently. The app saves both choices on the device. Login and registration use the selected design too, including after sign-out, lock and restart. All demo amounts use PKR.
+- **Theme:** choose SpendTrail Classic, Cobalt Fold or Fig Carousel under **Profile → Theme**, then save. Classic is the default. **Appearance** offers System, Light and Dark independently. The app saves both choices on the device. The bottom login and registration panel follows the selected design after sign-out, lock and restart; the original dark header and illustration remain fixed. All demo amounts use PKR.
 - **Demo actions:** Send, Request and TopUp have review and confirmation screens. Expenses and demo sends reduce the demo balance; top-ups increase it. Requests remain pending. Editing/deleting activity recalculates balances.
 - **Offline fonts:** Plus Jakarta Sans, DM Sans, Space Grotesk, Inter and Outfit are bundled with their OFL licenses.
 
