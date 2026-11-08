@@ -59,7 +59,13 @@ class HomeScreen extends StatelessWidget {
           const SizedBox(height: 14),
           FadeSlideIn(
             delay: Duration(milliseconds: 180),
-            child: _QuickActions(walletStyle: walletStyle),
+            child: onPurchases == null
+                ? _QuickActions(walletStyle: walletStyle)
+                : OutlinedButton.icon(
+                    onPressed: onPurchases,
+                    icon: const Icon(Icons.science_outlined),
+                    label: const Text('Simulate purchases & refunds'),
+                  ),
           ),
           const SizedBox(height: 14),
           FadeSlideIn(

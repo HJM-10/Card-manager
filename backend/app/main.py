@@ -13,7 +13,7 @@ from pydantic import AwareDatetime, BaseModel, ConfigDict, EmailStr, Field, fiel
 from pwdlib import PasswordHash
 
 from .db import connect
-from .purchases import PurchaseInput, TransactionRecord, TRANSACTION_SELECT, require_category, save_purchase
+from .purchases import PurchaseInput, SimulationInput, RefundInput, TransactionRecord, TRANSACTION_SELECT, require_category, save_purchase, save_refund
 from .csv_imports import CsvPreviewInput, CsvConfirmation, preview_import, confirm_import, public_batch
 
 app = FastAPI(title='SpendTrail API', version='0.1.0')
@@ -287,6 +287,22 @@ def record_purchase(body: PurchaseInput, response: Response, user=Depends(curren
         return saved
 
 
+@app.post('/simulations/purchases', status_code=201, response_model=TransactionRecord)
+def simulate_purchase(body: SimulationInput, response: Response, user=Depends(current_session)):
+    with connect() as db:
+        saved, created = save_purchase(db, user['id'], body, source='simulation', status=body.status)
+        response.status_code = 201 if created else 200
+        return saved
+
+
+@app.post('/transactions/{transaction_id}/refunds', status_code=201, response_model=TransactionRecord)
+def simulate_refund(transaction_id: UUID, body: RefundInput, response: Response, user=Depends(current_session)):
+    with connect() as db:
+        saved, created = save_refund(db, user['id'], transaction_id, body)
+        response.status_code = 201 if created else 200
+        return saved
+
+
 @app.get('/transactions', response_model=list[TransactionRecord])
 def transaction_history(
     limit: Annotated[int, Query(ge=1, le=100)] = 25,
@@ -295,6 +311,8 @@ def transaction_history(
     card_id: UUID | None = None,
     category_id: UUID | None = None,
     uncategorized: bool = False,
+    status: Literal['approved', 'declined'] | None = None,
+    kind: Literal['purchase', 'refund'] | None = None,
     occurred_from: AwareDatetime | None = None,
     occurred_before: AwareDatetime | None = None,
     user=Depends(current_session),
@@ -308,7 +326,7 @@ def transaction_history(
     if search.strip():
         conditions.append('strpos(lower(m.name), lower(%s)) > 0')
         values.append(search.strip())
-    for column, value in [('card_id', card_id), ('category_id', category_id)]:
+    for column, value in [('card_id', card_id), ('category_id', category_id), ('status', status), ('kind', kind)]:
         if value is not None:
             conditions.append(f't.{column} = %s')
             values.append(value)

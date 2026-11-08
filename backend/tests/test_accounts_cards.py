@@ -596,7 +596,8 @@ def test_csv_database_batch_ownership_is_enforced(client):
     bob = account(client, 'bob@example.com')
     bob_card = client.post('/cards', headers=bob, json=CARD).json()['id']
     foreign_batch = preview_file(client, bob, bob_card, csv_text([CSV_ROW])).json()
-    with pytest.raises(psycopg.errors.ForeignKeyViolation):
+    # Creation metadata is now immutable; either it or the ownership FK rejects this write.
+    with pytest.raises((psycopg.errors.ForeignKeyViolation, psycopg.errors.CheckViolation)):
         with db.connect() as conn:
             conn.execute('UPDATE spending_transactions SET import_batch_id = %s', (foreign_batch['id'],))
     assert len(client.get('/transactions', headers=alice).json()) == 1

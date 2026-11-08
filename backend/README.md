@@ -176,6 +176,37 @@ For embedded Python, use `backend/run.py pytest backend/tests -q` instead. The b
 
 ## Remaining scope
 
-Budgets, simulated payments, notification dispatch, account recovery and production deployment are future work. A separate runtime database role with restricted audit privileges is also pending. Existing local demo statistics are not yet backed by account purchase reports.
+### Payment simulation (migration 006)
+
+Run the migration command before using the updated API. It preserves existing
+transactions, expands type/status/source constraints, adds owned original-purchase
+references and enforces immutable creation values plus a cumulative refund limit.
+Current categories remain editable. `transaction_spending` exposes exact signed
+`spending_amount`: approved purchase positive, approved refund negative, decline
+zero. This is a foundation for the pending report/budget APIs.
+
+- `POST /simulations/purchases`: the manual purchase body plus required
+  `status` (`approved` or `declined`). Source is `simulation`.
+- `POST /transactions/{id}/refunds`: `{amount, occurred_at, source_reference}`.
+  Amount and timestamp follow the manual format. Source is `simulation`, kind
+  `refund`, status `approved`; card, merchant, channel and initial category are
+  inherited from the original owned approved purchase. Response includes
+  `original_purchase_id` (null for purchases).
+- Both routes return 201 for creation and 200 for matching retries. Conflicting
+  references and excessive refunds return 409. Invalid refund targets or a refund
+  before its purchase return 422; foreign/missing targets return 404.
+- Archived cards allow refunds and matching retries. New simulated purchases
+  require an active card. Refunds cannot themselves be refunded.
+- `GET /transactions` additionally accepts combined `status=approved|declined`
+  and `kind=purchase|refund` filters before pagination. History now includes all
+  transaction kinds, despite the retained Account purchases screen title.
+- Each creation queues one audit/outbox pair atomically, including declines.
+  Notification delivery is pending. API card locks and database original-purchase
+  locks prevent concurrent over-refunding; retries reuse the frozen request.
+
+See [design and fixed acceptance examples](../docs/DESIGN.md) and
+[verification evidence](../docs/MILESTONE_06.md).
+
+Budgets, notification dispatch, account recovery and production deployment are future work. A separate runtime database role with restricted audit privileges is also pending. Existing local demo statistics are not yet backed by account purchase reports.
 
 Implementation references: [FastAPI authentication and password hashing](https://fastapi.tiangolo.com/tutorial/security/oauth2-jwt/) and [Psycopg transaction management](https://www.psycopg.org/psycopg3/docs/basic/transactions.html).

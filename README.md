@@ -16,6 +16,15 @@ Choose a saved category when recording a purchase, or open its details and tap *
 
 ## Features
 
+**Payment simulation:** open **Account purchases → Simulate purchase**, choose
+an active account card, online/POS channel and Approved or Declined outcome.
+Open an approved purchase's details to **Simulate refund**, including partial
+refunds. Refund details link back to the original purchase; total refunds cannot
+exceed its amount. History shows type/status and supports both filters. Account
+Home replaces the old money shortcuts with this route; legacy demo mode keeps
+its local actions. No money moves. Server reports and budgets are still pending.
+See [verification](docs/MILESTONE_06.md) and [design contracts](docs/DESIGN.md).
+
 - **Animated splash:** coins drop above a cash stack, the illustration collapses into the SpendTrail wordmark, and a progress bar fills.
 - **Wallet-style card stack:** tap a back card to bring it to the front; the balance counts up.
 - **Notched front card:** an inverted-corner cut-out holds the *Add Card* pill (`CustomClipper`).

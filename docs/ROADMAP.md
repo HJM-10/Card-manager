@@ -45,12 +45,19 @@ Weeks are sequential working blocks, not promised calendar dates. Week 4 has the
 
 ## Ordered implementation backlog
 
+Progress as of 8 November 2026: **27 of 47 checklist items complete (57%)**,
+with 20 remaining (43%). This is an item count, not an estimate of effort or
+remaining calendar time. See [design and acceptance contracts](DESIGN.md) and
+[simulation verification](MILESTONE_06.md). Next feature: monthly budgets and
+server reports. The outstanding runtime audit-role restriction remains a
+database hardening task.
+
 ### 1. Establish the foundation
 
-- [ ] Run static analysis and the existing test suite; record actual results.
-- [ ] Inventory reusable screens and identify demo assumptions to remove.
-- [ ] Define transaction examples and exact expected report/budget totals.
-- [ ] Write the ER diagram, data dictionary and API/CSV contracts.
+- [x] Run static analysis and the existing test suite; record actual results.
+- [x] Inventory reusable screens and identify demo assumptions to remove.
+- [x] Define transaction examples and exact expected report/budget totals.
+- [x] Write the ER diagram, data dictionary and API/CSV contracts.
 - [x] Add `backend/` for the API, migrations and backend tests; worker follows with transaction events.
 - [x] Add environment examples without credentials and local database setup instructions.
 
@@ -71,11 +78,11 @@ Weeks are sequential working blocks, not promised calendar dates. Week 4 has the
 Manual purchases now persist in PostgreSQL and are available through authenticated history and detail endpoints. Flutter entry, paginated history and transaction details are connected under Home → Account purchases. The 7 November 2026 checks passed 37 Flutter tests, a separate live Flutter HTTP integration test, and nine PostgreSQL backend tests. See [purchase integration evidence](MILESTONE_02.md). The remaining transaction sources, filters and category rules expand this foundation.
 
 - [x] Add Merchant, Category and SpendingTransaction records with required references and constraints.
-- [ ] Define purchase/refund types, approved/declined states and source/channel values explicitly.
+- [x] Define purchase/refund types, approved/declined states and source/channel values explicitly.
 - [x] Require a non-null source reference and enforce unique `(card_id, source, source_reference)` at the database level.
 - [x] Save the transaction, creation audit record and notification outbox event atomically.
 - [x] Add history/detail APIs, pagination, date/card/category filters and merchant search.
-- [ ] Extend history filters to statuses when declined purchases and refunds are implemented.
+- [x] Extend history filters to statuses when declined purchases and refunds are implemented.
 - [x] Connect manual entry and history screens to the API.
 - [x] Enforce ownership on reads and writes, including a database trigger rejecting cross-user categories.
 - [ ] Protect audit history from modification by the application role.
@@ -87,9 +94,9 @@ Added prerequisite: optional Android fingerprint login, backed by revocable sess
 - [x] Specify CSV columns, date/decimal formats, size limits and row-error behavior before implementation.
 - [x] Add ImportBatch tracking and a preview that identifies invalid/duplicate rows before confirmation.
 - [x] Implement the agreed atomic import policy and repeat-import protection.
-- [ ] Replace demo money actions with simulated approved purchases, declines and refunds for online/POS channels.
-- [ ] Link refunds to original purchases and prevent cumulative approved refunds exceeding the approved purchase amount, including concurrent requests.
-- [ ] Verify that declines do not affect spending and approved refunds reduce it exactly once.
+- [x] Replace demo money actions with simulated approved purchases, declines and refunds for online/POS channels.
+- [x] Link refunds to original purchases and prevent cumulative approved refunds exceeding the approved purchase amount, including concurrent requests.
+- [x] Verify that declines do not affect spending and approved refunds reduce it exactly once.
 
 ### 5. Deliver budgets and reports
 

@@ -97,6 +97,8 @@ class _PurchasesScreenState extends State<PurchasesScreen> {
             ? null
             : filters.category,
         uncategorized: filters.category == uncategorizedValue,
+        status: filters.status,
+        kind: filters.kind,
         occurredFrom: filters.dates?.start,
         occurredBefore: filters.before,
       );
@@ -118,11 +120,14 @@ class _PurchasesScreenState extends State<PurchasesScreen> {
     }
   }
 
-  Future<void> add() async {
+  Future<void> add({bool simulation = false}) async {
     final saved = await Navigator.of(context).push<bool>(
       MaterialPageRoute(
-        builder: (_) =>
-            _PurchaseEditor(api: widget.api, onExpired: widget.onExpired),
+        builder: (_) => _PurchaseEditor(
+          api: widget.api,
+          onExpired: widget.onExpired,
+          simulation: simulation,
+        ),
       ),
     );
     if (saved == true && mounted) await load(reset: true);
@@ -213,9 +218,14 @@ class _PurchasesScreenState extends State<PurchasesScreen> {
                   'Dates: ${calendarDate(filters.dates!.start)} to ${calendarDate(filters.dates!.end)}',
                 ),
               FilledButton.icon(
-                onPressed: loading ? null : add,
+                onPressed: loading ? null : () => add(),
                 icon: const Icon(Icons.add),
                 label: const Text('Record purchase'),
+              ),
+              OutlinedButton.icon(
+                onPressed: loading ? null : () => add(simulation: true),
+                icon: const Icon(Icons.science_outlined),
+                label: const Text('Simulate purchase'),
               ),
               OutlinedButton.icon(
                 onPressed: loading ? null : importCsv,
@@ -235,9 +245,11 @@ class _PurchasesScreenState extends State<PurchasesScreen> {
                   child: ListTile(
                     title: Text(record['merchant'] as String),
                     subtitle: Text(
-                      '${_date(record['occurred_at'] as String)} · ${record['channel']}\n${record['category'] ?? 'Uncategorized'}',
+                      '${_date(record['occurred_at'] as String)} · ${record['channel']}\n${record['category'] ?? 'Uncategorized'} · ${record['kind']} · ${record['status']}',
                     ),
-                    trailing: Text('PKR ${record['amount']}'),
+                    trailing: Text(
+                      '${record['kind'] == 'refund' ? '−' : ''}PKR ${record['amount']}',
+                    ),
                     onTap: () => detail(record),
                   ),
                 ),
@@ -262,9 +274,16 @@ class _PurchasesScreenState extends State<PurchasesScreen> {
 }
 
 class _PurchaseEditor extends StatefulWidget {
-  const _PurchaseEditor({required this.api, required this.onExpired});
+  const _PurchaseEditor({
+    required this.api,
+    required this.onExpired,
+    this.simulation = false,
+    this.original,
+  });
   final SpendTrailApi api;
   final VoidCallback onExpired;
+  final bool simulation;
+  final Map<String, dynamic>? original;
   @override
   State<_PurchaseEditor> createState() => _PurchaseEditorState();
 }
@@ -277,6 +296,8 @@ class _PurchaseEditorState extends State<_PurchaseEditor> {
   String? categoryId;
   String? cardId, error;
   String channel = 'pos';
+  String status = 'approved';
+  bool get refund => widget.original != null;
   DateTime occurredAt = DateTime.now();
   bool loading = true, busy = false;
   // Freeze the entire request after the first attempt so ambiguous network
@@ -286,6 +307,14 @@ class _PurchaseEditorState extends State<_PurchaseEditor> {
   @override
   void initState() {
     super.initState();
+    if (refund) {
+      merchant.text = widget.original!['merchant'] as String;
+      channel = widget.original!['channel'] as String;
+      final originalDate = DateTime.parse(
+        widget.original!['occurred_at'] as String,
+      ).toLocal();
+      if (originalDate.isAfter(occurredAt)) occurredAt = originalDate;
+    }
     loadCards();
   }
 
@@ -305,7 +334,15 @@ class _PurchaseEditorState extends State<_PurchaseEditor> {
     });
     try {
       final result = await Future.wait([
-        widget.api.cards(),
+        refund
+            ? Future.value(<Map<String, dynamic>>[
+                {
+                  'id': widget.original!['card_id'],
+                  'label': 'Original purchase card',
+                  'last4': '••••',
+                },
+              ])
+            : widget.api.cards(),
         widget.api.categories(),
       ]);
       if (mounted) {
@@ -342,13 +379,29 @@ class _PurchaseEditorState extends State<_PurchaseEditor> {
         'source_reference':
             '${hex.substring(0, 8)}-${hex.substring(8, 12)}-${hex.substring(12, 16)}-${hex.substring(16, 20)}-${hex.substring(20)}',
       };
+      if (widget.simulation) pending!['status'] = status;
+      if (refund) {
+        pending = {
+          for (final key in ['amount', 'occurred_at', 'source_reference'])
+            key: pending![key],
+        };
+      }
     }
     setState(() {
       busy = true;
       error = null;
     });
     try {
-      await widget.api.recordPurchase(pending!);
+      if (refund) {
+        await widget.api.refundPurchase(
+          widget.original!['id'] as String,
+          pending!,
+        );
+      } else if (widget.simulation) {
+        await widget.api.simulatePurchase(pending!);
+      } else {
+        await widget.api.recordPurchase(pending!);
+      }
       if (mounted) Navigator.of(context).pop(true);
     } on ApiException catch (e) {
       // Definite rejections did not commit; allow correcting the form.
@@ -402,7 +455,15 @@ class _PurchaseEditorState extends State<_PurchaseEditor> {
     return PopScope(
       canPop: !busy,
       child: Scaffold(
-        appBar: AppBar(title: const Text('Record purchase')),
+        appBar: AppBar(
+          title: Text(
+            refund
+                ? 'Simulate refund'
+                : widget.simulation
+                ? 'Simulate purchase'
+                : 'Record purchase',
+          ),
+        ),
         body: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 600),
@@ -411,7 +472,13 @@ class _PurchaseEditorState extends State<_PurchaseEditor> {
               child: ListView(
                 padding: const EdgeInsets.all(20),
                 children: [
-                  const Text('Record a manual purchase. No money moves.'),
+                  Text(
+                    refund
+                        ? 'Refund an approved purchase. No money moves. The server checks the remaining refundable amount.'
+                        : widget.simulation
+                        ? 'Choose a simulated payment outcome. No money moves.'
+                        : 'Record a manual purchase. No money moves.',
+                  ),
                   const SizedBox(height: 16),
                   if (loading)
                     const Center(child: CircularProgressIndicator())
@@ -440,14 +507,14 @@ class _PurchaseEditorState extends State<_PurchaseEditor> {
                             ),
                           ),
                       ],
-                      onChanged: editable
+                      onChanged: editable && !refund
                           ? (v) => setState(() => cardId = v)
                           : null,
                     ),
                     const SizedBox(height: 16),
                     TextFormField(
                       controller: merchant,
-                      enabled: editable,
+                      enabled: editable && !refund,
                       maxLength: 100,
                       decoration: const InputDecoration(labelText: 'Merchant'),
                       validator: (v) =>
@@ -474,28 +541,29 @@ class _PurchaseEditorState extends State<_PurchaseEditor> {
                       },
                     ),
                     const SizedBox(height: 16),
-                    CategorySelector(
-                      categories: categories,
-                      value: categoryId,
-                      onChanged: editable
-                          ? (v) => setState(() => categoryId = v)
-                          : null,
-                      onCreate: editable
-                          ? () async {
-                              final result = await showNewCategory(
-                                context,
-                                widget.api,
-                                widget.onExpired,
-                              );
-                              if (result != null && mounted) {
-                                setState(() {
-                                  categories.add(result);
-                                  categoryId = result['id'] as String;
-                                });
+                    if (!refund)
+                      CategorySelector(
+                        categories: categories,
+                        value: categoryId,
+                        onChanged: editable
+                            ? (v) => setState(() => categoryId = v)
+                            : null,
+                        onCreate: editable
+                            ? () async {
+                                final result = await showNewCategory(
+                                  context,
+                                  widget.api,
+                                  widget.onExpired,
+                                );
+                                if (result != null && mounted) {
+                                  setState(() {
+                                    categories.add(result);
+                                    categoryId = result['id'] as String;
+                                  });
+                                }
                               }
-                            }
-                          : null,
-                    ),
+                            : null,
+                      ),
                     DropdownButtonFormField<String>(
                       initialValue: channel,
                       decoration: const InputDecoration(labelText: 'Channel'),
@@ -509,15 +577,35 @@ class _PurchaseEditorState extends State<_PurchaseEditor> {
                           child: Text('Online'),
                         ),
                       ],
-                      onChanged: editable
+                      onChanged: editable && !refund
                           ? (v) => setState(() => channel = v!)
                           : null,
                     ),
+                    if (widget.simulation && !refund)
+                      DropdownButtonFormField<String>(
+                        initialValue: status,
+                        decoration: const InputDecoration(
+                          labelText: 'Payment outcome',
+                        ),
+                        items: const [
+                          DropdownMenuItem(
+                            value: 'approved',
+                            child: Text('Approved'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'declined',
+                            child: Text('Declined'),
+                          ),
+                        ],
+                        onChanged: editable
+                            ? (v) => setState(() => status = v!)
+                            : null,
+                      ),
                     TextButton.icon(
                       onPressed: editable ? chooseDate : null,
                       icon: const Icon(Icons.calendar_today),
                       label: Text(
-                        'Purchase date: ${_date(occurredAt.toIso8601String())}',
+                        '${refund ? 'Refund' : 'Purchase'} date: ${_date(occurredAt.toIso8601String())}',
                       ),
                     ),
                     if (pending != null && !busy)
@@ -532,6 +620,8 @@ class _PurchaseEditorState extends State<_PurchaseEditor> {
                             ? 'Saving…'
                             : pending != null
                             ? 'Retry save'
+                            : refund
+                            ? 'Save refund'
                             : 'Save purchase',
                       ),
                     ),
@@ -633,6 +723,36 @@ class _PurchaseDetailState extends State<_PurchaseDetail> {
           Text(_date(record!['occurred_at'] as String)),
           const SizedBox(height: 12),
           Text('Category: ${record!['category'] ?? 'Uncategorized'}'),
+          if (record!['kind'] == 'purchase' && record!['status'] == 'approved')
+            FilledButton.icon(
+              onPressed: () async {
+                final saved = await Navigator.of(context).push<bool>(
+                  MaterialPageRoute(
+                    builder: (_) => _PurchaseEditor(
+                      api: widget.api,
+                      onExpired: widget.onExpired,
+                      original: record,
+                    ),
+                  ),
+                );
+                if (saved == true && mounted) await load();
+              },
+              icon: const Icon(Icons.undo),
+              label: const Text('Simulate refund'),
+            ),
+          if (record!['original_purchase_id'] != null)
+            TextButton(
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => _PurchaseDetail(
+                    api: widget.api,
+                    id: record!['original_purchase_id'] as String,
+                    onExpired: widget.onExpired,
+                  ),
+                ),
+              ),
+              child: const Text('Open original purchase'),
+            ),
           TextButton.icon(
             onPressed: editCategory,
             icon: const Icon(Icons.category_outlined),

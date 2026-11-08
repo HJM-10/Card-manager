@@ -152,6 +152,45 @@ void main() {
         receipt,
       );
       expect((await importer.purchases()).length, 3);
+      final simulation = {
+        ...body,
+        'card_id': importCard['id'],
+        'status': 'declined',
+      };
+      final declined = await importer.simulatePurchase(simulation);
+      expect(
+        (await importer.simulatePurchase(simulation))['id'],
+        declined['id'],
+      );
+      expect(
+        (await importer.purchases(status: 'declined')).single['id'],
+        declined['id'],
+      );
+      final refundBody = {
+        'amount': '250.05',
+        'occurred_at': '2026-11-08T12:00:00+05:00',
+        'source_reference': '91e3bc1e-38f9-43d5-a9e7-6d5a61cdb30b',
+      };
+      final refund = await importer.refundPurchase(
+        saved['id'] as String,
+        refundBody,
+      );
+      expect(refund['original_purchase_id'], saved['id']);
+      expect(
+        (await importer.refundPurchase(
+          saved['id'] as String,
+          refundBody,
+        ))['id'],
+        refund['id'],
+      );
+      expect(
+        (await importer.purchases(kind: 'refund')).single['id'],
+        refund['id'],
+      );
+      await expectLater(
+        other.refundPurchase(saved['id'] as String, refundBody),
+        throwsA(isA<ApiException>().having((e) => e.statusCode, 'status', 404)),
+      );
       await expectLater(
         other.csvImport(preview['id'] as String),
         throwsA(isA<ApiException>().having((e) => e.statusCode, 'status', 404)),

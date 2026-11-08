@@ -46,12 +46,13 @@ class TransactionRecord(BaseModel):
     channel: str
     category_id: UUID | None = None
     category: str | None = None
+    original_purchase_id: UUID | None = None
 
 
 TRANSACTION_SELECT = '''
     SELECT t.id, t.card_id, m.name AS merchant, t.amount, t.occurred_at,
            t.source, t.source_reference, t.kind, t.status, t.channel,
-           t.category_id, t.recorded_category_id, c.name AS category
+           t.category_id, t.recorded_category_id, c.name AS category, t.original_purchase_id
     FROM spending_transactions t
     JOIN merchants m ON (m.user_id, m.id) = (t.user_id, t.merchant_id)
     LEFT JOIN categories c ON (c.user_id, c.id) = (t.user_id, t.category_id)
@@ -70,7 +71,7 @@ def matching_purchase(existing, body):
         body.merchant, Decimal(body.amount), body.occurred_at, body.channel, body.category_id)
 
 
-def save_purchase(db, user_id, body, *, source='manual', reference=None, import_batch_id=None):
+def save_purchase(db, user_id, body, *, source='manual', reference=None, import_batch_id=None, status='approved'):
     """Shared atomic write path; caller owns the transaction/commit boundary."""
     reference = reference if reference is not None else str(body.source_reference)
     card = db.execute('SELECT archived FROM card_profiles WHERE user_id = %s AND id = %s FOR NO KEY UPDATE', (user_id, body.card_id)).fetchone()
@@ -78,7 +79,7 @@ def save_purchase(db, user_id, body, *, source='manual', reference=None, import_
         raise HTTPException(404, 'Card not found')
     existing = db.execute(TRANSACTION_SELECT + ' WHERE t.user_id = %s AND t.card_id = %s AND t.source = %s AND t.source_reference = %s', (user_id, body.card_id, source, reference)).fetchone()
     if existing is not None:
-        if not matching_purchase(existing, body):
+        if not matching_purchase(existing, body) or existing['status'] != status or existing['kind'] != 'purchase':
             raise HTTPException(409, 'This purchase reference is already in use with different details')
         return existing, False
     if card['archived']:
@@ -88,7 +89,48 @@ def save_purchase(db, user_id, body, *, source='manual', reference=None, import_
     transaction_id = uuid4()
     db.execute('''INSERT INTO spending_transactions
         (id, user_id, card_id, merchant_id, amount, occurred_at, source, source_reference, kind, status, channel, category_id, recorded_category_id, import_batch_id)
-        SELECT %s, user_id, %s, id, %s, %s, %s, %s, 'purchase', 'approved', %s, %s, %s, %s
+        SELECT %s, user_id, %s, id, %s, %s, %s, %s, 'purchase', %s, %s, %s, %s, %s
         FROM merchants WHERE user_id = %s AND name = %s''',
-        (transaction_id, body.card_id, Decimal(body.amount), body.occurred_at, source, reference, body.channel, body.category_id, body.category_id, import_batch_id, user_id, body.merchant))
+        (transaction_id, body.card_id, Decimal(body.amount), body.occurred_at, source, reference, status, body.channel, body.category_id, body.category_id, import_batch_id, user_id, body.merchant))
+    return db.execute(TRANSACTION_SELECT + ' WHERE t.user_id = %s AND t.id = %s', (user_id, transaction_id)).fetchone(), True
+
+
+class SimulationInput(PurchaseInput):
+    status: Literal['approved', 'declined']
+
+
+class RefundInput(BaseModel):
+    model_config = ConfigDict(extra='forbid', str_strip_whitespace=True)
+    amount: str = Field(pattern=r'^[0-9]{1,12}\.[0-9]{2}$')
+    occurred_at: AwareDatetime = Field(ge=datetime(2000, 1, 1, tzinfo=timezone.utc), lt=datetime(2101, 1, 1, tzinfo=timezone.utc))
+    source_reference: UUID
+    positive_amount = field_validator('amount')(PurchaseInput.positive_amount.__func__)
+    timestamp_string = field_validator('occurred_at', mode='before')(PurchaseInput.timestamp_string.__func__)
+
+
+def save_refund(db, user_id, original_id, body):
+    # Card lock uses the same ordering as all purchase/import writers. The
+    # database trigger independently enforces the cumulative refund ceiling.
+    original = db.execute('SELECT * FROM spending_transactions WHERE user_id = %s AND id = %s', (user_id, original_id)).fetchone()
+    if original is None:
+        raise HTTPException(404, 'Purchase not found')
+    db.execute('SELECT id FROM card_profiles WHERE user_id = %s AND id = %s FOR NO KEY UPDATE', (user_id, original['card_id']))
+    existing = db.execute(TRANSACTION_SELECT + ' WHERE t.user_id = %s AND t.card_id = %s AND t.source = %s AND t.source_reference = %s',
+                          (user_id, original['card_id'], 'simulation', str(body.source_reference))).fetchone()
+    if existing is not None:
+        if (existing['kind'], existing['original_purchase_id'], existing['amount'], existing['occurred_at']) != ('refund', original_id, Decimal(body.amount), body.occurred_at):
+            raise HTTPException(409, 'This simulation reference is already in use with different details')
+        return existing, False
+    if original['kind'] != 'purchase' or original['status'] != 'approved':
+        raise HTTPException(422, 'Only approved purchases can be refunded')
+    if body.occurred_at < original['occurred_at']:
+        raise HTTPException(422, 'A refund cannot precede its purchase')
+    refunded = db.execute("SELECT COALESCE(sum(amount), 0) AS amount FROM spending_transactions WHERE original_purchase_id = %s AND status = 'approved'", (original_id,)).fetchone()['amount']
+    if refunded + Decimal(body.amount) > original['amount']:
+        raise HTTPException(409, 'Refund exceeds the remaining purchase amount')
+    transaction_id = uuid4()
+    db.execute('''INSERT INTO spending_transactions
+        (id, user_id, card_id, merchant_id, amount, occurred_at, source, source_reference, kind, status, channel, category_id, recorded_category_id, original_purchase_id)
+        VALUES (%s, %s, %s, %s, %s, %s, 'simulation', %s, 'refund', 'approved', %s, %s, %s, %s)''',
+        (transaction_id, user_id, original['card_id'], original['merchant_id'], Decimal(body.amount), body.occurred_at, str(body.source_reference), original['channel'], original['category_id'], original['category_id'], original_id))
     return db.execute(TRANSACTION_SELECT + ' WHERE t.user_id = %s AND t.id = %s', (user_id, transaction_id)).fetchone(), True

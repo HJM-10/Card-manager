@@ -5,12 +5,24 @@ import '../../data/spendtrail_api.dart';
 const uncategorizedValue = 'uncategorized';
 
 class PurchaseFilters {
-  const PurchaseFilters({this.cardId, this.category, this.dates});
+  const PurchaseFilters({
+    this.cardId,
+    this.category,
+    this.dates,
+    this.status,
+    this.kind,
+  });
+  final String? status, kind;
   final String? cardId;
   // null means all categories; the sentinel selects records without a category.
   final String? category;
   final DateTimeRange? dates;
-  bool get active => cardId != null || category != null || dates != null;
+  bool get active =>
+      cardId != null ||
+      category != null ||
+      dates != null ||
+      status != null ||
+      kind != null;
   DateTime? get before => dates == null
       ? null
       : DateTime(dates!.end.year, dates!.end.month, dates!.end.day + 1);
@@ -37,6 +49,7 @@ class _PurchaseFiltersSheetState extends State<PurchaseFiltersSheet> {
   late String? cardId = widget.initial.cardId,
       category = widget.initial.category;
   late DateTimeRange? dates = widget.initial.dates;
+  late String? status = widget.initial.status, kind = widget.initial.kind;
   bool loading = true;
   String? error;
 
@@ -157,6 +170,39 @@ class _PurchaseFiltersSheetState extends State<PurchaseFiltersSheet> {
                 onChanged: (v) => setState(() => category = v == '' ? null : v),
               ),
               const SizedBox(height: 16),
+              for (final isStatus in [true, false])
+                DropdownButtonFormField<String>(
+                  key: ValueKey(
+                    '${isStatus ? 'status' : 'kind'}-${isStatus ? status : kind}',
+                  ),
+                  initialValue: (isStatus ? status : kind) ?? '',
+                  decoration: InputDecoration(
+                    labelText: isStatus ? 'Filter by status' : 'Filter by type',
+                  ),
+                  items: [
+                    DropdownMenuItem(
+                      value: '',
+                      child: Text(isStatus ? 'All statuses' : 'All types'),
+                    ),
+                    for (final value
+                        in isStatus
+                            ? ['approved', 'declined']
+                            : ['purchase', 'refund'])
+                      DropdownMenuItem(
+                        value: value,
+                        child: Text(
+                          '${value[0].toUpperCase()}${value.substring(1)}',
+                        ),
+                      ),
+                  ],
+                  onChanged: (v) => setState(() {
+                    if (isStatus) {
+                      status = v == '' ? null : v;
+                    } else {
+                      kind = v == '' ? null : v;
+                    }
+                  }),
+                ),
               TextButton.icon(
                 onPressed: chooseDates,
                 icon: const Icon(Icons.date_range),
@@ -177,6 +223,8 @@ class _PurchaseFiltersSheetState extends State<PurchaseFiltersSheet> {
                     cardId: cardId,
                     category: category,
                     dates: dates,
+                    status: status,
+                    kind: kind,
                   ),
                 ),
                 child: const Text('Apply filters'),
@@ -186,6 +234,8 @@ class _PurchaseFiltersSheetState extends State<PurchaseFiltersSheet> {
                   cardId = null;
                   category = null;
                   dates = null;
+                  status = null;
+                  kind = null;
                 }),
                 child: const Text('Reset filters'),
               ),

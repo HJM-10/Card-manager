@@ -141,6 +141,8 @@ class SpendTrailApi {
     String? cardId,
     String? categoryId,
     bool uncategorized = false,
+    String? status,
+    String? kind,
     DateTime? occurredFrom,
     DateTime? occurredBefore,
   }) async =>
@@ -155,6 +157,8 @@ class SpendTrailApi {
                     if (cardId != null) 'card_id': cardId,
                     if (categoryId != null) 'category_id': categoryId,
                     if (uncategorized) 'uncategorized': 'true',
+                    if (status != null) 'status': status,
+                    if (kind != null) 'kind': kind,
                     if (occurredFrom != null)
                       'occurred_from': occurredFrom.toUtc().toIso8601String(),
                     if (occurredBefore != null)
@@ -169,6 +173,23 @@ class SpendTrailApi {
 
   Future<Map<String, dynamic>> purchase(String id) async =>
       await _request('GET', '/transactions/${Uri.encodeComponent(id)}')
+          as Map<String, dynamic>;
+
+  Future<Map<String, dynamic>> simulatePurchase(
+    Map<String, dynamic> body,
+  ) async =>
+      await _request('POST', '/simulations/purchases', body)
+          as Map<String, dynamic>;
+
+  Future<Map<String, dynamic>> refundPurchase(
+    String id,
+    Map<String, dynamic> body,
+  ) async =>
+      await _request(
+            'POST',
+            '/transactions/${Uri.encodeComponent(id)}/refunds',
+            body,
+          )
           as Map<String, dynamic>;
 
   Future<void> logout() async {
