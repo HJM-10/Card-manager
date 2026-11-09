@@ -1,0 +1,138 @@
+{
+  "tables": {
+    "biometric_sessions": {
+      "rows": 3,
+      "sha256": "06fb9e392f5d64fcf1d6b59aefdbb07644626871eccc143aaa784643f9323bf4"
+    },
+    "budgets": {
+      "rows": 1,
+      "sha256": "eb7ad7c2e8a72109f17fae57bf0758b51bf907794c5fa6b870a57adb55f4e0cf"
+    },
+    "card_profiles": {
+      "rows": 4,
+      "sha256": "92579831ff2fbb84e19fafcd1d8bf081b378a1489f226fb322b65e56c749cbe1"
+    },
+    "categories": {
+      "rows": 18,
+      "sha256": "416838e72594aa5f80f2607674c0bfc6f109ea33c93959c68bf83c533c7512ba"
+    },
+    "device_registrations": {
+      "rows": 1,
+      "sha256": "f89acb73793f554aebf43e25b6c2e761e010457d3e03e2816a81b599e0c71c6d"
+    },
+    "import_batches": {
+      "rows": 1,
+      "sha256": "d669f16025b132009202885d59df215971d9ffc46e424995f5ee519f1847f26d"
+    },
+    "merchants": {
+      "rows": 9,
+      "sha256": "4d02ab3305737b07b992cef3dfd077cfc0762bd69780ddd1339d6e818880a8a6"
+    },
+    "notification_events": {
+      "rows": 2,
+      "sha256": "80f6566ad2ef0e39bc01c068bcf635bfcd555c36f1c0f75a4869e7bc75f4f919"
+    },
+    "schema_migrations": {
+      "rows": 9,
+      "sha256": "bb8342d3e27da0b1b38a479db6629b4b43a658b8a1840f79033baa490dc4dad7"
+    },
+    "sessions": {
+      "rows": 18,
+      "sha256": "94cbb2011130d55acc4ae90d09788ee39ff60df9e69af35c7d7918e79902aa5c"
+    },
+    "spending_transactions": {
+      "rows": 9,
+      "sha256": "1555f04820f717a672c4ddb3374912ad21c1975b406e0bff2e9635203f3c31a8"
+    },
+    "transaction_audit_events": {
+      "rows": 9,
+      "sha256": "ccb4e41f3b547a5dc3d31bd2bce538cd2c87e4fb2b48255a1fd25016e17610cc"
+    },
+    "transaction_outbox": {
+      "rows": 9,
+      "sha256": "e1b6106184e1f656c37a243e43bcf5ee54f548eab22e09e1b056eea961937576"
+    },
+    "users": {
+      "rows": 3,
+      "sha256": "78994619c8ba81fe2d5d18b08a14da346f318937474c05bc67ff64bdc7988386"
+    }
+  },
+  "views": {
+    "monthly_category_spending": {
+      "rows": 8,
+      "sha256": "713b1e0ce881aa6fae602c1a144a7b37873762f7b729f762e800b8b0b14ee7c3"
+    },
+    "transaction_spending": {
+      "rows": 9,
+      "sha256": "9705cec123998ea11a3f24348ca2114de068e3f721e5c4b763ca0b36e9183f9a"
+    }
+  },
+  "catalog": {
+    "columns": {
+      "objects": 121,
+      "sha256": "e84c774d089688c7ecdb168c03fe1b89714becb318f44d14036a3daee12baa6e"
+    },
+    "constraints": {
+      "objects": 87,
+      "sha256": "f891db80c84ccd3aa9deb7bba3a2730d984d7ad725279efded36e3f7b43d6920"
+    },
+    "indexes": {
+      "objects": 40,
+      "sha256": "e3a8b43370f5c5be411883526004e481eab0cae186855088b4aeb5f4d21149a8"
+    },
+    "triggers": {
+      "objects": 3,
+      "sha256": "d8c10b65ee1ca64fcbae42ac6ebb167ff1ef6fabf0ba40b759ec63a1750873b4"
+    },
+    "functions": {
+      "objects": 3,
+      "sha256": "adcc1067c1e735e5df87e2875a9e9974a021bae752e44386cae04132efca4201"
+    },
+    "relation_owners": {
+      "objects": 16,
+      "sha256": "b904496915175faa34bc418a5ad42b74240847dbc392e2512898a1e729436d9e"
+    },
+    "relation_acl": {
+      "objects": 160,
+      "sha256": "dde39340da796fa84a609d57768657952d97d60f2cbdd200ed94535921603b84"
+    },
+    "function_acl": {
+      "objects": 5,
+      "sha256": "04d39bbc2086333bacd7e2b281d889c264a55ce6786f4c42d3740146d63c33ae"
+    },
+    "schema_acl": {
+      "objects": 4,
+      "sha256": "4e0e9b94c6602312fd3cfc7384b7d2c4f57c10e15c68c867edf0e840bfbc19a9"
+    },
+    "view_definitions": {
+      "objects": 2,
+      "sha256": "704cb594e16f38d1afcc973b0100004ad9d6d5b5167398f957c1ae0fcc2c405f"
+    }
+  },
+  "totals": {
+    "transactions": 9,
+    "spent": "18998.55",
+    "purchases": "18998.55",
+    "refunds": "0"
+  },
+  "monthly_totals": [
+    {
+      "month": "2026-11-01",
+      "spent": "18998.55",
+      "purchases": "18998.55",
+      "refunds": "0",
+      "transactions": "9"
+    }
+  ],
+  "migrations": [
+    "001_accounts_cards.sql",
+    "002_manual_purchases.sql",
+    "003_categories_history.sql",
+    "004_biometric_sessions.sql",
+    "005_csv_imports.sql",
+    "006_payment_simulation.sql",
+    "007_monthly_budgets.sql",
+    "008_transaction_notifications.sql",
+    "009_audit_protection.sql"
+  ]
+}

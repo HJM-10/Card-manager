@@ -1,0 +1,75 @@
+{
+  "status": "passed",
+  "started_utc": "2026-11-09T10:52:11.037895+00:00",
+  "restored_database": "spendtrail_restore_20261109_105211_28edad98",
+  "restored_database_retained": true,
+  "archive_name": "spendtrail_restore_20261109_105211_28edad98.dump",
+  "archive_format": "PostgreSQL custom",
+  "source_snapshot_method": "pg_export_snapshot / pg_dump --snapshot; repeatable read read only",
+  "tools": {
+    "pg_dump": "pg_dump (PostgreSQL) 15.17",
+    "pg_restore": "pg_restore (PostgreSQL) 15.17"
+  },
+  "dump": {
+    "exit_code": 0,
+    "wall_seconds": 0.4353098999708891,
+    "stdout_characters": 0,
+    "stderr_characters": 0
+  },
+  "archive_bytes": 58797,
+  "archive_sha256": "f1f28ddf2306c70174f2c0de8b676b30cd54d6491d6ed6f877f9ed88397db1f1",
+  "restore": {
+    "exit_code": 0,
+    "wall_seconds": 0.4440541999647394,
+    "stdout_characters": 0,
+    "stderr_characters": 0
+  },
+  "restored_checks": {
+    "runtime_role": "spendtrail_runtime",
+    "runtime_superuser": false,
+    "audit_operations_denied": [
+      "insert",
+      "update",
+      "delete",
+      "truncate",
+      "disable_creation_trigger"
+    ],
+    "api": {
+      "health": 200,
+      "authenticated_profile": 200,
+      "history": 200,
+      "history_rows": 9,
+      "monthly_report": 200,
+      "month": "2026-11",
+      "expected_spent": "18998.55",
+      "reported_spent": "18998.55",
+      "transport": "in-process FastAPI TestClient"
+    },
+    "write_smoke": {
+      "created": true,
+      "retry_created": false,
+      "audit_rows": 1,
+      "outbox_rows": 1,
+      "amount": "12.34",
+      "transaction_rolled_back": true
+    },
+    "migration_rerun": "passed",
+    "notification_transport_started": false
+  },
+  "finished_utc": "2026-11-09T10:52:15.380766+00:00",
+  "source_database_written_by_runner": false,
+  "application_configuration_changed": false,
+  "data_catalog_and_acl_match": true,
+  "restored_smoke_changes_removed": true,
+  "live_after_matches_exported_snapshot": true,
+  "source_snapshot_sha256": "ab7b6a45e8df33723996ed199116afccd38e85abd993fd0474d3dfe86210e1c7",
+  "restored_snapshot_sha256": "ab7b6a45e8df33723996ed199116afccd38e85abd993fd0474d3dfe86210e1c7",
+  "source_database_properties": {
+    "server_version": "15.17",
+    "owner": "spendtrail_app",
+    "encoding": "UTF8",
+    "datcollate": "English_Pakistan.1252",
+    "datctype": "English_Pakistan.1252"
+  },
+  "runner_sha256": "bd1c29ed490abb97ebd15e4f7959530a00801a468c29e73ab6f2760474edf9f1"
+}

@@ -241,6 +241,18 @@ transaction without sending push notifications. Run
 observations offline. See the guide for the test command and administrator
 requirements.
 
+### Backup and restoration rehearsal
+
+The [backup/restoration guide](../docs/BACKUP_RESTORE.md) records a successful
+custom-format backup and restoration into a separate generated database.
+All 14 application tables, both reporting views, catalog definitions and
+application privileges matched the exported source snapshot. The restricted
+login passed API/report and rolled-back purchase/retry checks; the live
+database was unchanged. Use `tools.backup_rehearsal` with a temporary
+administrator connection and `tools.verify_backup_evidence` for repeatable
+rehearsal/verification. Dumps stay under ignored `backend/.local/backups`;
+only sanitized verification evidence belongs in Git.
+
 The transaction notification APIs and separate retrying FCM worker are
 implemented and verified with actual Firebase acceptance and phone receipt,
 including cold-start transaction opening after fingerprint sign-in. See

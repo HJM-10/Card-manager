@@ -1,0 +1,13 @@
+{
+  "status": "passed",
+  "tables_verified": 14,
+  "views_verified": 2,
+  "catalog_groups_verified": 10,
+  "archive_bytes_and_sha256_verified": true,
+  "source_restored_and_after_smoke_snapshots_identical": true,
+  "live_source_matches_snapshot": true,
+  "runtime_audit_restrictions_verified": true,
+  "api_and_rolled_back_write_smoke_verified": true,
+  "transactions": 9,
+  "spent": "18998.55"
+}

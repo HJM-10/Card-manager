@@ -45,14 +45,15 @@ Weeks are sequential working blocks, not promised calendar dates. Week 4 has the
 
 ## Ordered implementation backlog
 
-Progress as of 9 November 2026: **45 of 47 checklist items complete (96%)**,
-with 2 remaining (4%). This is an item count, not an estimate of effort or
+Progress as of 9 November 2026: **46 of 47 checklist items complete (98%)**,
+with 1 remaining (2%). This is an item count, not an estimate of effort or
 remaining calendar time. See [design and acceptance contracts](DESIGN.md) and
 [budget/report verification](MILESTONE_07.md). Audit-role hardening is verified
 in [milestone 9](MILESTONE_09.md). The five index-evaluation items are verified
 in [database evaluation](DATABASE_EVALUATION.md). Database-observed contention
 and atomicity are verified in [concurrency/rollback evidence](CONCURRENCY_ROLLBACK.md).
-Next work: backup restoration and delivery.
+Backup/restoration is verified in the [rehearsal guide](BACKUP_RESTORE.md).
+Next work: final device/accessibility checks, release packaging and demonstration.
 
 ### 1. Establish the foundation
 
@@ -130,7 +131,7 @@ See [verification evidence](MILESTONE_08.md) and [Firebase setup](NOTIFICATIONS.
 - [x] Repeat identical workloads before/after indexing on both dataset sizes; preserve seeds, SQL, environment details and raw `EXPLAIN (ANALYZE, BUFFERS)` outputs.
 - [x] Report median query time, scan choice, buffer activity and index size without inventing improvements.
 - [x] Prove concurrent duplicates commit one transaction and one event; prove failed writes roll back transaction/audit/outbox together.
-- [ ] Rehearse database backup and restoration; verify row counts and known totals afterward.
+- [x] Rehearse database backup and restoration; verify row counts and known totals afterward.
 - [ ] Complete real-device notification/deep-link checks, release packaging, setup instructions and a scripted demonstration.
 
 ## Data model and API planning map
