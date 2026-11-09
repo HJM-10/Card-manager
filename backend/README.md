@@ -219,6 +219,16 @@ For embedded Python, use `backend/run.py pytest backend/tests -q` instead. The b
 
 ## Remaining scope
 
+### Database index experiments
+
+The isolated 10,000/100,000-transaction index experiments are complete, including
+an independent repeat, actual plans/timings/buffers/index sizes and offline
+evidence verification. See [database evaluation](../docs/DATABASE_EVALUATION.md)
+for findings, raw artifacts and reproduction commands. The candidates were
+limited to disposable schemas in the test database; application indexes were
+not changed. Run `tools.index_benchmarks` with an explicit test connection and
+`tools.verify_index_evidence` to validate saved results.
+
 The transaction notification APIs and separate retrying FCM worker are
 implemented and verified with actual Firebase acceptance and phone receipt,
 including cold-start transaction opening after fingerprint sign-in. See

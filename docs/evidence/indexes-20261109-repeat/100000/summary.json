@@ -1,0 +1,939 @@
+[
+  {
+    "phase": "baseline",
+    "query": "history_month",
+    "samples": 11,
+    "median_ms": 0.593,
+    "min_ms": 0.521,
+    "p95_ms": 0.739,
+    "median_planning_ms": 0.351,
+    "median_shared_hits": 105,
+    "median_shared_reads": 0,
+    "scans": [
+      {
+        "Node Type": "Seq Scan",
+        "Relation Name": "merchants",
+        "Actual Rows": 10,
+        "Rows Removed by Filter": 190
+      },
+      {
+        "Node Type": "Bitmap Heap Scan",
+        "Relation Name": "spending_transactions",
+        "Actual Rows": 81
+      },
+      {
+        "Node Type": "Bitmap Index Scan",
+        "Index Name": "spending_transactions_user_history",
+        "Actual Rows": 419
+      },
+      {
+        "Node Type": "Bitmap Index Scan",
+        "Index Name": "spending_transactions_card_id_source_source_reference_key",
+        "Actual Rows": 978
+      },
+      {
+        "Node Type": "Seq Scan",
+        "Relation Name": "categories",
+        "Actual Rows": 6,
+        "Rows Removed by Filter": 30
+      }
+    ],
+    "result": {
+      "rows": 25,
+      "sha256": "2657a43bc2d46acf07a42bc97249a817cba3d2dfc4584209bfd7e8c684122995",
+      "count": null
+    }
+  },
+  {
+    "phase": "baseline",
+    "query": "history_year",
+    "samples": 11,
+    "median_ms": 2.329,
+    "min_ms": 1.908,
+    "p95_ms": 3.412,
+    "median_planning_ms": 0.481,
+    "median_shared_hits": 843,
+    "median_shared_reads": 0,
+    "scans": [
+      {
+        "Node Type": "Bitmap Heap Scan",
+        "Relation Name": "spending_transactions",
+        "Actual Rows": 978,
+        "Rows Removed by Filter": 0
+      },
+      {
+        "Node Type": "Bitmap Index Scan",
+        "Index Name": "spending_transactions_user_id_card_id_id_key",
+        "Actual Rows": 978
+      },
+      {
+        "Node Type": "Seq Scan",
+        "Relation Name": "merchants",
+        "Actual Rows": 10,
+        "Rows Removed by Filter": 190
+      },
+      {
+        "Node Type": "Seq Scan",
+        "Relation Name": "categories",
+        "Actual Rows": 6,
+        "Rows Removed by Filter": 114
+      }
+    ],
+    "result": {
+      "rows": 25,
+      "sha256": "6f7ad82bcd04088a9cb9f05962f839cf27d8167e1369e0e5d8b66582d5667e27",
+      "count": null
+    }
+  },
+  {
+    "phase": "baseline",
+    "query": "history_all_cards_control",
+    "samples": 11,
+    "median_ms": 0.112,
+    "min_ms": 0.09,
+    "p95_ms": 0.262,
+    "median_planning_ms": 0.333,
+    "median_shared_hits": 47,
+    "median_shared_reads": 0,
+    "scans": [
+      {
+        "Node Type": "Index Scan",
+        "Relation Name": "spending_transactions",
+        "Index Name": "spending_transactions_user_history",
+        "Actual Rows": 25
+      },
+      {
+        "Node Type": "Index Scan",
+        "Relation Name": "merchants",
+        "Index Name": "merchants_pkey",
+        "Actual Rows": 1,
+        "Rows Removed by Filter": 0
+      },
+      {
+        "Node Type": "Seq Scan",
+        "Relation Name": "categories",
+        "Actual Rows": 6,
+        "Rows Removed by Filter": 30
+      }
+    ],
+    "result": {
+      "rows": 25,
+      "sha256": "006c8ca6229bda3085e288bbce03481391860dd0bad6d4d98cc343b33df9e120",
+      "count": null
+    }
+  },
+  {
+    "phase": "baseline",
+    "query": "reference_hit",
+    "samples": 11,
+    "median_ms": 13.496,
+    "min_ms": 12.442,
+    "p95_ms": 16.43,
+    "median_planning_ms": 0.156,
+    "median_shared_hits": 2858,
+    "median_shared_reads": 0,
+    "scans": [
+      {
+        "Node Type": "Seq Scan",
+        "Relation Name": "spending_transactions",
+        "Actual Rows": 1,
+        "Rows Removed by Filter": 99999
+      }
+    ],
+    "result": {
+      "rows": 1,
+      "sha256": "b58650ee502497eb999a20a8277e5fe55aae598dac86c04ec346fb0080ae9f40",
+      "count": null
+    }
+  },
+  {
+    "phase": "baseline",
+    "query": "reference_miss",
+    "samples": 11,
+    "median_ms": 12.947,
+    "min_ms": 11.797,
+    "p95_ms": 13.754,
+    "median_planning_ms": 0.142,
+    "median_shared_hits": 2858,
+    "median_shared_reads": 0,
+    "scans": [
+      {
+        "Node Type": "Seq Scan",
+        "Relation Name": "spending_transactions",
+        "Actual Rows": 0,
+        "Rows Removed by Filter": 100000
+      }
+    ],
+    "result": {
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "count": null
+    }
+  },
+  {
+    "phase": "baseline",
+    "query": "reference_api_control",
+    "samples": 11,
+    "median_ms": 0.05,
+    "min_ms": 0.037,
+    "p95_ms": 0.109,
+    "median_planning_ms": 0.254,
+    "median_shared_hits": 6,
+    "median_shared_reads": 0,
+    "scans": [
+      {
+        "Node Type": "Index Scan",
+        "Relation Name": "spending_transactions",
+        "Index Name": "spending_transactions_card_id_source_source_reference_key",
+        "Actual Rows": 1,
+        "Rows Removed by Filter": 0
+      },
+      {
+        "Node Type": "Seq Scan",
+        "Relation Name": "merchants",
+        "Actual Rows": 8,
+        "Rows Removed by Filter": 50
+      },
+      {
+        "Node Type": "Seq Scan",
+        "Relation Name": "categories",
+        "Actual Rows": 3,
+        "Rows Removed by Filter": 30
+      }
+    ],
+    "result": {
+      "rows": 1,
+      "sha256": "e39b8d76630548d386491e6dab4e70dc9a77b1cb6a34742c4d78511c61b8384c",
+      "count": null
+    }
+  },
+  {
+    "phase": "baseline",
+    "query": "json_reference",
+    "samples": 11,
+    "median_ms": 23.802,
+    "min_ms": 22.189,
+    "p95_ms": 25.332,
+    "median_planning_ms": 0.124,
+    "median_shared_hits": 715,
+    "median_shared_reads": 0,
+    "scans": [
+      {
+        "Node Type": "Seq Scan",
+        "Relation Name": "import_batches",
+        "Actual Rows": 1,
+        "Rows Removed by Filter": 9999
+      }
+    ],
+    "result": {
+      "rows": 1,
+      "sha256": "fe89191b78968bcce0440b8dfc034e22c537ee5013bac8bf06adebf34d65c24c",
+      "count": 1
+    }
+  },
+  {
+    "phase": "baseline",
+    "query": "json_rare_error",
+    "samples": 11,
+    "median_ms": 22.72,
+    "min_ms": 21.001,
+    "p95_ms": 25.53,
+    "median_planning_ms": 0.146,
+    "median_shared_hits": 715,
+    "median_shared_reads": 0,
+    "scans": [
+      {
+        "Node Type": "Seq Scan",
+        "Relation Name": "import_batches",
+        "Actual Rows": 100,
+        "Rows Removed by Filter": 9900
+      }
+    ],
+    "result": {
+      "rows": 1,
+      "sha256": "58cd72fb622a9ea4dbb4ed6160a04ca268498acaf88f87c7f2d1f3f8cd551666",
+      "count": 100
+    }
+  },
+  {
+    "phase": "baseline",
+    "query": "json_common_ready_control",
+    "samples": 11,
+    "median_ms": 13.202,
+    "min_ms": 10.746,
+    "p95_ms": 15.004,
+    "median_planning_ms": 0.113,
+    "median_shared_hits": 715,
+    "median_shared_reads": 0,
+    "scans": [
+      {
+        "Node Type": "Seq Scan",
+        "Relation Name": "import_batches",
+        "Actual Rows": 10000,
+        "Rows Removed by Filter": 0
+      }
+    ],
+    "result": {
+      "rows": 1,
+      "sha256": "fd5a0891767cfff24f6187cd58067ba8925f71969bf8e53734beaf90a7d7f933",
+      "count": 10000
+    }
+  },
+  {
+    "phase": "history_btree",
+    "query": "history_month",
+    "samples": 11,
+    "median_ms": 0.569,
+    "min_ms": 0.432,
+    "p95_ms": 0.888,
+    "median_planning_ms": 0.348,
+    "median_shared_hits": 105,
+    "median_shared_reads": 0,
+    "scans": [
+      {
+        "Node Type": "Seq Scan",
+        "Relation Name": "merchants",
+        "Actual Rows": 10,
+        "Rows Removed by Filter": 190
+      },
+      {
+        "Node Type": "Bitmap Heap Scan",
+        "Relation Name": "spending_transactions",
+        "Actual Rows": 81
+      },
+      {
+        "Node Type": "Bitmap Index Scan",
+        "Index Name": "spending_transactions_user_history",
+        "Actual Rows": 419
+      },
+      {
+        "Node Type": "Bitmap Index Scan",
+        "Index Name": "spending_transactions_card_id_source_source_reference_key",
+        "Actual Rows": 978
+      },
+      {
+        "Node Type": "Seq Scan",
+        "Relation Name": "categories",
+        "Actual Rows": 6,
+        "Rows Removed by Filter": 30
+      }
+    ],
+    "result": {
+      "rows": 25,
+      "sha256": "2657a43bc2d46acf07a42bc97249a817cba3d2dfc4584209bfd7e8c684122995",
+      "count": null
+    }
+  },
+  {
+    "phase": "history_btree",
+    "query": "history_year",
+    "samples": 11,
+    "median_ms": 1.997,
+    "min_ms": 1.741,
+    "p95_ms": 3.046,
+    "median_planning_ms": 0.458,
+    "median_shared_hits": 843,
+    "median_shared_reads": 0,
+    "scans": [
+      {
+        "Node Type": "Bitmap Heap Scan",
+        "Relation Name": "spending_transactions",
+        "Actual Rows": 978,
+        "Rows Removed by Filter": 0
+      },
+      {
+        "Node Type": "Bitmap Index Scan",
+        "Index Name": "spending_transactions_user_id_card_id_id_key",
+        "Actual Rows": 978
+      },
+      {
+        "Node Type": "Seq Scan",
+        "Relation Name": "merchants",
+        "Actual Rows": 10,
+        "Rows Removed by Filter": 190
+      },
+      {
+        "Node Type": "Seq Scan",
+        "Relation Name": "categories",
+        "Actual Rows": 6,
+        "Rows Removed by Filter": 114
+      }
+    ],
+    "result": {
+      "rows": 25,
+      "sha256": "6f7ad82bcd04088a9cb9f05962f839cf27d8167e1369e0e5d8b66582d5667e27",
+      "count": null
+    }
+  },
+  {
+    "phase": "history_btree",
+    "query": "history_all_cards_control",
+    "samples": 11,
+    "median_ms": 0.133,
+    "min_ms": 0.085,
+    "p95_ms": 0.32,
+    "median_planning_ms": 0.395,
+    "median_shared_hits": 47,
+    "median_shared_reads": 0,
+    "scans": [
+      {
+        "Node Type": "Index Scan",
+        "Relation Name": "spending_transactions",
+        "Index Name": "spending_transactions_user_history",
+        "Actual Rows": 25
+      },
+      {
+        "Node Type": "Index Scan",
+        "Relation Name": "merchants",
+        "Index Name": "merchants_pkey",
+        "Actual Rows": 1,
+        "Rows Removed by Filter": 0
+      },
+      {
+        "Node Type": "Seq Scan",
+        "Relation Name": "categories",
+        "Actual Rows": 6,
+        "Rows Removed by Filter": 30
+      }
+    ],
+    "result": {
+      "rows": 25,
+      "sha256": "006c8ca6229bda3085e288bbce03481391860dd0bad6d4d98cc343b33df9e120",
+      "count": null
+    }
+  },
+  {
+    "phase": "history_after_drop",
+    "query": "history_month",
+    "samples": 11,
+    "median_ms": 0.589,
+    "min_ms": 0.54,
+    "p95_ms": 0.902,
+    "median_planning_ms": 0.35,
+    "median_shared_hits": 105,
+    "median_shared_reads": 0,
+    "scans": [
+      {
+        "Node Type": "Seq Scan",
+        "Relation Name": "merchants",
+        "Actual Rows": 10,
+        "Rows Removed by Filter": 190
+      },
+      {
+        "Node Type": "Bitmap Heap Scan",
+        "Relation Name": "spending_transactions",
+        "Actual Rows": 81
+      },
+      {
+        "Node Type": "Bitmap Index Scan",
+        "Index Name": "spending_transactions_user_history",
+        "Actual Rows": 419
+      },
+      {
+        "Node Type": "Bitmap Index Scan",
+        "Index Name": "spending_transactions_card_id_source_source_reference_key",
+        "Actual Rows": 978
+      },
+      {
+        "Node Type": "Seq Scan",
+        "Relation Name": "categories",
+        "Actual Rows": 6,
+        "Rows Removed by Filter": 30
+      }
+    ],
+    "result": {
+      "rows": 25,
+      "sha256": "2657a43bc2d46acf07a42bc97249a817cba3d2dfc4584209bfd7e8c684122995",
+      "count": null
+    }
+  },
+  {
+    "phase": "history_after_drop",
+    "query": "history_year",
+    "samples": 11,
+    "median_ms": 2.136,
+    "min_ms": 1.516,
+    "p95_ms": 3.183,
+    "median_planning_ms": 0.481,
+    "median_shared_hits": 843,
+    "median_shared_reads": 0,
+    "scans": [
+      {
+        "Node Type": "Bitmap Heap Scan",
+        "Relation Name": "spending_transactions",
+        "Actual Rows": 978,
+        "Rows Removed by Filter": 0
+      },
+      {
+        "Node Type": "Bitmap Index Scan",
+        "Index Name": "spending_transactions_user_id_card_id_id_key",
+        "Actual Rows": 978
+      },
+      {
+        "Node Type": "Seq Scan",
+        "Relation Name": "merchants",
+        "Actual Rows": 10,
+        "Rows Removed by Filter": 190
+      },
+      {
+        "Node Type": "Seq Scan",
+        "Relation Name": "categories",
+        "Actual Rows": 6,
+        "Rows Removed by Filter": 114
+      }
+    ],
+    "result": {
+      "rows": 25,
+      "sha256": "6f7ad82bcd04088a9cb9f05962f839cf27d8167e1369e0e5d8b66582d5667e27",
+      "count": null
+    }
+  },
+  {
+    "phase": "history_after_drop",
+    "query": "history_all_cards_control",
+    "samples": 11,
+    "median_ms": 0.114,
+    "min_ms": 0.083,
+    "p95_ms": 0.234,
+    "median_planning_ms": 0.32,
+    "median_shared_hits": 47,
+    "median_shared_reads": 0,
+    "scans": [
+      {
+        "Node Type": "Index Scan",
+        "Relation Name": "spending_transactions",
+        "Index Name": "spending_transactions_user_history",
+        "Actual Rows": 25
+      },
+      {
+        "Node Type": "Index Scan",
+        "Relation Name": "merchants",
+        "Index Name": "merchants_pkey",
+        "Actual Rows": 1,
+        "Rows Removed by Filter": 0
+      },
+      {
+        "Node Type": "Seq Scan",
+        "Relation Name": "categories",
+        "Actual Rows": 6,
+        "Rows Removed by Filter": 30
+      }
+    ],
+    "result": {
+      "rows": 25,
+      "sha256": "006c8ca6229bda3085e288bbce03481391860dd0bad6d4d98cc343b33df9e120",
+      "count": null
+    }
+  },
+  {
+    "phase": "reference_btree",
+    "query": "reference_hit",
+    "samples": 22,
+    "median_ms": 0.0335,
+    "min_ms": 0.017,
+    "p95_ms": 0.07,
+    "median_planning_ms": 0.092,
+    "median_shared_hits": 4.0,
+    "median_shared_reads": 0.0,
+    "scans": [
+      {
+        "Node Type": "Index Scan",
+        "Relation Name": "spending_transactions",
+        "Index Name": "benchmark_candidate",
+        "Actual Rows": 1
+      }
+    ],
+    "result": {
+      "rows": 1,
+      "sha256": "b58650ee502497eb999a20a8277e5fe55aae598dac86c04ec346fb0080ae9f40",
+      "count": null
+    }
+  },
+  {
+    "phase": "reference_btree",
+    "query": "reference_miss",
+    "samples": 22,
+    "median_ms": 0.0225,
+    "min_ms": 0.015,
+    "p95_ms": 0.048,
+    "median_planning_ms": 0.0645,
+    "median_shared_hits": 3.0,
+    "median_shared_reads": 0.0,
+    "scans": [
+      {
+        "Node Type": "Index Scan",
+        "Relation Name": "spending_transactions",
+        "Index Name": "benchmark_candidate",
+        "Actual Rows": 0
+      }
+    ],
+    "result": {
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "count": null
+    }
+  },
+  {
+    "phase": "reference_btree",
+    "query": "reference_api_control",
+    "samples": 22,
+    "median_ms": 0.0535,
+    "min_ms": 0.041,
+    "p95_ms": 0.121,
+    "median_planning_ms": 0.319,
+    "median_shared_hits": 6.0,
+    "median_shared_reads": 0.0,
+    "scans": [
+      {
+        "Node Type": "Index Scan",
+        "Relation Name": "spending_transactions",
+        "Index Name": "benchmark_candidate",
+        "Actual Rows": 1,
+        "Rows Removed by Filter": 0
+      },
+      {
+        "Node Type": "Seq Scan",
+        "Relation Name": "merchants",
+        "Actual Rows": 8,
+        "Rows Removed by Filter": 50
+      },
+      {
+        "Node Type": "Seq Scan",
+        "Relation Name": "categories",
+        "Actual Rows": 3,
+        "Rows Removed by Filter": 30
+      }
+    ],
+    "result": {
+      "rows": 1,
+      "sha256": "e39b8d76630548d386491e6dab4e70dc9a77b1cb6a34742c4d78511c61b8384c",
+      "count": null
+    }
+  },
+  {
+    "phase": "reference_hash",
+    "query": "reference_hit",
+    "samples": 22,
+    "median_ms": 0.01,
+    "min_ms": 0.007,
+    "p95_ms": 0.019,
+    "median_planning_ms": 0.0455,
+    "median_shared_hits": 2.0,
+    "median_shared_reads": 0.0,
+    "scans": [
+      {
+        "Node Type": "Index Scan",
+        "Relation Name": "spending_transactions",
+        "Index Name": "benchmark_candidate",
+        "Actual Rows": 1
+      }
+    ],
+    "result": {
+      "rows": 1,
+      "sha256": "b58650ee502497eb999a20a8277e5fe55aae598dac86c04ec346fb0080ae9f40",
+      "count": null
+    }
+  },
+  {
+    "phase": "reference_hash",
+    "query": "reference_miss",
+    "samples": 22,
+    "median_ms": 0.0085,
+    "min_ms": 0.007,
+    "p95_ms": 0.018,
+    "median_planning_ms": 0.0535,
+    "median_shared_hits": 1.0,
+    "median_shared_reads": 0.0,
+    "scans": [
+      {
+        "Node Type": "Index Scan",
+        "Relation Name": "spending_transactions",
+        "Index Name": "benchmark_candidate",
+        "Actual Rows": 0
+      }
+    ],
+    "result": {
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "count": null
+    }
+  },
+  {
+    "phase": "reference_hash",
+    "query": "reference_api_control",
+    "samples": 22,
+    "median_ms": 0.035,
+    "min_ms": 0.026,
+    "p95_ms": 0.111,
+    "median_planning_ms": 0.248,
+    "median_shared_hits": 4.0,
+    "median_shared_reads": 0.0,
+    "scans": [
+      {
+        "Node Type": "Index Scan",
+        "Relation Name": "spending_transactions",
+        "Index Name": "benchmark_candidate",
+        "Actual Rows": 1,
+        "Rows Removed by Filter": 0
+      },
+      {
+        "Node Type": "Seq Scan",
+        "Relation Name": "merchants",
+        "Actual Rows": 8,
+        "Rows Removed by Filter": 50
+      },
+      {
+        "Node Type": "Seq Scan",
+        "Relation Name": "categories",
+        "Actual Rows": 3,
+        "Rows Removed by Filter": 30
+      }
+    ],
+    "result": {
+      "rows": 1,
+      "sha256": "e39b8d76630548d386491e6dab4e70dc9a77b1cb6a34742c4d78511c61b8384c",
+      "count": null
+    }
+  },
+  {
+    "phase": "reference_after_drop",
+    "query": "reference_hit",
+    "samples": 11,
+    "median_ms": 12.444,
+    "min_ms": 11.354,
+    "p95_ms": 13.95,
+    "median_planning_ms": 0.188,
+    "median_shared_hits": 2858,
+    "median_shared_reads": 0,
+    "scans": [
+      {
+        "Node Type": "Seq Scan",
+        "Relation Name": "spending_transactions",
+        "Actual Rows": 1,
+        "Rows Removed by Filter": 99999
+      }
+    ],
+    "result": {
+      "rows": 1,
+      "sha256": "b58650ee502497eb999a20a8277e5fe55aae598dac86c04ec346fb0080ae9f40",
+      "count": null
+    }
+  },
+  {
+    "phase": "reference_after_drop",
+    "query": "reference_miss",
+    "samples": 11,
+    "median_ms": 13.882,
+    "min_ms": 11.38,
+    "p95_ms": 14.575,
+    "median_planning_ms": 0.142,
+    "median_shared_hits": 2858,
+    "median_shared_reads": 0,
+    "scans": [
+      {
+        "Node Type": "Seq Scan",
+        "Relation Name": "spending_transactions",
+        "Actual Rows": 0,
+        "Rows Removed by Filter": 100000
+      }
+    ],
+    "result": {
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "count": null
+    }
+  },
+  {
+    "phase": "reference_after_drop",
+    "query": "reference_api_control",
+    "samples": 11,
+    "median_ms": 0.044,
+    "min_ms": 0.036,
+    "p95_ms": 0.065,
+    "median_planning_ms": 0.249,
+    "median_shared_hits": 6,
+    "median_shared_reads": 0,
+    "scans": [
+      {
+        "Node Type": "Index Scan",
+        "Relation Name": "spending_transactions",
+        "Index Name": "spending_transactions_card_id_source_source_reference_key",
+        "Actual Rows": 1,
+        "Rows Removed by Filter": 0
+      },
+      {
+        "Node Type": "Seq Scan",
+        "Relation Name": "merchants",
+        "Actual Rows": 8,
+        "Rows Removed by Filter": 50
+      },
+      {
+        "Node Type": "Seq Scan",
+        "Relation Name": "categories",
+        "Actual Rows": 3,
+        "Rows Removed by Filter": 30
+      }
+    ],
+    "result": {
+      "rows": 1,
+      "sha256": "e39b8d76630548d386491e6dab4e70dc9a77b1cb6a34742c4d78511c61b8384c",
+      "count": null
+    }
+  },
+  {
+    "phase": "json_gin",
+    "query": "json_reference",
+    "samples": 11,
+    "median_ms": 0.024,
+    "min_ms": 0.021,
+    "p95_ms": 0.045,
+    "median_planning_ms": 0.042,
+    "median_shared_hits": 5,
+    "median_shared_reads": 0,
+    "scans": [
+      {
+        "Node Type": "Bitmap Heap Scan",
+        "Relation Name": "import_batches",
+        "Actual Rows": 1
+      },
+      {
+        "Node Type": "Bitmap Index Scan",
+        "Index Name": "benchmark_candidate",
+        "Actual Rows": 1
+      }
+    ],
+    "result": {
+      "rows": 1,
+      "sha256": "fe89191b78968bcce0440b8dfc034e22c537ee5013bac8bf06adebf34d65c24c",
+      "count": 1
+    }
+  },
+  {
+    "phase": "json_gin",
+    "query": "json_rare_error",
+    "samples": 11,
+    "median_ms": 0.21,
+    "min_ms": 0.167,
+    "p95_ms": 0.389,
+    "median_planning_ms": 0.055,
+    "median_shared_hits": 104,
+    "median_shared_reads": 0,
+    "scans": [
+      {
+        "Node Type": "Bitmap Heap Scan",
+        "Relation Name": "import_batches",
+        "Actual Rows": 100
+      },
+      {
+        "Node Type": "Bitmap Index Scan",
+        "Index Name": "benchmark_candidate",
+        "Actual Rows": 100
+      }
+    ],
+    "result": {
+      "rows": 1,
+      "sha256": "58cd72fb622a9ea4dbb4ed6160a04ca268498acaf88f87c7f2d1f3f8cd551666",
+      "count": 100
+    }
+  },
+  {
+    "phase": "json_gin",
+    "query": "json_common_ready_control",
+    "samples": 11,
+    "median_ms": 15.885,
+    "min_ms": 12.162,
+    "p95_ms": 18.325,
+    "median_planning_ms": 0.166,
+    "median_shared_hits": 722,
+    "median_shared_reads": 0,
+    "scans": [
+      {
+        "Node Type": "Bitmap Heap Scan",
+        "Relation Name": "import_batches",
+        "Actual Rows": 10000
+      },
+      {
+        "Node Type": "Bitmap Index Scan",
+        "Index Name": "benchmark_candidate",
+        "Actual Rows": 10000
+      }
+    ],
+    "result": {
+      "rows": 1,
+      "sha256": "fd5a0891767cfff24f6187cd58067ba8925f71969bf8e53734beaf90a7d7f933",
+      "count": 10000
+    }
+  },
+  {
+    "phase": "json_after_drop",
+    "query": "json_reference",
+    "samples": 11,
+    "median_ms": 28.178,
+    "min_ms": 21.47,
+    "p95_ms": 30.86,
+    "median_planning_ms": 0.105,
+    "median_shared_hits": 715,
+    "median_shared_reads": 0,
+    "scans": [
+      {
+        "Node Type": "Seq Scan",
+        "Relation Name": "import_batches",
+        "Actual Rows": 1,
+        "Rows Removed by Filter": 9999
+      }
+    ],
+    "result": {
+      "rows": 1,
+      "sha256": "fe89191b78968bcce0440b8dfc034e22c537ee5013bac8bf06adebf34d65c24c",
+      "count": 1
+    }
+  },
+  {
+    "phase": "json_after_drop",
+    "query": "json_rare_error",
+    "samples": 11,
+    "median_ms": 25.994,
+    "min_ms": 19.597,
+    "p95_ms": 28.303,
+    "median_planning_ms": 0.106,
+    "median_shared_hits": 715,
+    "median_shared_reads": 0,
+    "scans": [
+      {
+        "Node Type": "Seq Scan",
+        "Relation Name": "import_batches",
+        "Actual Rows": 100,
+        "Rows Removed by Filter": 9900
+      }
+    ],
+    "result": {
+      "rows": 1,
+      "sha256": "58cd72fb622a9ea4dbb4ed6160a04ca268498acaf88f87c7f2d1f3f8cd551666",
+      "count": 100
+    }
+  },
+  {
+    "phase": "json_after_drop",
+    "query": "json_common_ready_control",
+    "samples": 11,
+    "median_ms": 15.282,
+    "min_ms": 10.941,
+    "p95_ms": 16.11,
+    "median_planning_ms": 0.117,
+    "median_shared_hits": 715,
+    "median_shared_reads": 0,
+    "scans": [
+      {
+        "Node Type": "Seq Scan",
+        "Relation Name": "import_batches",
+        "Actual Rows": 10000,
+        "Rows Removed by Filter": 0
+      }
+    ],
+    "result": {
+      "rows": 1,
+      "sha256": "fd5a0891767cfff24f6187cd58067ba8925f71969bf8e53734beaf90a7d7f933",
+      "count": 10000
+    }
+  }
+]

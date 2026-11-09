@@ -1,0 +1,149 @@
+{
+  "size": 100000,
+  "seed": 20261109,
+  "schema": "bench_100000_d3d5e2ec67314351942611546592c6a7",
+  "schema_retained": false,
+  "started_utc": "2026-11-09T10:23:38.365104+00:00",
+  "seed_wall_seconds": 15.956010399968363,
+  "repeats_per_phase": 11,
+  "warmups_per_query_per_phase": 3,
+  "correctness": {
+    "transaction_sha256": "267dc4ac5b5d83da453f775f6fab98ed7cb5d46afb41c545ab835831af9e4a10",
+    "transactions": 100000,
+    "expected_spent": "224933124.15",
+    "observed_spent": "224933124.15",
+    "transaction_audit_events": 100000,
+    "transaction_outbox": 100000,
+    "import_batches": 10000
+  },
+  "settings": [
+    {
+      "name": "block_size",
+      "setting": "8192",
+      "unit": null
+    },
+    {
+      "name": "default_statistics_target",
+      "setting": "100",
+      "unit": null
+    },
+    {
+      "name": "effective_cache_size",
+      "setting": "524288",
+      "unit": "8kB"
+    },
+    {
+      "name": "jit",
+      "setting": "on",
+      "unit": null
+    },
+    {
+      "name": "maintenance_work_mem",
+      "setting": "65536",
+      "unit": "kB"
+    },
+    {
+      "name": "max_parallel_workers_per_gather",
+      "setting": "2",
+      "unit": null
+    },
+    {
+      "name": "random_page_cost",
+      "setting": "4",
+      "unit": null
+    },
+    {
+      "name": "seq_page_cost",
+      "setting": "1",
+      "unit": null
+    },
+    {
+      "name": "server_version",
+      "setting": "15.17",
+      "unit": null
+    },
+    {
+      "name": "shared_buffers",
+      "setting": "16384",
+      "unit": "8kB"
+    },
+    {
+      "name": "track_io_timing",
+      "setting": "off",
+      "unit": null
+    },
+    {
+      "name": "work_mem",
+      "setting": "4096",
+      "unit": "kB"
+    }
+  ],
+  "version": "PostgreSQL 15.17, compiled by Visual C++ build 1944, 64-bit",
+  "table_sizes": [
+    {
+      "relname": "biometric_sessions",
+      "heap_bytes": 0,
+      "total_bytes": 32768
+    },
+    {
+      "relname": "budgets",
+      "heap_bytes": 0,
+      "total_bytes": 16384
+    },
+    {
+      "relname": "card_profiles",
+      "heap_bytes": 16384,
+      "total_bytes": 122880
+    },
+    {
+      "relname": "categories",
+      "heap_bytes": 16384,
+      "total_bytes": 106496
+    },
+    {
+      "relname": "device_registrations",
+      "heap_bytes": 0,
+      "total_bytes": 32768
+    },
+    {
+      "relname": "import_batches",
+      "heap_bytes": 5857280,
+      "total_bytes": 8945664
+    },
+    {
+      "relname": "merchants",
+      "heap_bytes": 24576,
+      "total_bytes": 155648
+    },
+    {
+      "relname": "notification_events",
+      "heap_bytes": 0,
+      "total_bytes": 40960
+    },
+    {
+      "relname": "sessions",
+      "heap_bytes": 0,
+      "total_bytes": 32768
+    },
+    {
+      "relname": "spending_transactions",
+      "heap_bytes": 23412736,
+      "total_bytes": 72130560
+    },
+    {
+      "relname": "transaction_audit_events",
+      "heap_bytes": 5218304,
+      "total_bytes": 9609216
+    },
+    {
+      "relname": "transaction_outbox",
+      "heap_bytes": 5218304,
+      "total_bytes": 9609216
+    },
+    {
+      "relname": "users",
+      "heap_bytes": 8192,
+      "total_bytes": 81920
+    }
+  ]
+}

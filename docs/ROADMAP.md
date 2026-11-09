@@ -45,11 +45,13 @@ Weeks are sequential working blocks, not promised calendar dates. Week 4 has the
 
 ## Ordered implementation backlog
 
-Progress as of 9 November 2026: **39 of 47 checklist items complete (83%)**,
-with 8 remaining (17%). This is an item count, not an estimate of effort or
+Progress as of 9 November 2026: **44 of 47 checklist items complete (94%)**,
+with 3 remaining (6%). This is an item count, not an estimate of effort or
 remaining calendar time. See [design and acceptance contracts](DESIGN.md) and
 [budget/report verification](MILESTONE_07.md). Audit-role hardening is verified
-in [milestone 9](MILESTONE_09.md). Next work: database evaluation and delivery.
+in [milestone 9](MILESTONE_09.md). The five index-evaluation items are verified
+in [database evaluation](DATABASE_EVALUATION.md). Next work: finish the
+concurrency/rollback evidence package, backup restoration and delivery.
 
 ### 1. Establish the foundation
 
@@ -121,11 +123,11 @@ See [verification evidence](MILESTONE_08.md) and [Firebase setup](NOTIFICATIONS.
 
 ### 7. Evaluate and package
 
-- [ ] Evaluate composite B-tree `(card_id, occurred_at)` for history queries.
-- [ ] Compare B-tree versus hash for `source_reference` equality with only one candidate active at a time; document other indexes that may affect the plan.
-- [ ] Evaluate GIN for a defined JSONB containment workload.
-- [ ] Repeat identical workloads before/after indexing on both dataset sizes; preserve seeds, SQL, environment details and raw `EXPLAIN (ANALYZE, BUFFERS)` outputs.
-- [ ] Report median query time, scan choice, buffer activity and index size without inventing improvements.
+- [x] Evaluate composite B-tree `(card_id, occurred_at)` for history queries.
+- [x] Compare B-tree versus hash for `source_reference` equality with only one candidate active at a time; document other indexes that may affect the plan.
+- [x] Evaluate GIN for a defined JSONB containment workload.
+- [x] Repeat identical workloads before/after indexing on both dataset sizes; preserve seeds, SQL, environment details and raw `EXPLAIN (ANALYZE, BUFFERS)` outputs.
+- [x] Report median query time, scan choice, buffer activity and index size without inventing improvements.
 - [ ] Prove concurrent duplicates commit one transaction and one event; prove failed writes roll back transaction/audit/outbox together.
 - [ ] Rehearse database backup and restoration; verify row counts and known totals afterward.
 - [ ] Complete real-device notification/deep-link checks, release packaging, setup instructions and a scripted demonstration.

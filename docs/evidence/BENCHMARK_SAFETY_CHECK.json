@@ -1,0 +1,10 @@
+{
+  "benchmark_schemas_created_and_removed": 4,
+  "remaining_created_schemas": [],
+  "application_database_after_experiments": {
+    "runtime_role": "spendtrail_runtime",
+    "transactions": 9,
+    "audit_events": 9,
+    "spent": "18998.55"
+  }
+}

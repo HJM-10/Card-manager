@@ -1,0 +1,77 @@
+{
+  "history_month": {
+    "sql": "\n    SELECT t.id, t.card_id, m.name AS merchant, t.amount, t.occurred_at,\n           t.source, t.source_reference, t.kind, t.status, t.channel,\n           t.category_id, t.recorded_category_id, c.name AS category, t.original_purchase_id\n    FROM spending_transactions t\n    JOIN merchants m ON (m.user_id, m.id) = (t.user_id, t.merchant_id)\n    LEFT JOIN categories c ON (c.user_id, c.id) = (t.user_id, t.category_id)\n WHERE t.user_id = %s AND t.card_id = %s\n        AND t.occurred_at >= %s AND t.occurred_at < %s\n        ORDER BY t.occurred_at DESC, t.id DESC LIMIT 25 OFFSET 0",
+    "parameters": [
+      "a744b4c5-9e43-5dc1-ab28-4cfcd41445a6",
+      "9376333b-2f27-541a-9987-c209efb79d56",
+      "2026-06-01T00:00:00Z",
+      "2026-07-01T00:00:00Z"
+    ]
+  },
+  "history_year": {
+    "sql": "\n    SELECT t.id, t.card_id, m.name AS merchant, t.amount, t.occurred_at,\n           t.source, t.source_reference, t.kind, t.status, t.channel,\n           t.category_id, t.recorded_category_id, c.name AS category, t.original_purchase_id\n    FROM spending_transactions t\n    JOIN merchants m ON (m.user_id, m.id) = (t.user_id, t.merchant_id)\n    LEFT JOIN categories c ON (c.user_id, c.id) = (t.user_id, t.category_id)\n WHERE t.user_id = %s AND t.card_id = %s\n        AND t.occurred_at >= %s AND t.occurred_at < %s\n        ORDER BY t.occurred_at DESC, t.id DESC LIMIT 25 OFFSET 0",
+    "parameters": [
+      "a744b4c5-9e43-5dc1-ab28-4cfcd41445a6",
+      "9376333b-2f27-541a-9987-c209efb79d56",
+      "2026-01-01 00:00:00+00:00",
+      "2027-01-01T00:00:00Z"
+    ]
+  },
+  "history_all_cards_control": {
+    "sql": "\n    SELECT t.id, t.card_id, m.name AS merchant, t.amount, t.occurred_at,\n           t.source, t.source_reference, t.kind, t.status, t.channel,\n           t.category_id, t.recorded_category_id, c.name AS category, t.original_purchase_id\n    FROM spending_transactions t\n    JOIN merchants m ON (m.user_id, m.id) = (t.user_id, t.merchant_id)\n    LEFT JOIN categories c ON (c.user_id, c.id) = (t.user_id, t.category_id)\n WHERE t.user_id = %s\n            ORDER BY t.occurred_at DESC, t.id DESC LIMIT 25 OFFSET 0",
+    "parameters": [
+      "a744b4c5-9e43-5dc1-ab28-4cfcd41445a6"
+    ]
+  },
+  "reference_hit": {
+    "sql": "SELECT id, card_id, amount FROM spending_transactions WHERE source_reference = %s",
+    "parameters": [
+      "55b3976e-fdde-5570-a05a-8f2eaf1d8bd6"
+    ]
+  },
+  "reference_miss": {
+    "sql": "SELECT id, card_id, amount FROM spending_transactions WHERE source_reference = %s",
+    "parameters": [
+      "dca59bc4-a1f2-58f5-b926-c436681ed73d"
+    ]
+  },
+  "reference_api_control": {
+    "sql": "\n    SELECT t.id, t.card_id, m.name AS merchant, t.amount, t.occurred_at,\n           t.source, t.source_reference, t.kind, t.status, t.channel,\n           t.category_id, t.recorded_category_id, c.name AS category, t.original_purchase_id\n    FROM spending_transactions t\n    JOIN merchants m ON (m.user_id, m.id) = (t.user_id, t.merchant_id)\n    LEFT JOIN categories c ON (c.user_id, c.id) = (t.user_id, t.category_id)\n WHERE t.user_id = %s AND t.card_id = %s\n            AND t.source = %s AND t.source_reference = %s",
+    "parameters": [
+      "a744b4c5-9e43-5dc1-ab28-4cfcd41445a6",
+      "9376333b-2f27-541a-9987-c209efb79d56",
+      "simulation",
+      "55b3976e-fdde-5570-a05a-8f2eaf1d8bd6"
+    ]
+  },
+  "json_reference": {
+    "sql": "SELECT count(*) AS n FROM import_batches WHERE rows @> %s",
+    "parameters": [
+      [
+        {
+          "reference": "preview-5000-0"
+        }
+      ]
+    ]
+  },
+  "json_rare_error": {
+    "sql": "SELECT count(*) AS n FROM import_batches WHERE rows @> %s",
+    "parameters": [
+      [
+        {
+          "state": "error"
+        }
+      ]
+    ]
+  },
+  "json_common_ready_control": {
+    "sql": "SELECT count(*) AS n FROM import_batches WHERE rows @> %s",
+    "parameters": [
+      [
+        {
+          "state": "ready"
+        }
+      ]
+    ]
+  }
+}

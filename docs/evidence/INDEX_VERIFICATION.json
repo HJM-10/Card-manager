@@ -1,0 +1,22 @@
+{
+  "bundles": [
+    "docs\\evidence\\indexes-20261109",
+    "docs\\evidence\\indexes-20261109-repeat"
+  ],
+  "raw_plan_samples": 1584,
+  "independent_data_sql_parameters_and_results_identical": true,
+  "candidate_isolation_and_existing_indexes_verified": true,
+  "raw_plan_times_buffers_and_reported_medians_verified": true,
+  "benchmark_source_sha256": "7a1c33f56e95d2e283d6ce3d73c71163c916f0bffea274dd23fe817b0c75ae54",
+  "migration_sha256": {
+    "001_accounts_cards.sql": "68166154f53f87260a69a2c43ccfd18870b24581c63954ad12c1edc4e278229c",
+    "002_manual_purchases.sql": "61b104c10752ca5996840ca836dab5cb5d83e32c24028beba76a6f3862d4b11a",
+    "003_categories_history.sql": "6eff0ff71a24f1a1d5b5040351271632d35f6a9b995f88ae966237e9930400d3",
+    "004_biometric_sessions.sql": "b6c21a11d4a596a16d796aa23e42df2a837f77d2154e2046662851d9813158ae",
+    "005_csv_imports.sql": "f265d7a4a7016de4ee29f173fabbffd70a37a9ef418cc18240104f4a080a0289",
+    "006_payment_simulation.sql": "3b0d94b33a7020bb1c9862d05216612daeeaaf9238ee0d1e5bf3a63c4a535e5b",
+    "007_monthly_budgets.sql": "99a32dd069d0c9cecb78c964c9a80b6b6037efe2eb4968e2d1b960b727d3e297",
+    "008_transaction_notifications.sql": "a6d5963dd99c70328113406e0c4068de1ce0db26c596132b23c22ca58c9aef75",
+    "009_audit_protection.sql": "142b9f3cd7035211d226fca71e3b38fd28eda5ec49676050e39a52eeba7dd801"
+  }
+}

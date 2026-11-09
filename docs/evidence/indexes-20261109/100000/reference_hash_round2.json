@@ -1,0 +1,422 @@
+{
+  "name": "reference_hash_round2",
+  "indexes": [
+    {
+      "name": "benchmark_candidate",
+      "definition": "CREATE INDEX benchmark_candidate ON bench_100000_0cf7a21a1c8a4487af110a489b8f6041.spending_transactions USING hash (source_reference)",
+      "bytes": 4210688
+    },
+    {
+      "name": "biometric_sessions_pkey",
+      "definition": "CREATE UNIQUE INDEX biometric_sessions_pkey ON bench_100000_0cf7a21a1c8a4487af110a489b8f6041.biometric_sessions USING btree (id)",
+      "bytes": 8192
+    },
+    {
+      "name": "biometric_sessions_token_hash_key",
+      "definition": "CREATE UNIQUE INDEX biometric_sessions_token_hash_key ON bench_100000_0cf7a21a1c8a4487af110a489b8f6041.biometric_sessions USING btree (token_hash)",
+      "bytes": 8192
+    },
+    {
+      "name": "biometric_sessions_user_id_id_key",
+      "definition": "CREATE UNIQUE INDEX biometric_sessions_user_id_id_key ON bench_100000_0cf7a21a1c8a4487af110a489b8f6041.biometric_sessions USING btree (user_id, id)",
+      "bytes": 8192
+    },
+    {
+      "name": "budgets_pkey",
+      "definition": "CREATE UNIQUE INDEX budgets_pkey ON bench_100000_0cf7a21a1c8a4487af110a489b8f6041.budgets USING btree (id)",
+      "bytes": 8192
+    },
+    {
+      "name": "budgets_user_id_category_id_month_key",
+      "definition": "CREATE UNIQUE INDEX budgets_user_id_category_id_month_key ON bench_100000_0cf7a21a1c8a4487af110a489b8f6041.budgets USING btree (user_id, category_id, month)",
+      "bytes": 8192
+    },
+    {
+      "name": "card_profiles_pkey",
+      "definition": "CREATE UNIQUE INDEX card_profiles_pkey ON bench_100000_0cf7a21a1c8a4487af110a489b8f6041.card_profiles USING btree (id)",
+      "bytes": 16384
+    },
+    {
+      "name": "card_profiles_user_created",
+      "definition": "CREATE INDEX card_profiles_user_created ON bench_100000_0cf7a21a1c8a4487af110a489b8f6041.card_profiles USING btree (user_id, created_at)",
+      "bytes": 16384
+    },
+    {
+      "name": "card_profiles_user_id_id_key",
+      "definition": "CREATE UNIQUE INDEX card_profiles_user_id_id_key ON bench_100000_0cf7a21a1c8a4487af110a489b8f6041.card_profiles USING btree (user_id, id)",
+      "bytes": 16384
+    },
+    {
+      "name": "card_profiles_user_id_network_last4_key",
+      "definition": "CREATE UNIQUE INDEX card_profiles_user_id_network_last4_key ON bench_100000_0cf7a21a1c8a4487af110a489b8f6041.card_profiles USING btree (user_id, network, last4)",
+      "bytes": 16384
+    },
+    {
+      "name": "categories_owner_name",
+      "definition": "CREATE UNIQUE INDEX categories_owner_name ON bench_100000_0cf7a21a1c8a4487af110a489b8f6041.categories USING btree (user_id, lower(name))",
+      "bytes": 16384
+    },
+    {
+      "name": "categories_pkey",
+      "definition": "CREATE UNIQUE INDEX categories_pkey ON bench_100000_0cf7a21a1c8a4487af110a489b8f6041.categories USING btree (id)",
+      "bytes": 16384
+    },
+    {
+      "name": "categories_user_id_id_key",
+      "definition": "CREATE UNIQUE INDEX categories_user_id_id_key ON bench_100000_0cf7a21a1c8a4487af110a489b8f6041.categories USING btree (user_id, id)",
+      "bytes": 16384
+    },
+    {
+      "name": "device_active_token",
+      "definition": "CREATE UNIQUE INDEX device_active_token ON bench_100000_0cf7a21a1c8a4487af110a489b8f6041.device_registrations USING btree (token) WHERE enabled",
+      "bytes": 8192
+    },
+    {
+      "name": "device_registrations_pkey",
+      "definition": "CREATE UNIQUE INDEX device_registrations_pkey ON bench_100000_0cf7a21a1c8a4487af110a489b8f6041.device_registrations USING btree (id)",
+      "bytes": 8192
+    },
+    {
+      "name": "device_registrations_user_id_id_key",
+      "definition": "CREATE UNIQUE INDEX device_registrations_user_id_id_key ON bench_100000_0cf7a21a1c8a4487af110a489b8f6041.device_registrations USING btree (user_id, id)",
+      "bytes": 8192
+    },
+    {
+      "name": "import_batches_pkey",
+      "definition": "CREATE UNIQUE INDEX import_batches_pkey ON bench_100000_0cf7a21a1c8a4487af110a489b8f6041.import_batches USING btree (id)",
+      "bytes": 417792
+    },
+    {
+      "name": "import_batches_user_id_card_id_file_hash_key",
+      "definition": "CREATE UNIQUE INDEX import_batches_user_id_card_id_file_hash_key ON bench_100000_0cf7a21a1c8a4487af110a489b8f6041.import_batches USING btree (user_id, card_id, file_hash)",
+      "bytes": 1736704
+    },
+    {
+      "name": "import_batches_user_id_card_id_id_key",
+      "definition": "CREATE UNIQUE INDEX import_batches_user_id_card_id_id_key ON bench_100000_0cf7a21a1c8a4487af110a489b8f6041.import_batches USING btree (user_id, card_id, id)",
+      "bytes": 892928
+    },
+    {
+      "name": "merchants_pkey",
+      "definition": "CREATE UNIQUE INDEX merchants_pkey ON bench_100000_0cf7a21a1c8a4487af110a489b8f6041.merchants USING btree (id)",
+      "bytes": 16384
+    },
+    {
+      "name": "merchants_user_id_id_key",
+      "definition": "CREATE UNIQUE INDEX merchants_user_id_id_key ON bench_100000_0cf7a21a1c8a4487af110a489b8f6041.merchants USING btree (user_id, id)",
+      "bytes": 32768
+    },
+    {
+      "name": "merchants_user_id_name_key",
+      "definition": "CREATE UNIQUE INDEX merchants_user_id_name_key ON bench_100000_0cf7a21a1c8a4487af110a489b8f6041.merchants USING btree (user_id, name)",
+      "bytes": 40960
+    },
+    {
+      "name": "notification_due",
+      "definition": "CREATE INDEX notification_due ON bench_100000_0cf7a21a1c8a4487af110a489b8f6041.notification_events USING btree (next_attempt_at, created_at) WHERE (status = ANY (ARRAY['pending'::text, 'processing'::text]))",
+      "bytes": 8192
+    },
+    {
+      "name": "notification_events_pkey",
+      "definition": "CREATE UNIQUE INDEX notification_events_pkey ON bench_100000_0cf7a21a1c8a4487af110a489b8f6041.notification_events USING btree (id)",
+      "bytes": 8192
+    },
+    {
+      "name": "notification_events_transaction_id_device_id_key",
+      "definition": "CREATE UNIQUE INDEX notification_events_transaction_id_device_id_key ON bench_100000_0cf7a21a1c8a4487af110a489b8f6041.notification_events USING btree (transaction_id, device_id)",
+      "bytes": 8192
+    },
+    {
+      "name": "notification_owner_history",
+      "definition": "CREATE INDEX notification_owner_history ON bench_100000_0cf7a21a1c8a4487af110a489b8f6041.notification_events USING btree (user_id, created_at DESC, id DESC)",
+      "bytes": 8192
+    },
+    {
+      "name": "sessions_biometric_session",
+      "definition": "CREATE INDEX sessions_biometric_session ON bench_100000_0cf7a21a1c8a4487af110a489b8f6041.sessions USING btree (biometric_session_id)",
+      "bytes": 8192
+    },
+    {
+      "name": "sessions_pkey",
+      "definition": "CREATE UNIQUE INDEX sessions_pkey ON bench_100000_0cf7a21a1c8a4487af110a489b8f6041.sessions USING btree (token_hash)",
+      "bytes": 8192
+    },
+    {
+      "name": "sessions_user_id",
+      "definition": "CREATE INDEX sessions_user_id ON bench_100000_0cf7a21a1c8a4487af110a489b8f6041.sessions USING btree (user_id)",
+      "bytes": 8192
+    },
+    {
+      "name": "spending_transactions_card_id_source_source_reference_key",
+      "definition": "CREATE UNIQUE INDEX spending_transactions_card_id_source_source_reference_key ON bench_100000_0cf7a21a1c8a4487af110a489b8f6041.spending_transactions USING btree (card_id, source, source_reference)",
+      "bytes": 11378688
+    },
+    {
+      "name": "spending_transactions_category_history",
+      "definition": "CREATE INDEX spending_transactions_category_history ON bench_100000_0cf7a21a1c8a4487af110a489b8f6041.spending_transactions USING btree (user_id, category_id, occurred_at DESC, id DESC)",
+      "bytes": 9977856
+    },
+    {
+      "name": "spending_transactions_pkey",
+      "definition": "CREATE UNIQUE INDEX spending_transactions_pkey ON bench_100000_0cf7a21a1c8a4487af110a489b8f6041.spending_transactions USING btree (id)",
+      "bytes": 4358144
+    },
+    {
+      "name": "spending_transactions_refunds",
+      "definition": "CREATE INDEX spending_transactions_refunds ON bench_100000_0cf7a21a1c8a4487af110a489b8f6041.spending_transactions USING btree (original_purchase_id) WHERE (original_purchase_id IS NOT NULL)",
+      "bytes": 8192
+    },
+    {
+      "name": "spending_transactions_user_history",
+      "definition": "CREATE INDEX spending_transactions_user_history ON bench_100000_0cf7a21a1c8a4487af110a489b8f6041.spending_transactions USING btree (user_id, occurred_at DESC, id DESC)",
+      "bytes": 7790592
+    },
+    {
+      "name": "spending_transactions_user_id_card_id_id_key",
+      "definition": "CREATE UNIQUE INDEX spending_transactions_user_id_card_id_id_key ON bench_100000_0cf7a21a1c8a4487af110a489b8f6041.spending_transactions USING btree (user_id, card_id, id)",
+      "bytes": 8855552
+    },
+    {
+      "name": "spending_transactions_user_id_id_key",
+      "definition": "CREATE UNIQUE INDEX spending_transactions_user_id_id_key ON bench_100000_0cf7a21a1c8a4487af110a489b8f6041.spending_transactions USING btree (user_id, id)",
+      "bytes": 6307840
+    },
+    {
+      "name": "transaction_audit_events_pkey",
+      "definition": "CREATE UNIQUE INDEX transaction_audit_events_pkey ON bench_100000_0cf7a21a1c8a4487af110a489b8f6041.transaction_audit_events USING btree (transaction_id)",
+      "bytes": 4358144
+    },
+    {
+      "name": "transaction_outbox_pkey",
+      "definition": "CREATE UNIQUE INDEX transaction_outbox_pkey ON bench_100000_0cf7a21a1c8a4487af110a489b8f6041.transaction_outbox USING btree (transaction_id)",
+      "bytes": 4358144
+    },
+    {
+      "name": "users_email_key",
+      "definition": "CREATE UNIQUE INDEX users_email_key ON bench_100000_0cf7a21a1c8a4487af110a489b8f6041.users USING btree (email)",
+      "bytes": 16384
+    },
+    {
+      "name": "users_pkey",
+      "definition": "CREATE UNIQUE INDEX users_pkey ON bench_100000_0cf7a21a1c8a4487af110a489b8f6041.users USING btree (id)",
+      "bytes": 16384
+    }
+  ],
+  "queries": {
+    "reference_hit": {
+      "result": {
+        "rows": 1,
+        "sha256": "b58650ee502497eb999a20a8277e5fe55aae598dac86c04ec346fb0080ae9f40",
+        "count": null
+      },
+      "execution_ms": [
+        0.022,
+        0.017,
+        0.016,
+        0.014,
+        0.039,
+        0.019,
+        0.018,
+        0.025,
+        0.021,
+        0.02,
+        0.016
+      ],
+      "planning_ms": [
+        0.096,
+        0.088,
+        0.077,
+        0.071,
+        0.165,
+        0.088,
+        0.112,
+        0.127,
+        0.11,
+        0.103,
+        0.067
+      ],
+      "shared_hits": [
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2
+      ],
+      "shared_reads": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "scan_nodes_first_sample": [
+        {
+          "Node Type": "Index Scan",
+          "Relation Name": "spending_transactions",
+          "Index Name": "benchmark_candidate",
+          "Actual Rows": 1
+        }
+      ]
+    },
+    "reference_miss": {
+      "result": {
+        "rows": 0,
+        "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "count": null
+      },
+      "execution_ms": [
+        0.017,
+        0.015,
+        0.015,
+        0.014,
+        0.013,
+        0.015,
+        0.013,
+        0.014,
+        0.021,
+        0.011,
+        0.01
+      ],
+      "planning_ms": [
+        0.106,
+        0.09,
+        0.104,
+        0.083,
+        0.085,
+        0.111,
+        0.1,
+        0.089,
+        0.109,
+        0.065,
+        0.062
+      ],
+      "shared_hits": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "shared_reads": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "scan_nodes_first_sample": [
+        {
+          "Node Type": "Index Scan",
+          "Relation Name": "spending_transactions",
+          "Index Name": "benchmark_candidate",
+          "Actual Rows": 0
+        }
+      ]
+    },
+    "reference_api_control": {
+      "result": {
+        "rows": 1,
+        "sha256": "e39b8d76630548d386491e6dab4e70dc9a77b1cb6a34742c4d78511c61b8384c",
+        "count": null
+      },
+      "execution_ms": [
+        0.074,
+        0.062,
+        0.205,
+        0.053,
+        0.047,
+        0.046,
+        0.036,
+        0.061,
+        0.064,
+        0.073,
+        0.136
+      ],
+      "planning_ms": [
+        0.455,
+        0.497,
+        0.799,
+        0.526,
+        0.381,
+        0.373,
+        0.256,
+        0.438,
+        0.453,
+        0.494,
+        0.516
+      ],
+      "shared_hits": [
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4
+      ],
+      "shared_reads": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "scan_nodes_first_sample": [
+        {
+          "Node Type": "Index Scan",
+          "Relation Name": "spending_transactions",
+          "Index Name": "benchmark_candidate",
+          "Actual Rows": 1,
+          "Rows Removed by Filter": 0
+        },
+        {
+          "Node Type": "Seq Scan",
+          "Relation Name": "merchants",
+          "Actual Rows": 8,
+          "Rows Removed by Filter": 50
+        },
+        {
+          "Node Type": "Seq Scan",
+          "Relation Name": "categories",
+          "Actual Rows": 3,
+          "Rows Removed by Filter": 30
+        }
+      ]
+    }
+  },
+  "index_build_wall_ms": 316.5315999649465
+}
