@@ -1,0 +1,112 @@
+{
+  "test": "test_failed_refund_preserves_purchase_and_refund_capacity",
+  "status": "passed",
+  "started_utc": "2026-11-09T10:39:36.651818+00:00",
+  "finished_utc": "2026-11-09T10:39:38.138713+00:00",
+  "schema": "test_cdc502373864459fb4c89ed421523052",
+  "runtime": {
+    "role": "runtime_6dfe9944ac464c1985e3dbc35a142f35",
+    "isolation": "read committed",
+    "superuser": false
+  },
+  "environment": {
+    "version": "PostgreSQL 15.17, compiled by Visual C++ build 1944, 64-bit",
+    "observer_isolation": "read committed"
+  },
+  "before": {
+    "counts": {
+      "merchants": 1,
+      "spending_transactions": 1,
+      "transaction_audit_events": 1,
+      "transaction_outbox": 1,
+      "notification_events": 1,
+      "import_batches": 0
+    },
+    "transactions": [
+      {
+        "id": "11f449ad-9b38-4b9b-bf4e-6eef8dae16f5",
+        "source_reference": "c83e4dd9-a60d-420f-ad6b-829a6ea67439",
+        "kind": "purchase",
+        "status": "approved",
+        "amount": "1250.05",
+        "audits": 1,
+        "outbox_events": 1,
+        "device_events": 1
+      }
+    ],
+    "imports": [],
+    "spent": "1250.05"
+  },
+  "failed_response": {
+    "status": 500,
+    "body": "Internal Server Error"
+  },
+  "transient_notices": [
+    {
+      "transaction_visible": true,
+      "audit_visible": true,
+      "batch_transactions": 0,
+      "batch_audits": 0,
+      "batch_outbox": 0
+    }
+  ],
+  "after_failure": {
+    "counts": {
+      "merchants": 1,
+      "spending_transactions": 1,
+      "transaction_audit_events": 1,
+      "transaction_outbox": 1,
+      "notification_events": 1,
+      "import_batches": 0
+    },
+    "transactions": [
+      {
+        "id": "11f449ad-9b38-4b9b-bf4e-6eef8dae16f5",
+        "source_reference": "c83e4dd9-a60d-420f-ad6b-829a6ea67439",
+        "kind": "purchase",
+        "status": "approved",
+        "amount": "1250.05",
+        "audits": 1,
+        "outbox_events": 1,
+        "device_events": 1
+      }
+    ],
+    "imports": [],
+    "spent": "1250.05"
+  },
+  "recovery_status": 201,
+  "committed": {
+    "counts": {
+      "merchants": 1,
+      "spending_transactions": 2,
+      "transaction_audit_events": 2,
+      "transaction_outbox": 2,
+      "notification_events": 2,
+      "import_batches": 0
+    },
+    "transactions": [
+      {
+        "id": "11f449ad-9b38-4b9b-bf4e-6eef8dae16f5",
+        "source_reference": "c83e4dd9-a60d-420f-ad6b-829a6ea67439",
+        "kind": "purchase",
+        "status": "approved",
+        "amount": "1250.05",
+        "audits": 1,
+        "outbox_events": 1,
+        "device_events": 1
+      },
+      {
+        "id": "029a4a6b-c326-4d65-86bd-98511c6da180",
+        "source_reference": "f54516b4-a271-40b3-9bec-0aeaf4d67098",
+        "kind": "refund",
+        "status": "approved",
+        "amount": "800.00",
+        "audits": 1,
+        "outbox_events": 1,
+        "device_events": 1
+      }
+    ],
+    "imports": [],
+    "spent": "450.05"
+  }
+}

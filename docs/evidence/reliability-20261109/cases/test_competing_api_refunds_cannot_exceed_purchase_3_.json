@@ -1,0 +1,106 @@
+{
+  "test": "test_competing_api_refunds_cannot_exceed_purchase[3]",
+  "status": "passed",
+  "started_utc": "2026-11-09T10:39:11.478821+00:00",
+  "finished_utc": "2026-11-09T10:39:12.342333+00:00",
+  "schema": "test_2b232554384c4344adc6e04dcfa70bac",
+  "runtime": {
+    "role": "runtime_e06051bf5ecc4156a55332ed96552b75",
+    "isolation": "read committed",
+    "superuser": false
+  },
+  "environment": {
+    "version": "PostgreSQL 15.17, compiled by Visual C++ build 1944, 64-bit",
+    "observer_isolation": "read committed"
+  },
+  "round": 3,
+  "original_amount": "1250.05",
+  "requested_refunds": [
+    "800.00",
+    "800.00"
+  ],
+  "responses": [
+    {
+      "status": 201,
+      "body": {
+        "id": "4451c0bd-4534-41c6-b9d4-2d18710f4135",
+        "card_id": "3e9d5354-abf1-4297-a1d0-8badab68b4e2",
+        "merchant": "Corner Market",
+        "amount": "800.00",
+        "currency": "PKR",
+        "occurred_at": "2026-11-06T10:30:00+05:00",
+        "source": "simulation",
+        "source_reference": "e7504d28-1547-45be-adbe-ee1d6088d115",
+        "kind": "refund",
+        "status": "approved",
+        "channel": "pos",
+        "category_id": null,
+        "category": null,
+        "original_purchase_id": "df2eff56-74c3-4a77-bcc6-d9684fb5c77c"
+      }
+    },
+    {
+      "status": 409,
+      "body": {
+        "detail": "Refund exceeds the remaining purchase amount"
+      }
+    }
+  ],
+  "lock_observation": {
+    "gate_pid": 4184,
+    "workers": 2,
+    "observed_blocked": [
+      {
+        "pid": 11108,
+        "wait_event_type": "Lock",
+        "wait_event": "transactionid",
+        "blockers": [
+          4184
+        ]
+      },
+      {
+        "pid": 35108,
+        "wait_event_type": "Lock",
+        "wait_event": "tuple",
+        "blockers": [
+          11108
+        ]
+      }
+    ],
+    "gate": "card_profile"
+  },
+  "committed": {
+    "counts": {
+      "merchants": 1,
+      "spending_transactions": 2,
+      "transaction_audit_events": 2,
+      "transaction_outbox": 2,
+      "notification_events": 2,
+      "import_batches": 0
+    },
+    "transactions": [
+      {
+        "id": "df2eff56-74c3-4a77-bcc6-d9684fb5c77c",
+        "source_reference": "3d51aea8-9558-44ef-9569-7363f4d8cadf",
+        "kind": "purchase",
+        "status": "approved",
+        "amount": "1250.05",
+        "audits": 1,
+        "outbox_events": 1,
+        "device_events": 1
+      },
+      {
+        "id": "4451c0bd-4534-41c6-b9d4-2d18710f4135",
+        "source_reference": "e7504d28-1547-45be-adbe-ee1d6088d115",
+        "kind": "refund",
+        "status": "approved",
+        "amount": "800.00",
+        "audits": 1,
+        "outbox_events": 1,
+        "device_events": 1
+      }
+    ],
+    "imports": [],
+    "spent": "450.05"
+  }
+}

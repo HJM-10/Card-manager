@@ -1,0 +1,94 @@
+{
+  "test": "test_uncommitted_transaction_is_invisible_and_is_discarded[disconnect]",
+  "status": "passed",
+  "started_utc": "2026-11-09T10:39:41.736009+00:00",
+  "finished_utc": "2026-11-09T10:39:42.654261+00:00",
+  "schema": "test_2300741c4a2e41b69cb882c4e84956a6",
+  "runtime": {
+    "role": "runtime_80ac03710c014eb3a2ac8833599cffdd",
+    "isolation": "read committed",
+    "superuser": false
+  },
+  "environment": {
+    "version": "PostgreSQL 15.17, compiled by Visual C++ build 1944, 64-bit",
+    "observer_isolation": "read committed"
+  },
+  "mode": "disconnect",
+  "before": {
+    "counts": {
+      "merchants": 1,
+      "spending_transactions": 1,
+      "transaction_audit_events": 1,
+      "transaction_outbox": 1,
+      "notification_events": 1,
+      "import_batches": 0
+    },
+    "transactions": [
+      {
+        "id": "95cedafa-dd14-49f1-90b5-4e940c70702b",
+        "source_reference": "d669e9bf-d092-451f-b066-b19481c794d1",
+        "kind": "purchase",
+        "status": "approved",
+        "amount": "1250.05",
+        "audits": 1,
+        "outbox_events": 1,
+        "device_events": 1
+      }
+    ],
+    "imports": [],
+    "spent": "1250.05"
+  },
+  "inside_uncommitted_counts": {
+    "spending_transactions": 1,
+    "transaction_audit_events": 1,
+    "transaction_outbox": 1
+  },
+  "other_connection_before_end": {
+    "counts": {
+      "merchants": 1,
+      "spending_transactions": 1,
+      "transaction_audit_events": 1,
+      "transaction_outbox": 1,
+      "notification_events": 1,
+      "import_batches": 0
+    },
+    "transactions": [
+      {
+        "id": "95cedafa-dd14-49f1-90b5-4e940c70702b",
+        "source_reference": "d669e9bf-d092-451f-b066-b19481c794d1",
+        "kind": "purchase",
+        "status": "approved",
+        "amount": "1250.05",
+        "audits": 1,
+        "outbox_events": 1,
+        "device_events": 1
+      }
+    ],
+    "imports": [],
+    "spent": "1250.05"
+  },
+  "after_discard": {
+    "counts": {
+      "merchants": 1,
+      "spending_transactions": 1,
+      "transaction_audit_events": 1,
+      "transaction_outbox": 1,
+      "notification_events": 1,
+      "import_batches": 0
+    },
+    "transactions": [
+      {
+        "id": "95cedafa-dd14-49f1-90b5-4e940c70702b",
+        "source_reference": "d669e9bf-d092-451f-b066-b19481c794d1",
+        "kind": "purchase",
+        "status": "approved",
+        "amount": "1250.05",
+        "audits": 1,
+        "outbox_events": 1,
+        "device_events": 1
+      }
+    ],
+    "imports": [],
+    "spent": "1250.05"
+  }
+}

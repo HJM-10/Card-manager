@@ -1,0 +1,114 @@
+{
+  "test": "test_direct_sql_duplicate_constraint_commits_once[3]",
+  "status": "passed",
+  "started_utc": "2026-11-09T10:39:17.602424+00:00",
+  "finished_utc": "2026-11-09T10:39:18.398780+00:00",
+  "schema": "test_5494548132074b8eabb091443d159689",
+  "runtime": {
+    "role": "runtime_939a586c54b249479477784f768d628b",
+    "isolation": "read committed",
+    "superuser": false
+  },
+  "environment": {
+    "version": "PostgreSQL 15.17, compiled by Visual C++ build 1944, 64-bit",
+    "observer_isolation": "read committed"
+  },
+  "round": 3,
+  "responses": [
+    {
+      "outcome": "committed",
+      "id": "259d5144-7b34-4545-a886-f900bdaf68da"
+    },
+    {
+      "outcome": "rejected",
+      "sqlstate": "23505",
+      "constraint": "spending_transactions_card_id_source_source_reference_key",
+      "message": "duplicate key value violates unique constraint \"spending_transactions_card_id_source_source_reference_key\""
+    },
+    {
+      "outcome": "rejected",
+      "sqlstate": "23505",
+      "constraint": "spending_transactions_card_id_source_source_reference_key",
+      "message": "duplicate key value violates unique constraint \"spending_transactions_card_id_source_source_reference_key\""
+    },
+    {
+      "outcome": "rejected",
+      "sqlstate": "23505",
+      "constraint": "spending_transactions_card_id_source_source_reference_key",
+      "message": "duplicate key value violates unique constraint \"spending_transactions_card_id_source_source_reference_key\""
+    }
+  ],
+  "lock_observation": {
+    "gate_pid": 5776,
+    "workers": 4,
+    "observed_blocked": [
+      {
+        "pid": 8740,
+        "wait_event_type": "Lock",
+        "wait_event": "transactionid",
+        "blockers": [
+          9004
+        ]
+      },
+      {
+        "pid": 9004,
+        "wait_event_type": "Lock",
+        "wait_event": "transactionid",
+        "blockers": [
+          5776
+        ]
+      },
+      {
+        "pid": 25680,
+        "wait_event_type": "Lock",
+        "wait_event": "transactionid",
+        "blockers": [
+          9004
+        ]
+      },
+      {
+        "pid": 35064,
+        "wait_event_type": "Lock",
+        "wait_event": "transactionid",
+        "blockers": [
+          9004
+        ]
+      }
+    ],
+    "gate": "card_profile"
+  },
+  "committed": {
+    "counts": {
+      "merchants": 1,
+      "spending_transactions": 2,
+      "transaction_audit_events": 2,
+      "transaction_outbox": 2,
+      "notification_events": 2,
+      "import_batches": 0
+    },
+    "transactions": [
+      {
+        "id": "259d5144-7b34-4545-a886-f900bdaf68da",
+        "source_reference": "121ce115-435d-41b7-991d-bc52b8ea30a9",
+        "kind": "purchase",
+        "status": "approved",
+        "amount": "1250.05",
+        "audits": 1,
+        "outbox_events": 1,
+        "device_events": 1
+      },
+      {
+        "id": "548e802c-c030-4e78-a759-4b13461469f4",
+        "source_reference": "bf83225c-7fc0-4bf5-841b-b56893b811ee",
+        "kind": "purchase",
+        "status": "approved",
+        "amount": "1250.05",
+        "audits": 1,
+        "outbox_events": 1,
+        "device_events": 1
+      }
+    ],
+    "imports": [],
+    "spent": "2500.10"
+  }
+}

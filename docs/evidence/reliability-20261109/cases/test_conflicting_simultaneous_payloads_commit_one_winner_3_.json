@@ -1,0 +1,95 @@
+{
+  "test": "test_conflicting_simultaneous_payloads_commit_one_winner[3]",
+  "status": "passed",
+  "started_utc": "2026-11-09T10:39:05.047468+00:00",
+  "finished_utc": "2026-11-09T10:39:05.807588+00:00",
+  "schema": "test_86d4f69192974ce8b385ab19d13ccd1f",
+  "runtime": {
+    "role": "runtime_678189e56f814c7a9f47ff9849494c63",
+    "isolation": "read committed",
+    "superuser": false
+  },
+  "environment": {
+    "version": "PostgreSQL 15.17, compiled by Visual C++ build 1944, 64-bit",
+    "observer_isolation": "read committed"
+  },
+  "round": 3,
+  "submitted_amounts": [
+    "1250.05",
+    "1251.05"
+  ],
+  "responses": [
+    {
+      "status": 409,
+      "body": {
+        "detail": "This purchase reference is already in use with different details"
+      }
+    },
+    {
+      "status": 201,
+      "body": {
+        "id": "7ca270da-1e21-4673-a8f5-c3add10f3c94",
+        "card_id": "3d2bccbf-62b7-4c44-bf61-fa64ec4d7762",
+        "merchant": "Corner Market",
+        "amount": "1251.05",
+        "currency": "PKR",
+        "occurred_at": "2026-11-05T10:30:00+05:00",
+        "source": "manual",
+        "source_reference": "a6e4b8fb-cd69-4f28-92fa-07053dd832f4",
+        "kind": "purchase",
+        "status": "approved",
+        "channel": "pos",
+        "category_id": null,
+        "category": null,
+        "original_purchase_id": null
+      }
+    }
+  ],
+  "lock_observation": {
+    "gate_pid": 20392,
+    "workers": 2,
+    "observed_blocked": [
+      {
+        "pid": 34056,
+        "wait_event_type": "Lock",
+        "wait_event": "tuple",
+        "blockers": [
+          35316
+        ]
+      },
+      {
+        "pid": 35316,
+        "wait_event_type": "Lock",
+        "wait_event": "transactionid",
+        "blockers": [
+          20392
+        ]
+      }
+    ],
+    "gate": "card_profile"
+  },
+  "committed": {
+    "counts": {
+      "merchants": 1,
+      "spending_transactions": 1,
+      "transaction_audit_events": 1,
+      "transaction_outbox": 1,
+      "notification_events": 1,
+      "import_batches": 0
+    },
+    "transactions": [
+      {
+        "id": "7ca270da-1e21-4673-a8f5-c3add10f3c94",
+        "source_reference": "a6e4b8fb-cd69-4f28-92fa-07053dd832f4",
+        "kind": "purchase",
+        "status": "approved",
+        "amount": "1251.05",
+        "audits": 1,
+        "outbox_events": 1,
+        "device_events": 1
+      }
+    ],
+    "imports": [],
+    "spent": "1251.05"
+  }
+}

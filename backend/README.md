@@ -229,6 +229,18 @@ limited to disposable schemas in the test database; application indexes were
 not changed. Run `tools.index_benchmarks` with an explicit test connection and
 `tools.verify_index_evidence` to validate saved results.
 
+### Concurrency and rollback evidence
+
+The [reliability evidence](../docs/CONCURRENCY_ROLLBACK.md) records 23 focused
+checks with restricted logins: database-observed lock contention, duplicate
+requests and direct SQL constraints, competing refunds, injected audit/outbox
+failures, atomic multirow imports, rollback/connection closure and commit
+visibility. The tests inspect one audit/outbox/device event per committed
+transaction without sending push notifications. Run
+`tools.verify_reliability_evidence` against a saved evidence folder to check its
+observations offline. See the guide for the test command and administrator
+requirements.
+
 The transaction notification APIs and separate retrying FCM worker are
 implemented and verified with actual Firebase acceptance and phone receipt,
 including cold-start transaction opening after fingerprint sign-in. See

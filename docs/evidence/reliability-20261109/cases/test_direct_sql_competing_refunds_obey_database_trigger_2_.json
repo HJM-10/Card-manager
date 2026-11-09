@@ -1,0 +1,91 @@
+{
+  "test": "test_direct_sql_competing_refunds_obey_database_trigger[2]",
+  "status": "passed",
+  "started_utc": "2026-11-09T10:39:21.469319+00:00",
+  "finished_utc": "2026-11-09T10:39:22.290289+00:00",
+  "schema": "test_575a639c01d74a43be3fb3922da26d4a",
+  "runtime": {
+    "role": "runtime_9be01f92e1f74a4a90c32f4bc54006d5",
+    "isolation": "read committed",
+    "superuser": false
+  },
+  "environment": {
+    "version": "PostgreSQL 15.17, compiled by Visual C++ build 1944, 64-bit",
+    "observer_isolation": "read committed"
+  },
+  "round": 2,
+  "original_amount": "1250.05",
+  "requested_refunds": [
+    "800.00",
+    "800.00"
+  ],
+  "responses": [
+    {
+      "outcome": "committed",
+      "id": "1216dcb6-8280-4636-98a5-8196fdea27b5"
+    },
+    {
+      "outcome": "rejected",
+      "sqlstate": "23514",
+      "constraint": null,
+      "message": "Refund exceeds remaining amount"
+    }
+  ],
+  "lock_observation": {
+    "gate_pid": 12312,
+    "workers": 2,
+    "observed_blocked": [
+      {
+        "pid": 18856,
+        "wait_event_type": "Lock",
+        "wait_event": "transactionid",
+        "blockers": [
+          12312
+        ]
+      },
+      {
+        "pid": 31492,
+        "wait_event_type": "Lock",
+        "wait_event": "tuple",
+        "blockers": [
+          18856
+        ]
+      }
+    ],
+    "gate": "original_purchase"
+  },
+  "committed": {
+    "counts": {
+      "merchants": 1,
+      "spending_transactions": 2,
+      "transaction_audit_events": 2,
+      "transaction_outbox": 2,
+      "notification_events": 2,
+      "import_batches": 0
+    },
+    "transactions": [
+      {
+        "id": "1216dcb6-8280-4636-98a5-8196fdea27b5",
+        "source_reference": "a6040afc-e720-4b5c-9ae9-caf2e9a8fc35",
+        "kind": "refund",
+        "status": "approved",
+        "amount": "800.00",
+        "audits": 1,
+        "outbox_events": 1,
+        "device_events": 1
+      },
+      {
+        "id": "1e4acc31-dc22-42a4-8082-69633311fdd1",
+        "source_reference": "e23e67c8-81e1-4f23-b899-e324a0140523",
+        "kind": "purchase",
+        "status": "approved",
+        "amount": "1250.05",
+        "audits": 1,
+        "outbox_events": 1,
+        "device_events": 1
+      }
+    ],
+    "imports": [],
+    "spent": "450.05"
+  }
+}

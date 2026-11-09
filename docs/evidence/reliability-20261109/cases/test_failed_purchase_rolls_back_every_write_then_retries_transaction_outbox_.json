@@ -1,0 +1,84 @@
+{
+  "test": "test_failed_purchase_rolls_back_every_write_then_retries[transaction_outbox]",
+  "status": "passed",
+  "started_utc": "2026-11-09T10:39:31.143138+00:00",
+  "finished_utc": "2026-11-09T10:39:32.337825+00:00",
+  "schema": "test_beeab2fd72a447bbb85ac0ae60240487",
+  "runtime": {
+    "role": "runtime_22f7a94ca335494d884089d41b446e78",
+    "isolation": "read committed",
+    "superuser": false
+  },
+  "environment": {
+    "version": "PostgreSQL 15.17, compiled by Visual C++ build 1944, 64-bit",
+    "observer_isolation": "read committed"
+  },
+  "fault_table": "transaction_outbox",
+  "before": {
+    "counts": {
+      "merchants": 0,
+      "spending_transactions": 0,
+      "transaction_audit_events": 0,
+      "transaction_outbox": 0,
+      "notification_events": 0,
+      "import_batches": 0
+    },
+    "transactions": [],
+    "imports": [],
+    "spent": "0"
+  },
+  "failed_response": {
+    "status": 500,
+    "body": "Internal Server Error"
+  },
+  "transient_notices": [
+    {
+      "transaction_visible": true,
+      "audit_visible": true,
+      "batch_transactions": 0,
+      "batch_audits": 0,
+      "batch_outbox": 0
+    }
+  ],
+  "after_failure": {
+    "counts": {
+      "merchants": 0,
+      "spending_transactions": 0,
+      "transaction_audit_events": 0,
+      "transaction_outbox": 0,
+      "notification_events": 0,
+      "import_batches": 0
+    },
+    "transactions": [],
+    "imports": [],
+    "spent": "0"
+  },
+  "recovery_statuses": [
+    201,
+    200
+  ],
+  "committed": {
+    "counts": {
+      "merchants": 1,
+      "spending_transactions": 1,
+      "transaction_audit_events": 1,
+      "transaction_outbox": 1,
+      "notification_events": 1,
+      "import_batches": 0
+    },
+    "transactions": [
+      {
+        "id": "f8796f8d-4f19-49f3-9df7-54fe14004fc5",
+        "source_reference": "9041e28b-7aa5-48a3-8309-b6a54699b350",
+        "kind": "purchase",
+        "status": "approved",
+        "amount": "1250.05",
+        "audits": 1,
+        "outbox_events": 1,
+        "device_events": 1
+      }
+    ],
+    "imports": [],
+    "spent": "1250.05"
+  }
+}

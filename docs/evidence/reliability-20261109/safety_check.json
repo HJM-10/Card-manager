@@ -1,0 +1,12 @@
+{
+  "observed_test_schemas_removed": 23,
+  "observed_test_roles_removed": 23,
+  "remaining_observed_schemas": [],
+  "remaining_observed_roles": [],
+  "application_database_after_tests": {
+    "runtime_role": "spendtrail_runtime",
+    "transactions": 9,
+    "audit_events": 9,
+    "spent": "18998.55"
+  }
+}

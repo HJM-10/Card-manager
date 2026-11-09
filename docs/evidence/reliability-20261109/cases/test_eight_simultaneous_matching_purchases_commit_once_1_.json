@@ -1,0 +1,287 @@
+{
+  "test": "test_eight_simultaneous_matching_purchases_commit_once[1]",
+  "status": "passed",
+  "started_utc": "2026-11-09T10:38:54.112014+00:00",
+  "finished_utc": "2026-11-09T10:38:55.071142+00:00",
+  "schema": "test_71ba12b4fb0e4c76b2f6c676dc037135",
+  "runtime": {
+    "role": "runtime_57853589cd16417090400634ff478618",
+    "isolation": "read committed",
+    "superuser": false
+  },
+  "environment": {
+    "version": "PostgreSQL 15.17, compiled by Visual C++ build 1944, 64-bit",
+    "observer_isolation": "read committed"
+  },
+  "round": 1,
+  "responses": [
+    {
+      "status": 200,
+      "body": {
+        "id": "239c1253-028a-47bb-92c5-8ec8f068c76d",
+        "card_id": "c1a22937-e037-465f-96bc-24e12379a03a",
+        "merchant": "Corner Market",
+        "amount": "1250.05",
+        "currency": "PKR",
+        "occurred_at": "2026-11-05T10:30:00+05:00",
+        "source": "manual",
+        "source_reference": "9e64cb05-db68-49ad-a8bf-f97134dd3d9b",
+        "kind": "purchase",
+        "status": "approved",
+        "channel": "pos",
+        "category_id": null,
+        "category": null,
+        "original_purchase_id": null
+      }
+    },
+    {
+      "status": 200,
+      "body": {
+        "id": "239c1253-028a-47bb-92c5-8ec8f068c76d",
+        "card_id": "c1a22937-e037-465f-96bc-24e12379a03a",
+        "merchant": "Corner Market",
+        "amount": "1250.05",
+        "currency": "PKR",
+        "occurred_at": "2026-11-05T10:30:00+05:00",
+        "source": "manual",
+        "source_reference": "9e64cb05-db68-49ad-a8bf-f97134dd3d9b",
+        "kind": "purchase",
+        "status": "approved",
+        "channel": "pos",
+        "category_id": null,
+        "category": null,
+        "original_purchase_id": null
+      }
+    },
+    {
+      "status": 201,
+      "body": {
+        "id": "239c1253-028a-47bb-92c5-8ec8f068c76d",
+        "card_id": "c1a22937-e037-465f-96bc-24e12379a03a",
+        "merchant": "Corner Market",
+        "amount": "1250.05",
+        "currency": "PKR",
+        "occurred_at": "2026-11-05T10:30:00+05:00",
+        "source": "manual",
+        "source_reference": "9e64cb05-db68-49ad-a8bf-f97134dd3d9b",
+        "kind": "purchase",
+        "status": "approved",
+        "channel": "pos",
+        "category_id": null,
+        "category": null,
+        "original_purchase_id": null
+      }
+    },
+    {
+      "status": 200,
+      "body": {
+        "id": "239c1253-028a-47bb-92c5-8ec8f068c76d",
+        "card_id": "c1a22937-e037-465f-96bc-24e12379a03a",
+        "merchant": "Corner Market",
+        "amount": "1250.05",
+        "currency": "PKR",
+        "occurred_at": "2026-11-05T10:30:00+05:00",
+        "source": "manual",
+        "source_reference": "9e64cb05-db68-49ad-a8bf-f97134dd3d9b",
+        "kind": "purchase",
+        "status": "approved",
+        "channel": "pos",
+        "category_id": null,
+        "category": null,
+        "original_purchase_id": null
+      }
+    },
+    {
+      "status": 200,
+      "body": {
+        "id": "239c1253-028a-47bb-92c5-8ec8f068c76d",
+        "card_id": "c1a22937-e037-465f-96bc-24e12379a03a",
+        "merchant": "Corner Market",
+        "amount": "1250.05",
+        "currency": "PKR",
+        "occurred_at": "2026-11-05T10:30:00+05:00",
+        "source": "manual",
+        "source_reference": "9e64cb05-db68-49ad-a8bf-f97134dd3d9b",
+        "kind": "purchase",
+        "status": "approved",
+        "channel": "pos",
+        "category_id": null,
+        "category": null,
+        "original_purchase_id": null
+      }
+    },
+    {
+      "status": 200,
+      "body": {
+        "id": "239c1253-028a-47bb-92c5-8ec8f068c76d",
+        "card_id": "c1a22937-e037-465f-96bc-24e12379a03a",
+        "merchant": "Corner Market",
+        "amount": "1250.05",
+        "currency": "PKR",
+        "occurred_at": "2026-11-05T10:30:00+05:00",
+        "source": "manual",
+        "source_reference": "9e64cb05-db68-49ad-a8bf-f97134dd3d9b",
+        "kind": "purchase",
+        "status": "approved",
+        "channel": "pos",
+        "category_id": null,
+        "category": null,
+        "original_purchase_id": null
+      }
+    },
+    {
+      "status": 200,
+      "body": {
+        "id": "239c1253-028a-47bb-92c5-8ec8f068c76d",
+        "card_id": "c1a22937-e037-465f-96bc-24e12379a03a",
+        "merchant": "Corner Market",
+        "amount": "1250.05",
+        "currency": "PKR",
+        "occurred_at": "2026-11-05T10:30:00+05:00",
+        "source": "manual",
+        "source_reference": "9e64cb05-db68-49ad-a8bf-f97134dd3d9b",
+        "kind": "purchase",
+        "status": "approved",
+        "channel": "pos",
+        "category_id": null,
+        "category": null,
+        "original_purchase_id": null
+      }
+    },
+    {
+      "status": 200,
+      "body": {
+        "id": "239c1253-028a-47bb-92c5-8ec8f068c76d",
+        "card_id": "c1a22937-e037-465f-96bc-24e12379a03a",
+        "merchant": "Corner Market",
+        "amount": "1250.05",
+        "currency": "PKR",
+        "occurred_at": "2026-11-05T10:30:00+05:00",
+        "source": "manual",
+        "source_reference": "9e64cb05-db68-49ad-a8bf-f97134dd3d9b",
+        "kind": "purchase",
+        "status": "approved",
+        "channel": "pos",
+        "category_id": null,
+        "category": null,
+        "original_purchase_id": null
+      }
+    }
+  ],
+  "lock_observation": {
+    "gate_pid": 20924,
+    "workers": 8,
+    "observed_blocked": [
+      {
+        "pid": 3424,
+        "wait_event_type": "Lock",
+        "wait_event": "transactionid",
+        "blockers": [
+          20924
+        ]
+      },
+      {
+        "pid": 4940,
+        "wait_event_type": "Lock",
+        "wait_event": "tuple",
+        "blockers": [
+          3424,
+          36404
+        ]
+      },
+      {
+        "pid": 5408,
+        "wait_event_type": "Lock",
+        "wait_event": "tuple",
+        "blockers": [
+          3424,
+          36404,
+          4940,
+          36544,
+          36488
+        ]
+      },
+      {
+        "pid": 16816,
+        "wait_event_type": "Lock",
+        "wait_event": "tuple",
+        "blockers": [
+          3424,
+          36404,
+          4940,
+          36544,
+          36488,
+          5408
+        ]
+      },
+      {
+        "pid": 30576,
+        "wait_event_type": "Lock",
+        "wait_event": "tuple",
+        "blockers": [
+          3424,
+          36404,
+          4940,
+          36544,
+          36488,
+          5408,
+          16816
+        ]
+      },
+      {
+        "pid": 36404,
+        "wait_event_type": "Lock",
+        "wait_event": "tuple",
+        "blockers": [
+          3424
+        ]
+      },
+      {
+        "pid": 36488,
+        "wait_event_type": "Lock",
+        "wait_event": "tuple",
+        "blockers": [
+          3424,
+          36404,
+          4940,
+          36544
+        ]
+      },
+      {
+        "pid": 36544,
+        "wait_event_type": "Lock",
+        "wait_event": "tuple",
+        "blockers": [
+          3424,
+          36404,
+          4940
+        ]
+      }
+    ],
+    "gate": "card_profile"
+  },
+  "committed": {
+    "counts": {
+      "merchants": 1,
+      "spending_transactions": 1,
+      "transaction_audit_events": 1,
+      "transaction_outbox": 1,
+      "notification_events": 1,
+      "import_batches": 0
+    },
+    "transactions": [
+      {
+        "id": "239c1253-028a-47bb-92c5-8ec8f068c76d",
+        "source_reference": "9e64cb05-db68-49ad-a8bf-f97134dd3d9b",
+        "kind": "purchase",
+        "status": "approved",
+        "amount": "1250.05",
+        "audits": 1,
+        "outbox_events": 1,
+        "device_events": 1
+      }
+    ],
+    "imports": [],
+    "spent": "1250.05"
+  }
+}

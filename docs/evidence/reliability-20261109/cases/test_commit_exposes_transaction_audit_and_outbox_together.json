@@ -1,0 +1,108 @@
+{
+  "test": "test_commit_exposes_transaction_audit_and_outbox_together",
+  "status": "passed",
+  "started_utc": "2026-11-09T10:39:43.849300+00:00",
+  "finished_utc": "2026-11-09T10:39:45.129377+00:00",
+  "schema": "test_77c4313949b1458099df78c8c422195b",
+  "runtime": {
+    "role": "runtime_0e481dd3013542a8855052fe526235b2",
+    "isolation": "read committed",
+    "superuser": false
+  },
+  "environment": {
+    "version": "PostgreSQL 15.17, compiled by Visual C++ build 1944, 64-bit",
+    "observer_isolation": "read committed"
+  },
+  "before": {
+    "counts": {
+      "merchants": 1,
+      "spending_transactions": 1,
+      "transaction_audit_events": 1,
+      "transaction_outbox": 1,
+      "notification_events": 1,
+      "import_batches": 0
+    },
+    "transactions": [
+      {
+        "id": "c6f07578-0eeb-45d2-a6f8-4d572998ce8d",
+        "source_reference": "f9215c25-8073-47cc-8e10-52d332768ec9",
+        "kind": "purchase",
+        "status": "approved",
+        "amount": "1250.05",
+        "audits": 1,
+        "outbox_events": 1,
+        "device_events": 1
+      }
+    ],
+    "imports": [],
+    "spent": "1250.05"
+  },
+  "after_commit_before_fanout": {
+    "counts": {
+      "merchants": 1,
+      "spending_transactions": 2,
+      "transaction_audit_events": 2,
+      "transaction_outbox": 2,
+      "notification_events": 1,
+      "import_batches": 0
+    },
+    "transactions": [
+      {
+        "id": "94a315f8-8db9-43bf-9b63-b7d1c2039bc6",
+        "source_reference": "4c384fad-f822-49c3-b011-84a202656e74",
+        "kind": "purchase",
+        "status": "approved",
+        "amount": "1250.05",
+        "audits": 1,
+        "outbox_events": 1,
+        "device_events": 0
+      },
+      {
+        "id": "c6f07578-0eeb-45d2-a6f8-4d572998ce8d",
+        "source_reference": "f9215c25-8073-47cc-8e10-52d332768ec9",
+        "kind": "purchase",
+        "status": "approved",
+        "amount": "1250.05",
+        "audits": 1,
+        "outbox_events": 1,
+        "device_events": 1
+      }
+    ],
+    "imports": [],
+    "spent": "2500.10"
+  },
+  "after_fanout": {
+    "counts": {
+      "merchants": 1,
+      "spending_transactions": 2,
+      "transaction_audit_events": 2,
+      "transaction_outbox": 2,
+      "notification_events": 2,
+      "import_batches": 0
+    },
+    "transactions": [
+      {
+        "id": "94a315f8-8db9-43bf-9b63-b7d1c2039bc6",
+        "source_reference": "4c384fad-f822-49c3-b011-84a202656e74",
+        "kind": "purchase",
+        "status": "approved",
+        "amount": "1250.05",
+        "audits": 1,
+        "outbox_events": 1,
+        "device_events": 1
+      },
+      {
+        "id": "c6f07578-0eeb-45d2-a6f8-4d572998ce8d",
+        "source_reference": "f9215c25-8073-47cc-8e10-52d332768ec9",
+        "kind": "purchase",
+        "status": "approved",
+        "amount": "1250.05",
+        "audits": 1,
+        "outbox_events": 1,
+        "device_events": 1
+      }
+    ],
+    "imports": [],
+    "spent": "2500.10"
+  }
+}

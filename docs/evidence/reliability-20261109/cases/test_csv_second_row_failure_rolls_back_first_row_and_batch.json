@@ -1,0 +1,233 @@
+{
+  "test": "test_csv_second_row_failure_rolls_back_first_row_and_batch",
+  "status": "passed",
+  "started_utc": "2026-11-09T10:39:33.640465+00:00",
+  "finished_utc": "2026-11-09T10:39:35.342856+00:00",
+  "schema": "test_17dbf96f6d2c4b2bb540131ae4fa061a",
+  "runtime": {
+    "role": "runtime_4793a1bfa6244bdea71f14886712fbb8",
+    "isolation": "read committed",
+    "superuser": false
+  },
+  "environment": {
+    "version": "PostgreSQL 15.17, compiled by Visual C++ build 1944, 64-bit",
+    "observer_isolation": "read committed"
+  },
+  "before": {
+    "counts": {
+      "merchants": 0,
+      "spending_transactions": 0,
+      "transaction_audit_events": 0,
+      "transaction_outbox": 0,
+      "notification_events": 0,
+      "import_batches": 1
+    },
+    "transactions": [],
+    "imports": [
+      {
+        "id": "096473b2-da16-4f6b-ac1c-32299659caad",
+        "status": "preview",
+        "rows": [
+          {
+            "row": 2,
+            "state": "ready",
+            "amount": "100.00",
+            "channel": "pos",
+            "message": "Ready to import",
+            "category": "",
+            "merchant": "Rollback CSV 1",
+            "reference": "reliability-1",
+            "category_id": null,
+            "occurred_at": "2026-11-06T10:30:00+05:00"
+          },
+          {
+            "row": 3,
+            "state": "ready",
+            "amount": "100.00",
+            "channel": "pos",
+            "message": "Ready to import",
+            "category": "",
+            "merchant": "Rollback CSV 2",
+            "reference": "reliability-2",
+            "category_id": null,
+            "occurred_at": "2026-11-06T10:30:00+05:00"
+          }
+        ],
+        "imported_count": 0,
+        "duplicate_count": 0,
+        "total_amount": "0.00"
+      }
+    ],
+    "spent": "0"
+  },
+  "failed_response": {
+    "status": 500,
+    "body": "Internal Server Error"
+  },
+  "transient_notices": [
+    {
+      "transaction_visible": true,
+      "audit_visible": true,
+      "batch_transactions": 2,
+      "batch_audits": 2,
+      "batch_outbox": 1
+    }
+  ],
+  "after_failure": {
+    "counts": {
+      "merchants": 0,
+      "spending_transactions": 0,
+      "transaction_audit_events": 0,
+      "transaction_outbox": 0,
+      "notification_events": 0,
+      "import_batches": 1
+    },
+    "transactions": [],
+    "imports": [
+      {
+        "id": "096473b2-da16-4f6b-ac1c-32299659caad",
+        "status": "preview",
+        "rows": [
+          {
+            "row": 2,
+            "state": "ready",
+            "amount": "100.00",
+            "channel": "pos",
+            "message": "Ready to import",
+            "category": "",
+            "merchant": "Rollback CSV 1",
+            "reference": "reliability-1",
+            "category_id": null,
+            "occurred_at": "2026-11-06T10:30:00+05:00"
+          },
+          {
+            "row": 3,
+            "state": "ready",
+            "amount": "100.00",
+            "channel": "pos",
+            "message": "Ready to import",
+            "category": "",
+            "merchant": "Rollback CSV 2",
+            "reference": "reliability-2",
+            "category_id": null,
+            "occurred_at": "2026-11-06T10:30:00+05:00"
+          }
+        ],
+        "imported_count": 0,
+        "duplicate_count": 0,
+        "total_amount": "0.00"
+      }
+    ],
+    "spent": "0"
+  },
+  "recovery_receipt": {
+    "id": "096473b2-da16-4f6b-ac1c-32299659caad",
+    "file_name": "purchases.csv",
+    "status": "confirmed",
+    "preview_token": "485e00da-893a-43c6-bbf1-9fd36b6a0ad1",
+    "rows": [
+      {
+        "row": 2,
+        "state": "imported",
+        "amount": "100.00",
+        "channel": "pos",
+        "message": "Imported",
+        "category": "",
+        "merchant": "Rollback CSV 1",
+        "reference": "reliability-1",
+        "category_id": null,
+        "occurred_at": "2026-11-06T10:30:00+05:00",
+        "transaction_id": "08528e8b-0827-4251-906f-79d157e7b761"
+      },
+      {
+        "row": 3,
+        "state": "imported",
+        "amount": "100.00",
+        "channel": "pos",
+        "message": "Imported",
+        "category": "",
+        "merchant": "Rollback CSV 2",
+        "reference": "reliability-2",
+        "category_id": null,
+        "occurred_at": "2026-11-06T10:30:00+05:00",
+        "transaction_id": "984cd2cb-dc3c-4785-86d2-5f6081b035ac"
+      }
+    ],
+    "ready_count": 0,
+    "duplicate_count": 0,
+    "error_count": 0,
+    "imported_count": 2,
+    "total_amount": "200.00",
+    "can_confirm": false
+  },
+  "committed": {
+    "counts": {
+      "merchants": 2,
+      "spending_transactions": 2,
+      "transaction_audit_events": 2,
+      "transaction_outbox": 2,
+      "notification_events": 2,
+      "import_batches": 1
+    },
+    "transactions": [
+      {
+        "id": "08528e8b-0827-4251-906f-79d157e7b761",
+        "source_reference": "reliability-1",
+        "kind": "purchase",
+        "status": "approved",
+        "amount": "100.00",
+        "audits": 1,
+        "outbox_events": 1,
+        "device_events": 1
+      },
+      {
+        "id": "984cd2cb-dc3c-4785-86d2-5f6081b035ac",
+        "source_reference": "reliability-2",
+        "kind": "purchase",
+        "status": "approved",
+        "amount": "100.00",
+        "audits": 1,
+        "outbox_events": 1,
+        "device_events": 1
+      }
+    ],
+    "imports": [
+      {
+        "id": "096473b2-da16-4f6b-ac1c-32299659caad",
+        "status": "confirmed",
+        "rows": [
+          {
+            "row": 2,
+            "state": "imported",
+            "amount": "100.00",
+            "channel": "pos",
+            "message": "Imported",
+            "category": "",
+            "merchant": "Rollback CSV 1",
+            "reference": "reliability-1",
+            "category_id": null,
+            "occurred_at": "2026-11-06T10:30:00+05:00",
+            "transaction_id": "08528e8b-0827-4251-906f-79d157e7b761"
+          },
+          {
+            "row": 3,
+            "state": "imported",
+            "amount": "100.00",
+            "channel": "pos",
+            "message": "Imported",
+            "category": "",
+            "merchant": "Rollback CSV 2",
+            "reference": "reliability-2",
+            "category_id": null,
+            "occurred_at": "2026-11-06T10:30:00+05:00",
+            "transaction_id": "984cd2cb-dc3c-4785-86d2-5f6081b035ac"
+          }
+        ],
+        "imported_count": 2,
+        "duplicate_count": 0,
+        "total_amount": "200.00"
+      }
+    ],
+    "spent": "200.00"
+  }
+}
