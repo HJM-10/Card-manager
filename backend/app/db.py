@@ -12,9 +12,16 @@ def connect():
     return psycopg.connect(os.environ['DATABASE_URL'], row_factory=dict_row, connect_timeout=5)
 
 
+def migration_connect():
+    url = os.environ.get('MIGRATION_DATABASE_URL')
+    if url:
+        return psycopg.connect(url, row_factory=dict_row, connect_timeout=5)
+    return connect()
+
+
 def migrate():
     # Serialize migration runners and commit the schema and version together.
-    with connect() as db:
+    with migration_connect() as db:
         db.execute('SELECT pg_advisory_xact_lock(741003)')
         db.execute('CREATE TABLE IF NOT EXISTS schema_migrations (version TEXT PRIMARY KEY)')
         for path in sorted((Path(__file__).resolve().parents[1] / 'migrations').glob('*.sql')):

@@ -45,12 +45,11 @@ Weeks are sequential working blocks, not promised calendar dates. Week 4 has the
 
 ## Ordered implementation backlog
 
-Progress as of 8 November 2026: **38 of 47 checklist items complete (81%)**,
-with 9 remaining (19%). This is an item count, not an estimate of effort or
+Progress as of 9 November 2026: **39 of 47 checklist items complete (83%)**,
+with 8 remaining (17%). This is an item count, not an estimate of effort or
 remaining calendar time. See [design and acceptance contracts](DESIGN.md) and
-[budget/report verification](MILESTONE_07.md). Next work: audit-role hardening, then database evaluation and delivery.
-The outstanding runtime audit-role restriction remains a
-database hardening task.
+[budget/report verification](MILESTONE_07.md). Audit-role hardening is verified
+in [milestone 9](MILESTONE_09.md). Next work: database evaluation and delivery.
 
 ### 1. Establish the foundation
 
@@ -85,7 +84,7 @@ Manual purchases now persist in PostgreSQL and are available through authenticat
 - [x] Extend history filters to statuses when declined purchases and refunds are implemented.
 - [x] Connect manual entry and history screens to the API.
 - [x] Enforce ownership on reads and writes, including a database trigger rejecting cross-user categories.
-- [ ] Protect audit history from modification by the application role.
+- [x] Protect audit history from modification by the application role.
 
 ### 4. Add imports and payment simulation
 

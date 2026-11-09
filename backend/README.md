@@ -4,7 +4,7 @@ The API provides registration/login, revocable 12-hour bearer sessions, optional
 
 ## Standard local setup
 
-Use Python 3.11+ and PostgreSQL 15+. Create an empty `spendtrail` database and a dedicated login role with access to create its initial schema. Do not use an existing production database.
+Use Python 3.11+ and PostgreSQL 15+. Create an empty `spendtrail` database and a dedicated schema-owner login (`spendtrail_owner` in the example). Do not use an existing production database. The API and worker use a separate restricted login; the owner is used for migrations only.
 
 From the repository root, in PowerShell:
 
@@ -12,14 +12,54 @@ From the repository root, in PowerShell:
 py -m venv backend/.venv
 & backend/.venv/Scripts/python.exe -m pip install -r backend/requirements.txt
 Copy-Item backend/.env.example backend/.env
-# Set DATABASE_URL in backend/.env to your local database connection.
+# Set MIGRATION_DATABASE_URL in backend/.env to the schema-owner connection.
 Push-Location backend
 & .venv/Scripts/python.exe -m app.db
+# Provision with an administrator able to create roles and grant table access.
+# If the migration account has those privileges, this temporary setting is optional.
+$env:PROVISION_DATABASE_URL='postgresql://ADMIN:PASSWORD@localhost:5432/spendtrail'
+& .venv/Scripts/python.exe -m app.db_access --configure-local
+Remove-Item Env:PROVISION_DATABASE_URL -ErrorAction SilentlyContinue
 & .venv/Scripts/python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8000
 Pop-Location
 ```
 
 Migrations are explicit, transactional and versioned; API startup never silently changes the schema. Re-running the migration command skips applied files.
+
+### Audit-history protection (migration 009)
+
+`DATABASE_URL` is for the API/worker's `spendtrail_runtime` login.
+`MIGRATION_DATABASE_URL` is for the separate schema owner. For legacy setups,
+the migration command falls back to `DATABASE_URL` when no migration URL is set;
+after hardening, always retain the owner URL for future migrations.
+
+Apply migration 009, then run `app.db_access --configure-local` using the setup
+above. Provisioning generates a password, saves the two connections in ignored
+`backend/.env` without printing credentials, and grants only known application
+operations. An optional temporary `PROVISION_DATABASE_URL` lets an administrator
+create the login when the schema owner lacks `CREATEROLE`; it is not saved.
+The administrator must target the same database as the migration URL.
+Restart the API and notification worker afterward. Re-running provisioning
+rotates the runtime password and reapplies grants, so restart both services again.
+`--role` and `--schema` support isolated/custom installations; the defaults are
+`spendtrail_runtime` and `public`.
+
+The runtime role can read audit history but cannot insert, update, delete,
+truncate, add audit triggers, change the creation trigger, or assume the owner
+role. It owns no application objects and has no administrative privileges or
+role memberships. Only the creation trigger writes audit/outbox rows through
+a `SECURITY DEFINER` function owned by the migration owner. The function uses
+schema-qualified targets, a fixed search path, and no PUBLIC execution grant.
+Temporary shadow tables cannot redirect its writes. Audit, transaction and
+outbox writes still commit or roll back together. The worker retains the
+outbox update permission needed for dispatch.
+
+Provisioning revokes PUBLIC schema creation in the selected application schema;
+use a dedicated SpendTrail database. New tables receive no automatic runtime
+grants: update the explicit grant list when future migrations need new access.
+Schema owners and administrators remain trusted maintenance identities; this
+restriction protects against changes made through the runtime database login.
+See [audit verification](../docs/MILESTONE_09.md) for tests and local evidence.
 
 Start Flutter in a second terminal:
 
@@ -155,7 +195,7 @@ The backend trusts possession of the opaque credential; Android enforces biometr
 
 ## Verification
 
-Set `TEST_DATABASE_URL` to a test PostgreSQL database whose user can create schemas. Tests create a unique schema per case and drop only that schema afterward; no existing tables are truncated.
+Set `TEST_DATABASE_URL` to a dedicated PostgreSQL test database using a test administrator that can create schemas and create/clean up roles. Tests create a unique schema per case and drop only that schema afterward; audit tests also create and remove randomly named runtime roles. No existing tables are truncated.
 
 ```powershell
 $env:TEST_DATABASE_URL='postgresql://USER:PASSWORD@localhost:5432/spendtrail_test'
@@ -218,7 +258,7 @@ zero. This is a foundation for the pending report/budget APIs.
 See [design and fixed acceptance examples](../docs/DESIGN.md) and
 [verification evidence](../docs/MILESTONE_06.md).
 
-Account recovery and production deployment are future work. A separate runtime database role with restricted audit privileges is also pending. Signed-in Statistics now uses account spending and budgets; explicit legacy demo mode retains local statistics.
+Account recovery and production deployment are future work. Migration 009 and runtime-role provisioning restrict audit writes; see the setup above. Signed-in Statistics now uses account spending and budgets; explicit legacy demo mode retains local statistics.
 
 ### Monthly budgets and reports (migration 007)
 

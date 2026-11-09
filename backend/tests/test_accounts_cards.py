@@ -27,6 +27,7 @@ def client(monkeypatch):
         return psycopg.connect(url, options=f'-csearch_path={schema}', row_factory=dict_row)
 
     monkeypatch.setattr(db, 'connect', connect)
+    monkeypatch.setattr(db, 'migration_connect', connect)
     monkeypatch.setattr(main, 'connect', connect)
     try:
         db.migrate()
