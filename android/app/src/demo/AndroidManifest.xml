@@ -1,0 +1,4 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Release-mode classroom demo: HTTP is limited to the USB loopback API. -->
+    <application android:networkSecurityConfig="@xml/demo_network_security_config" />
+</manifest>

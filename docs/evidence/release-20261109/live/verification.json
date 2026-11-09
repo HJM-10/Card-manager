@@ -1,0 +1,21 @@
+{
+  "started_utc": "2026-11-09T11:46:31.766672+00:00",
+  "schema": "acceptance_b17411202eb54de6891d2dc0147c5455",
+  "restricted_role": "acceptance_ddac7c75ddb04e6eaa3c5249f4cb9f45",
+  "url": "http://127.0.0.1:8011",
+  "flutter_test": {
+    "passed": true,
+    "wall_seconds": 29.935143800103106,
+    "skipped": 0
+  },
+  "committed_counts": {
+    "users": 2,
+    "spending_transactions": 5,
+    "transaction_audit_events": 5,
+    "transaction_outbox": 5
+  },
+  "status": "passed",
+  "cleanup": "schema and role removed; isolated API stopped",
+  "finished_utc": "2026-11-09T11:47:04.519687+00:00",
+  "application_database_changed": false
+}

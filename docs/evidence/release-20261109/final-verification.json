@@ -1,0 +1,11 @@
+{
+  "status": "passed",
+  "package_file_hashes_match": true,
+  "delivery_and_source_zip_crc_valid": true,
+  "source_contains_completed_roadmap": true,
+  "private_data_and_unrelated_presentation_excluded": true,
+  "backend_104_test_source_fingerprints_unchanged": true,
+  "source_files": 512,
+  "apk_bytes": 57636991,
+  "bundle_bytes": 35616285
+}

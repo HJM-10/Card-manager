@@ -1,0 +1,52 @@
+{
+  "model": "SM-A725F",
+  "android": "14",
+  "display": "Physical size: 1080x2400",
+  "density": "Physical density: 450",
+  "version": "2 minSdk=24 targetSdk=36",
+  "home_controls": {
+    "Home": {
+      "clickable": true,
+      "size_dp": [
+        90.66666666666667,
+        48.0
+      ]
+    },
+    "Cards": {
+      "clickable": true,
+      "size_dp": [
+        48.0,
+        48.0
+      ]
+    },
+    "Stats": {
+      "clickable": true,
+      "size_dp": [
+        48.0,
+        48.0
+      ]
+    },
+    "Profile": {
+      "clickable": true,
+      "size_dp": [
+        48.0,
+        48.0
+      ]
+    },
+    "Transaction alerts": {
+      "clickable": true,
+      "size_dp": [
+        48.0,
+        48.0
+      ]
+    }
+  },
+  "history_loaded_with_amounts": true,
+  "physical_font_scale_2_history_loaded": true,
+  "landscape_rotation": "1",
+  "landscape_history_loaded": true,
+  "display_settings_restored": true,
+  "statistics_loaded": true,
+  "profile_loaded": true,
+  "status": "passed"
+}

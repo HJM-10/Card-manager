@@ -1,0 +1,279 @@
+{"protocolVersion":"0.1.1","runnerVersion":"1.26.2","pid":34920,"type":"start","time":0}
+{"suite":{"id":0,"platform":"vm","path":"D:/python/Flutter/Spendtrail/test/accessibility_release_test.dart"},"type":"suite","time":0}
+{"test":{"id":1,"name":"loading D:/python/Flutter/Spendtrail/test/accessibility_release_test.dart","suiteID":0,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":2}
+{"suite":{"id":2,"platform":"vm","path":"D:/python/Flutter/Spendtrail/test/app_flows_test.dart"},"type":"suite","time":10}
+{"test":{"id":3,"name":"loading D:/python/Flutter/Spendtrail/test/app_flows_test.dart","suiteID":2,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":10}
+{"suite":{"id":4,"platform":"vm","path":"D:/python/Flutter/Spendtrail/test/biometric_test.dart"},"type":"suite","time":11}
+{"test":{"id":5,"name":"loading D:/python/Flutter/Spendtrail/test/biometric_test.dart","suiteID":4,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":11}
+{"suite":{"id":6,"platform":"vm","path":"D:/python/Flutter/Spendtrail/test/csv_import_test.dart"},"type":"suite","time":11}
+{"test":{"id":7,"name":"loading D:/python/Flutter/Spendtrail/test/csv_import_test.dart","suiteID":6,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":11}
+{"suite":{"id":8,"platform":"vm","path":"D:/python/Flutter/Spendtrail/test/demo_actions_test.dart"},"type":"suite","time":12}
+{"test":{"id":9,"name":"loading D:/python/Flutter/Spendtrail/test/demo_actions_test.dart","suiteID":8,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":12}
+{"suite":{"id":10,"platform":"vm","path":"D:/python/Flutter/Spendtrail/test/expenses_test.dart"},"type":"suite","time":12}
+{"test":{"id":11,"name":"loading D:/python/Flutter/Spendtrail/test/expenses_test.dart","suiteID":10,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":12}
+{"suite":{"id":12,"platform":"vm","path":"D:/python/Flutter/Spendtrail/test/expense_editor_test.dart"},"type":"suite","time":13}
+{"test":{"id":13,"name":"loading D:/python/Flutter/Spendtrail/test/expense_editor_test.dart","suiteID":12,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":13}
+{"suite":{"id":14,"platform":"vm","path":"D:/python/Flutter/Spendtrail/test/monthly_budget_test.dart"},"type":"suite","time":15}
+{"test":{"id":15,"name":"loading D:/python/Flutter/Spendtrail/test/monthly_budget_test.dart","suiteID":14,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":15}
+{"count":19,"time":18,"type":"allSuites"}
+
+[{"event":"test.startedProcess","params":{"vmServiceUri":null}}]
+
+[{"event":"test.startedProcess","params":{"vmServiceUri":null}}]
+{"testID":1,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":2677}
+{"group":{"id":16,"suiteID":0,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":9,"line":null,"column":null,"url":null},"type":"group","time":2682}
+{"test":{"id":17,"name":"login accessibility: light","suiteID":0,"groupIDs":[16],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":43,"root_column":5,"root_url":"file:///D:/python/Flutter/Spendtrail/test/accessibility_release_test.dart"},"type":"testStart","time":2683}
+
+[{"event":"test.startedProcess","params":{"vmServiceUri":null}}]
+{"testID":3,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":2970}
+{"group":{"id":18,"suiteID":2,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":6,"line":null,"column":null,"url":null},"type":"group","time":2970}
+{"test":{"id":19,"name":"splash reaches home, then add card completes","suiteID":2,"groupIDs":[18],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":13,"root_column":3,"root_url":"file:///D:/python/Flutter/Spendtrail/test/app_flows_test.dart"},"type":"testStart","time":2970}
+
+[{"event":"test.startedProcess","params":{"vmServiceUri":null}}]
+
+[{"event":"test.startedProcess","params":{"vmServiceUri":null}}]
+{"testID":5,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":3624}
+{"group":{"id":20,"suiteID":4,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":8,"line":null,"column":null,"url":null},"type":"group","time":3624}
+{"test":{"id":21,"name":"lock hides the account even when the backend is offline","suiteID":4,"groupIDs":[20],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":46,"root_column":3,"root_url":"file:///D:/python/Flutter/Spendtrail/test/biometric_test.dart"},"type":"testStart","time":3625}
+
+[{"event":"test.startedProcess","params":{"vmServiceUri":null}}]
+{"testID":7,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":4029}
+{"group":{"id":22,"suiteID":6,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":5,"line":null,"column":null,"url":null},"type":"group","time":4029}
+{"test":{"id":23,"name":"upload previews without saving, then retries same confirmation after response loss","suiteID":6,"groupIDs":[22],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":90,"root_column":3,"root_url":"file:///D:/python/Flutter/Spendtrail/test/csv_import_test.dart"},"type":"testStart","time":4029}
+
+[{"event":"test.startedProcess","params":{"vmServiceUri":null}}]
+{"testID":9,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":4409}
+{"group":{"id":24,"suiteID":8,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":3,"line":null,"column":null,"url":null},"type":"group","time":4410}
+{"test":{"id":25,"name":"Send requires review and records one demo entry","suiteID":8,"groupIDs":[24],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":9,"root_column":5,"root_url":"file:///D:/python/Flutter/Spendtrail/test/demo_actions_test.dart"},"type":"testStart","time":4410}
+
+[{"event":"test.startedProcess","params":{"vmServiceUri":null}}]
+{"testID":11,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":4645}
+{"group":{"id":26,"suiteID":10,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":2,"line":null,"column":null,"url":null},"type":"group","time":4646}
+{"test":{"id":27,"name":"money parser preserves cents and rejects invalid input","suiteID":10,"groupIDs":[26],"metadata":{"skip":false,"skipReason":null},"line":8,"column":3,"url":"file:///D:/python/Flutter/Spendtrail/test/expenses_test.dart"},"type":"testStart","time":4646}
+{"testID":27,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":4680}
+{"test":{"id":28,"name":"expense create, edit, restore and delete","suiteID":10,"groupIDs":[26],"metadata":{"skip":false,"skipReason":null},"line":15,"column":3,"url":"file:///D:/python/Flutter/Spendtrail/test/expenses_test.dart"},"type":"testStart","time":4681}
+{"testID":28,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":4828}
+{"suite":{"id":29,"platform":"vm","path":"D:/python/Flutter/Spendtrail/test/notifications_test.dart"},"type":"suite","time":4877}
+{"test":{"id":30,"name":"loading D:/python/Flutter/Spendtrail/test/notifications_test.dart","suiteID":29,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":4877}
+{"testID":13,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":5093}
+{"group":{"id":31,"suiteID":12,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":1,"line":null,"column":null,"url":null},"type":"group","time":5094}
+{"test":{"id":32,"name":"expense editor saves, edits and deletes a record","suiteID":12,"groupIDs":[31],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":8,"root_column":3,"root_url":"file:///D:/python/Flutter/Spendtrail/test/expense_editor_test.dart"},"type":"testStart","time":5094}
+
+[{"event":"test.startedProcess","params":{"vmServiceUri":null}}]
+{"testID":15,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":5488}
+{"group":{"id":33,"suiteID":14,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":5,"line":null,"column":null,"url":null},"type":"group","time":5488}
+{"test":{"id":34,"name":"budget create edit remove and exact limit validation","suiteID":14,"groupIDs":[33],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":79,"root_column":3,"root_url":"file:///D:/python/Flutter/Spendtrail/test/monthly_budget_test.dart"},"type":"testStart","time":5489}
+{"testID":17,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":5760}
+{"test":{"id":35,"name":"purchase and budget accessibility: light","suiteID":0,"groupIDs":[16],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":70,"root_column":5,"root_url":"file:///D:/python/Flutter/Spendtrail/test/accessibility_release_test.dart"},"type":"testStart","time":5760}
+{"testID":30,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":6189}
+{"group":{"id":36,"suiteID":29,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":7,"line":null,"column":null,"url":null},"type":"group","time":6192}
+{"test":{"id":37,"name":"permission denial does not register a device or block saving","suiteID":29,"groupIDs":[36],"metadata":{"skip":false,"skipReason":null},"line":96,"column":3,"url":"file:///D:/python/Flutter/Spendtrail/test/notifications_test.dart"},"type":"testStart","time":6192}
+{"testID":37,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":6279}
+{"test":{"id":38,"name":"device token rotation reuses account device and disable revokes it","suiteID":29,"groupIDs":[36],"metadata":{"skip":false,"skipReason":null},"line":119,"column":3,"url":"file:///D:/python/Flutter/Spendtrail/test/notifications_test.dart"},"type":"testStart","time":6280}
+{"testID":38,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":6297}
+{"test":{"id":39,"name":"tap verifies event and transaction ownership and suppresses repeats after restart","suiteID":29,"groupIDs":[36],"metadata":{"skip":false,"skipReason":null},"line":146,"column":3,"url":"file:///D:/python/Flutter/Spendtrail/test/notifications_test.dart"},"type":"testStart","time":6297}
+{"testID":39,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":6318}
+{"test":{"id":40,"name":"cold notification waits for matching sign-in and foreground duplicates show one banner","suiteID":29,"groupIDs":[36],"metadata":{"skip":false,"skipReason":null},"line":187,"column":3,"url":"file:///D:/python/Flutter/Spendtrail/test/notifications_test.dart"},"type":"testStart","time":6318}
+{"testID":40,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":6333}
+{"test":{"id":41,"name":"wrong account and inaccessible transaction never navigate; expiry is handled","suiteID":29,"groupIDs":[36],"metadata":{"skip":false,"skipReason":null},"line":215,"column":3,"url":"file:///D:/python/Flutter/Spendtrail/test/notifications_test.dart"},"type":"testStart","time":6333}
+{"testID":41,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":6348}
+{"test":{"id":42,"name":"unconfigured settings clearly disable alerts while leaving history available","suiteID":29,"groupIDs":[36],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":251,"root_column":3,"root_url":"file:///D:/python/Flutter/Spendtrail/test/notifications_test.dart"},"type":"testStart","time":6349}
+{"testID":23,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":6535}
+{"test":{"id":43,"name":"row errors block confirmation and display actionable feedback on a small screen","suiteID":6,"groupIDs":[22],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":145,"root_column":3,"root_url":"file:///D:/python/Flutter/Spendtrail/test/csv_import_test.dart"},"type":"testStart","time":6536}
+{"testID":43,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":6888}
+{"test":{"id":44,"name":"invalid encoding and oversized files never reach preview API","suiteID":6,"groupIDs":[22],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":180,"root_column":3,"root_url":"file:///D:/python/Flutter/Spendtrail/test/csv_import_test.dart"},"type":"testStart","time":6889}
+{"testID":19,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":6921}
+{"test":{"id":45,"name":"all tabs fit a small screen at text scale 1.0","suiteID":2,"groupIDs":[18],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":52,"root_column":5,"root_url":"file:///D:/python/Flutter/Spendtrail/test/app_flows_test.dart"},"type":"testStart","time":6921}
+{"testID":35,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":7100}
+{"test":{"id":46,"name":"login accessibility: dark","suiteID":0,"groupIDs":[16],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":43,"root_column":5,"root_url":"file:///D:/python/Flutter/Spendtrail/test/accessibility_release_test.dart"},"type":"testStart","time":7100}
+{"testID":44,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":7253}
+{"test":{"id":47,"name":"picker cancellation makes no preview request and sample is previewed explicitly","suiteID":6,"groupIDs":[22],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":223,"root_column":3,"root_url":"file:///D:/python/Flutter/Spendtrail/test/csv_import_test.dart"},"type":"testStart","time":7254}
+{"testID":25,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":7557}
+{"test":{"id":48,"name":"Request requires review and records one demo entry","suiteID":8,"groupIDs":[24],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":9,"root_column":5,"root_url":"file:///D:/python/Flutter/Spendtrail/test/demo_actions_test.dart"},"type":"testStart","time":7558}
+{"testID":47,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":7560}
+{"test":{"id":49,"name":"stale confirmation requires a new preview and session expiry returns to sign-in","suiteID":6,"groupIDs":[22],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":246,"root_column":3,"root_url":"file:///D:/python/Flutter/Spendtrail/test/csv_import_test.dart"},"type":"testStart","time":7560}
+{"testID":42,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":7782}
+{"test":{"id":50,"name":"cold alert opens the authorized transaction after password sign-in","suiteID":29,"groupIDs":[36],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":278,"root_column":3,"root_url":"file:///D:/python/Flutter/Spendtrail/test/notifications_test.dart"},"type":"testStart","time":7783}
+{"testID":46,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":7811}
+{"test":{"id":51,"name":"purchase and budget accessibility: dark","suiteID":0,"groupIDs":[16],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":70,"root_column":5,"root_url":"file:///D:/python/Flutter/Spendtrail/test/accessibility_release_test.dart"},"type":"testStart","time":7812}
+{"testID":49,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":7958}
+{"testID":45,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":7963}
+{"test":{"id":52,"name":"all tabs fit a small screen at text scale 2.0","suiteID":2,"groupIDs":[18],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":52,"root_column":5,"root_url":"file:///D:/python/Flutter/Spendtrail/test/app_flows_test.dart"},"type":"testStart","time":7963}
+{"suite":{"id":53,"platform":"vm","path":"D:/python/Flutter/Spendtrail/test/persistence_test.dart"},"type":"suite","time":8004}
+{"test":{"id":54,"name":"loading D:/python/Flutter/Spendtrail/test/persistence_test.dart","suiteID":53,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":8004}
+{"testID":48,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":8061}
+{"test":{"id":55,"name":"TopUp requires review and records one demo entry","suiteID":8,"groupIDs":[24],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":9,"root_column":5,"root_url":"file:///D:/python/Flutter/Spendtrail/test/demo_actions_test.dart"},"type":"testStart","time":8063}
+
+[{"event":"test.startedProcess","params":{"vmServiceUri":null}}]
+{"testID":51,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":8491}
+{"test":{"id":56,"name":"navigation and alerts are labeled 48dp targets","suiteID":0,"groupIDs":[16],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":117,"root_column":3,"root_url":"file:///D:/python/Flutter/Spendtrail/test/accessibility_release_test.dart"},"type":"testStart","time":8492}
+{"testID":52,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":8500}
+{"test":{"id":57,"name":"all three wallet designs fit in light and dark mode","suiteID":2,"groupIDs":[18],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":89,"root_column":3,"root_url":"file:///D:/python/Flutter/Spendtrail/test/app_flows_test.dart"},"type":"testStart","time":8501}
+{"testID":55,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":8539}
+{"suite":{"id":58,"platform":"vm","path":"D:/python/Flutter/Spendtrail/test/purchases_test.dart"},"type":"suite","time":8596}
+{"test":{"id":59,"name":"loading D:/python/Flutter/Spendtrail/test/purchases_test.dart","suiteID":58,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":8596}
+{"testID":32,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":8881}
+{"suite":{"id":60,"platform":"vm","path":"D:/python/Flutter/Spendtrail/test/purchase_live_test.dart"},"type":"suite","time":8930}
+{"test":{"id":61,"name":"loading D:/python/Flutter/Spendtrail/test/purchase_live_test.dart","suiteID":60,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":8930}
+{"testID":21,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":8931}
+{"test":{"id":62,"name":"enable, lock, fingerprint login and explicit sign-out","suiteID":4,"groupIDs":[20],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":94,"root_column":3,"root_url":"file:///D:/python/Flutter/Spendtrail/test/biometric_test.dart"},"type":"testStart","time":8938}
+
+[{"event":"test.startedProcess","params":{"vmServiceUri":null}}]
+{"testID":34,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":9124}
+{"test":{"id":63,"name":"report card and month selection use server data and clear stale results on error","suiteID":14,"groupIDs":[33],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":147,"root_column":3,"root_url":"file:///D:/python/Flutter/Spendtrail/test/monthly_budget_test.dart"},"type":"testStart","time":9125}
+{"testID":54,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":9292}
+{"group":{"id":64,"suiteID":53,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":2,"line":null,"column":null,"url":null},"type":"group","time":9292}
+{"test":{"id":65,"name":"card order survives a new container without sensitive data","suiteID":53,"groupIDs":[64],"metadata":{"skip":false,"skipReason":null},"line":9,"column":3,"url":"file:///D:/python/Flutter/Spendtrail/test/persistence_test.dart"},"type":"testStart","time":9293}
+{"testID":56,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":9312}
+{"test":{"id":66,"name":"reduced motion completes splash without its 2.9 second animation","suiteID":0,"groupIDs":[16],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":147,"root_column":3,"root_url":"file:///D:/python/Flutter/Spendtrail/test/accessibility_release_test.dart"},"type":"testStart","time":9313}
+
+[{"event":"test.startedProcess","params":{"vmServiceUri":null}}]
+{"testID":66,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":9381}
+{"test":{"id":67,"name":"custom actions activate with keyboard Enter and Space","suiteID":0,"groupIDs":[16],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":166,"root_column":3,"root_url":"file:///D:/python/Flutter/Spendtrail/test/accessibility_release_test.dart"},"type":"testStart","time":9382}
+{"testID":65,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":9477}
+{"test":{"id":68,"name":"removing all cards keeps an empty wallet after restart","suiteID":53,"groupIDs":[64],"metadata":{"skip":false,"skipReason":null},"line":27,"column":3,"url":"file:///D:/python/Flutter/Spendtrail/test/persistence_test.dart"},"type":"testStart","time":9478}
+{"testID":68,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":9489}
+{"testID":67,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":9512}
+{"test":{"id":69,"name":"account forms fit Size(320.0, 568.0) at 2.0 text scale","suiteID":0,"groupIDs":[16],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":193,"root_column":5,"root_url":"file:///D:/python/Flutter/Spendtrail/test/accessibility_release_test.dart"},"type":"testStart","time":9513}
+{"suite":{"id":70,"platform":"vm","path":"D:/python/Flutter/Spendtrail/test/settings_test.dart"},"type":"suite","time":9526}
+{"test":{"id":71,"name":"loading D:/python/Flutter/Spendtrail/test/settings_test.dart","suiteID":70,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":9526}
+{"testID":63,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":9838}
+{"test":{"id":72,"name":"budget retry after uncertain save keeps the same month category and amount","suiteID":14,"groupIDs":[33],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":185,"root_column":3,"root_url":"file:///D:/python/Flutter/Spendtrail/test/monthly_budget_test.dart"},"type":"testStart","time":9838}
+
+[{"event":"test.startedProcess","params":{"vmServiceUri":null}}]
+{"testID":59,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":9963}
+{"group":{"id":73,"suiteID":58,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":12,"line":null,"column":null,"url":null},"type":"group","time":9963}
+{"test":{"id":74,"name":"search and combined card/category filters reach server and clear resets them","suiteID":58,"groupIDs":[73],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":67,"root_column":3,"root_url":"file:///D:/python/Flutter/Spendtrail/test/purchases_test.dart"},"type":"testStart","time":9963}
+{"testID":61,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":10113}
+{"group":{"id":75,"suiteID":60,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":1,"line":null,"column":null,"url":null},"type":"group","time":10114}
+{"test":{"id":76,"name":"real HTTP purchase persists across clients and is isolated by account","suiteID":60,"groupIDs":[75],"metadata":{"skip":true,"skipReason":"Set LIVE_API_URL to a dedicated test API."},"line":8,"column":3,"url":"file:///D:/python/Flutter/Spendtrail/test/purchase_live_test.dart"},"type":"testStart","time":10114}
+{"testID":76,"messageType":"skip","message":"Skip: Set LIVE_API_URL to a dedicated test API.","type":"print","time":10116}
+{"testID":76,"result":"success","skipped":true,"hidden":false,"type":"testDone","time":10116}
+{"testID":69,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":10127}
+{"test":{"id":77,"name":"account forms fit Size(844.0, 390.0) at 1.0 text scale","suiteID":0,"groupIDs":[16],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":193,"root_column":5,"root_url":"file:///D:/python/Flutter/Spendtrail/test/accessibility_release_test.dart"},"type":"testStart","time":10128}
+{"suite":{"id":78,"platform":"vm","path":"D:/python/Flutter/Spendtrail/test/simulation_test.dart"},"type":"suite","time":10152}
+{"test":{"id":79,"name":"loading D:/python/Flutter/Spendtrail/test/simulation_test.dart","suiteID":78,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":10152}
+{"testID":72,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":10295}
+{"test":{"id":80,"name":"report expiry invokes sign-in handling and inactive tab does not fetch","suiteID":14,"groupIDs":[33],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":220,"root_column":3,"root_url":"file:///D:/python/Flutter/Spendtrail/test/monthly_budget_test.dart"},"type":"testStart","time":10296}
+{"testID":80,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":10470}
+{"test":{"id":81,"name":"monthly budget form fits small screens with enlarged text","suiteID":14,"groupIDs":[33],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":237,"root_column":3,"root_url":"file:///D:/python/Flutter/Spendtrail/test/monthly_budget_test.dart"},"type":"testStart","time":10470}
+
+[{"event":"test.startedProcess","params":{"vmServiceUri":null}}]
+{"testID":57,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":10525}
+{"test":{"id":82,"name":"Cobalt Fold brings a rear card to the front","suiteID":2,"groupIDs":[18],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":122,"root_column":3,"root_url":"file:///D:/python/Flutter/Spendtrail/test/app_flows_test.dart"},"type":"testStart","time":10525}
+{"testID":77,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":10568}
+{"testID":71,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":10633}
+{"group":{"id":83,"suiteID":70,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":1,"line":null,"column":null,"url":null},"type":"group","time":10633}
+{"test":{"id":84,"name":"older currency settings still display PKR and preserve appearance","suiteID":70,"groupIDs":[83],"metadata":{"skip":false,"skipReason":null},"line":9,"column":3,"url":"file:///D:/python/Flutter/Spendtrail/test/settings_test.dart"},"type":"testStart","time":10633}
+{"suite":{"id":85,"platform":"vm","path":"D:/python/Flutter/Spendtrail/test/spendtrail_test.dart"},"type":"suite","time":10648}
+{"test":{"id":86,"name":"loading D:/python/Flutter/Spendtrail/test/spendtrail_test.dart","suiteID":85,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":10648}
+{"testID":84,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":10789}
+{"suite":{"id":87,"platform":"vm","path":"D:/python/Flutter/Spendtrail/test/statistics_test.dart"},"type":"suite","time":10827}
+{"test":{"id":88,"name":"loading D:/python/Flutter/Spendtrail/test/statistics_test.dart","suiteID":87,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":10828}
+{"testID":81,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":10857}
+{"suite":{"id":89,"platform":"vm","path":"D:/python/Flutter/Spendtrail/test/storage_failure_test.dart"},"type":"suite","time":10921}
+{"test":{"id":90,"name":"loading D:/python/Flutter/Spendtrail/test/storage_failure_test.dart","suiteID":89,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":10921}
+{"testID":82,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":10965}
+{"test":{"id":91,"name":"add-card form scrolls above keyboard on a small screen","suiteID":2,"groupIDs":[18],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":140,"root_column":3,"root_url":"file:///D:/python/Flutter/Spendtrail/test/app_flows_test.dart"},"type":"testStart","time":10966}
+
+[{"event":"test.startedProcess","params":{"vmServiceUri":null}}]
+{"testID":50,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":11272}
+{"suite":{"id":92,"platform":"vm","path":"D:/python/Flutter/Spendtrail/test/visual_preview_test.dart"},"type":"suite","time":11338}
+{"test":{"id":93,"name":"loading D:/python/Flutter/Spendtrail/test/visual_preview_test.dart","suiteID":92,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":11339}
+
+[{"event":"test.startedProcess","params":{"vmServiceUri":null}}]
+{"testID":79,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":11444}
+{"group":{"id":94,"suiteID":78,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":3,"line":null,"column":null,"url":null},"type":"group","time":11445}
+{"test":{"id":95,"name":"declined simulation retains identical request after a lost response","suiteID":78,"groupIDs":[94],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":10,"root_column":3,"root_url":"file:///D:/python/Flutter/Spendtrail/test/simulation_test.dart"},"type":"testStart","time":11445}
+{"testID":91,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":11594}
+{"suite":{"id":96,"platform":"vm","path":"D:/python/Flutter/Spendtrail/test/widget_test.dart"},"type":"suite","time":11664}
+{"test":{"id":97,"name":"loading D:/python/Flutter/Spendtrail/test/widget_test.dart","suiteID":96,"groupIDs":[],"metadata":{"skip":false,"skipReason":null},"line":null,"column":null,"url":null},"type":"testStart","time":11664}
+
+[{"event":"test.startedProcess","params":{"vmServiceUri":null}}]
+{"testID":62,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":11881}
+{"test":{"id":98,"name":"cancel fingerprint login keeps password fallback","suiteID":4,"groupIDs":[20],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":183,"root_column":5,"root_url":"file:///D:/python/Flutter/Spendtrail/test/biometric_test.dart"},"type":"testStart","time":11882}
+{"testID":86,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":11974}
+{"group":{"id":99,"suiteID":85,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":4,"line":null,"column":null,"url":null},"type":"group","time":11975}
+{"test":{"id":100,"name":"register, add masked card, sign out and sign in again","suiteID":85,"groupIDs":[99],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":27,"root_column":3,"root_url":"file:///D:/python/Flutter/Spendtrail/test/spendtrail_test.dart"},"type":"testStart","time":11975}
+
+[{"event":"test.startedProcess","params":{"vmServiceUri":null}}]
+{"testID":88,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":12142}
+{"group":{"id":101,"suiteID":87,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":1,"line":null,"column":null,"url":null},"type":"group","time":12143}
+{"test":{"id":102,"name":"statistics group spending and cross year boundaries","suiteID":87,"groupIDs":[101],"metadata":{"skip":false,"skipReason":null},"line":6,"column":3,"url":"file:///D:/python/Flutter/Spendtrail/test/statistics_test.dart"},"type":"testStart","time":12143}
+{"testID":102,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":12180}
+{"testID":98,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":12218}
+{"test":{"id":103,"name":"expired fingerprint login keeps password fallback","suiteID":4,"groupIDs":[20],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":183,"root_column":5,"root_url":"file:///D:/python/Flutter/Spendtrail/test/biometric_test.dart"},"type":"testStart","time":12219}
+
+[{"event":"test.startedProcess","params":{"vmServiceUri":null}}]
+{"testID":90,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":12443}
+{"group":{"id":104,"suiteID":89,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":2,"line":null,"column":null,"url":null},"type":"group","time":12444}
+{"test":{"id":105,"name":"failed writes leave cards and expenses unchanged","suiteID":89,"groupIDs":[104],"metadata":{"skip":false,"skipReason":null},"line":8,"column":3,"url":"file:///D:/python/Flutter/Spendtrail/test/storage_failure_test.dart"},"type":"testStart","time":12445}
+{"testID":103,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":12521}
+{"test":{"id":106,"name":"offline fingerprint login keeps password fallback","suiteID":4,"groupIDs":[20],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":183,"root_column":5,"root_url":"file:///D:/python/Flutter/Spendtrail/test/biometric_test.dart"},"type":"testStart","time":12522}
+{"testID":105,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":12612}
+{"test":{"id":107,"name":"duplicate cards are rejected without saving a card number","suiteID":89,"groupIDs":[104],"metadata":{"skip":false,"skipReason":null},"line":37,"column":3,"url":"file:///D:/python/Flutter/Spendtrail/test/storage_failure_test.dart"},"type":"testStart","time":12613}
+{"testID":106,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":12877}
+{"test":{"id":108,"name":"unavailable fingerprint login keeps password fallback","suiteID":4,"groupIDs":[20],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":183,"root_column":5,"root_url":"file:///D:/python/Flutter/Spendtrail/test/biometric_test.dart"},"type":"testStart","time":12877}
+{"testID":93,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":12905}
+{"group":{"id":109,"suiteID":92,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":1,"line":null,"column":null,"url":null},"type":"group","time":12905}
+{"test":{"id":110,"name":"render light and dark previews with recorded spending","suiteID":92,"groupIDs":[109],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":15,"root_column":3,"root_url":"file:///D:/python/Flutter/Spendtrail/test/visual_preview_test.dart"},"type":"testStart","time":12906}
+{"testID":108,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":13150}
+{"test":{"id":111,"name":"cancelled enrollment revokes server credential and leaves switch off","suiteID":4,"groupIDs":[20],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":249,"root_column":3,"root_url":"file:///D:/python/Flutter/Spendtrail/test/biometric_test.dart"},"type":"testStart","time":13151}
+{"testID":97,"result":"success","skipped":false,"hidden":true,"type":"testDone","time":13201}
+{"group":{"id":112,"suiteID":96,"parentID":null,"name":"","metadata":{"skip":false,"skipReason":null},"testCount":7,"line":null,"column":null,"url":null},"type":"group","time":13201}
+{"group":{"id":113,"suiteID":96,"parentID":112,"name":"card utils","metadata":{"skip":false,"skipReason":null},"testCount":7,"line":5,"column":3,"url":"file:///D:/python/Flutter/Spendtrail/test/widget_test.dart"},"type":"group","time":13202}
+{"test":{"id":114,"name":"card utils detects brands","suiteID":96,"groupIDs":[112,113],"metadata":{"skip":false,"skipReason":null},"line":6,"column":5,"url":"file:///D:/python/Flutter/Spendtrail/test/widget_test.dart"},"type":"testStart","time":13202}
+{"testID":114,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":13237}
+{"test":{"id":115,"name":"card utils formats card number in groups of four","suiteID":96,"groupIDs":[112,113],"metadata":{"skip":false,"skipReason":null},"line":13,"column":5,"url":"file:///D:/python/Flutter/Spendtrail/test/widget_test.dart"},"type":"testStart","time":13237}
+{"testID":115,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":13245}
+{"test":{"id":116,"name":"card utils formats expiry with slash","suiteID":96,"groupIDs":[112,113],"metadata":{"skip":false,"skipReason":null},"line":21,"column":5,"url":"file:///D:/python/Flutter/Spendtrail/test/widget_test.dart"},"type":"testStart","time":13246}
+{"testID":116,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":13251}
+{"test":{"id":117,"name":"card utils validates expiry","suiteID":96,"groupIDs":[112,113],"metadata":{"skip":false,"skipReason":null},"line":29,"column":5,"url":"file:///D:/python/Flutter/Spendtrail/test/widget_test.dart"},"type":"testStart","time":13251}
+{"testID":117,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":13261}
+{"test":{"id":118,"name":"card utils formats money","suiteID":96,"groupIDs":[112,113],"metadata":{"skip":false,"skipReason":null},"line":36,"column":5,"url":"file:///D:/python/Flutter/Spendtrail/test/widget_test.dart"},"type":"testStart","time":13262}
+{"testID":118,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":13272}
+{"test":{"id":119,"name":"card utils luhn","suiteID":96,"groupIDs":[112,113],"metadata":{"skip":false,"skipReason":null},"line":41,"column":5,"url":"file:///D:/python/Flutter/Spendtrail/test/widget_test.dart"},"type":"testStart","time":13273}
+{"testID":119,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":13277}
+{"test":{"id":120,"name":"card utils card validation rejects unchecked and unsupported numbers","suiteID":96,"groupIDs":[112,113],"metadata":{"skip":false,"skipReason":null},"line":45,"column":5,"url":"file:///D:/python/Flutter/Spendtrail/test/widget_test.dart"},"type":"testStart","time":13278}
+{"testID":120,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":13282}
+{"testID":74,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":13588}
+{"test":{"id":121,"name":"existing purchase category can change, retry and clear","suiteID":58,"groupIDs":[73],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":112,"root_column":3,"root_url":"file:///D:/python/Flutter/Spendtrail/test/purchases_test.dart"},"type":"testStart","time":13589}
+{"testID":111,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":14053}
+{"test":{"id":122,"name":"Android vault forwards server binding and preserves cancellation errors","suiteID":4,"groupIDs":[20],"metadata":{"skip":false,"skipReason":null},"line":307,"column":3,"url":"file:///D:/python/Flutter/Spendtrail/test/biometric_test.dart"},"type":"testStart","time":14054}
+{"testID":122,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":14072}
+{"testID":121,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":14683}
+{"test":{"id":123,"name":"custom category is selected and submitted with new purchase","suiteID":58,"groupIDs":[73],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":164,"root_column":3,"root_url":"file:///D:/python/Flutter/Spendtrail/test/purchases_test.dart"},"type":"testStart","time":14683}
+{"testID":107,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":15039}
+{"testID":95,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":15145}
+{"test":{"id":124,"name":"approved purchase opens refund and submits only refund fields","suiteID":78,"groupIDs":[94],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":65,"root_column":3,"root_url":"file:///D:/python/Flutter/Spendtrail/test/simulation_test.dart"},"type":"testStart","time":15145}
+{"testID":123,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":15821}
+{"test":{"id":125,"name":"date filters use local day boundaries, exact query encoding and exclusive end","suiteID":58,"groupIDs":[73],"metadata":{"skip":false,"skipReason":null},"line":213,"column":3,"url":"file:///D:/python/Flutter/Spendtrail/test/purchases_test.dart"},"type":"testStart","time":15822}
+{"testID":125,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":15836}
+{"test":{"id":126,"name":"small screen validates precision and permits correction after rejection","suiteID":58,"groupIDs":[73],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":245,"root_column":3,"root_url":"file:///D:/python/Flutter/Spendtrail/test/purchases_test.dart"},"type":"testStart","time":15837}
+{"testID":124,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":16256}
+{"test":{"id":127,"name":"declined purchases have no refund action","suiteID":78,"groupIDs":[94],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":109,"root_column":3,"root_url":"file:///D:/python/Flutter/Spendtrail/test/simulation_test.dart"},"type":"testStart","time":16257}
+{"testID":127,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":16759}
+{"testID":110,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":16924}
+{"testID":126,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":16941}
+{"test":{"id":128,"name":"save uses exact decimal, safe retry, refreshed history and server detail","suiteID":58,"groupIDs":[73],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":327,"root_column":3,"root_url":"file:///D:/python/Flutter/Spendtrail/test/purchases_test.dart"},"type":"testStart","time":16942}
+{"testID":128,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":18163}
+{"test":{"id":129,"name":"pagination failure retries same offset and refresh replaces history","suiteID":58,"groupIDs":[73],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":416,"root_column":3,"root_url":"file:///D:/python/Flutter/Spendtrail/test/purchases_test.dart"},"type":"testStart","time":18164}
+{"testID":129,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":18720}
+{"test":{"id":130,"name":"empty cards and recoverable card errors fit small screen","suiteID":58,"groupIDs":[73],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":471,"root_column":3,"root_url":"file:///D:/python/Flutter/Spendtrail/test/purchases_test.dart"},"type":"testStart","time":18720}
+{"testID":130,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":19006}
+{"test":{"id":131,"name":"expired session during history returns control to sign-in","suiteID":58,"groupIDs":[73],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":496,"root_column":5,"root_url":"file:///D:/python/Flutter/Spendtrail/test/purchases_test.dart"},"type":"testStart","time":19006}
+{"testID":131,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":19186}
+{"test":{"id":132,"name":"expired session during cards returns control to sign-in","suiteID":58,"groupIDs":[73],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":496,"root_column":5,"root_url":"file:///D:/python/Flutter/Spendtrail/test/purchases_test.dart"},"type":"testStart","time":19187}
+{"testID":132,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":19533}
+{"test":{"id":133,"name":"expired session during save returns control to sign-in","suiteID":58,"groupIDs":[73],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":496,"root_column":5,"root_url":"file:///D:/python/Flutter/Spendtrail/test/purchases_test.dart"},"type":"testStart","time":19534}
+{"testID":133,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":20109}
+{"test":{"id":134,"name":"expired session during detail returns control to sign-in","suiteID":58,"groupIDs":[73],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":496,"root_column":5,"root_url":"file:///D:/python/Flutter/Spendtrail/test/purchases_test.dart"},"type":"testStart","time":20110}
+{"testID":134,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":20476}
+{"testID":100,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":20479}
+{"test":{"id":135,"name":"server error remains visible and can be retried","suiteID":85,"groupIDs":[99],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":173,"root_column":3,"root_url":"file:///D:/python/Flutter/Spendtrail/test/spendtrail_test.dart"},"type":"testStart","time":20480}
+{"testID":135,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":20940}
+{"test":{"id":136,"name":"signed-in Statistics loads and refreshes account budgets then handles expiry","suiteID":85,"groupIDs":[99],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":202,"root_column":3,"root_url":"file:///D:/python/Flutter/Spendtrail/test/spendtrail_test.dart"},"type":"testStart","time":20940}
+{"testID":136,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":22346}
+{"test":{"id":137,"name":"appearance persists and sign-up fits a small screen","suiteID":85,"groupIDs":[99],"metadata":{"skip":false,"skipReason":null},"line":174,"column":5,"url":"package:flutter_test/src/widget_tester.dart","root_line":276,"root_column":3,"root_url":"file:///D:/python/Flutter/Spendtrail/test/spendtrail_test.dart"},"type":"testStart","time":22346}
+{"testID":137,"result":"success","skipped":false,"hidden":false,"type":"testDone","time":23170}
+{"success":true,"type":"done","time":23223}

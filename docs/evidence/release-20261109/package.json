@@ -1,0 +1,42 @@
+{
+  "created_utc": "2026-11-09T12:01:37.971649+00:00",
+  "version": "1.0.0+2",
+  "package": "com.hjm.Spendtrail",
+  "flavor": "demo",
+  "compilation": "release",
+  "signing": "existing development certificate; local review distribution",
+  "api": "http://127.0.0.1:8000 over adb reverse",
+  "source_files": 512,
+  "private_credentials_and_databases_included": false,
+  "files": {
+    "DEMO_GUIDE.md": {
+      "bytes": 6618,
+      "sha256": "a27f5e88951867338d668de45d8c8a43415009e2acdd827e7af2a907022cc2aa"
+    },
+    "RELEASE_VERIFICATION.md": {
+      "bytes": 8453,
+      "sha256": "118d58e6dee604d81c35a0de9bcfbbc29b48d4d559242bdb0cec8cf498e6d8f2"
+    },
+    "sample_purchases.csv": {
+      "bytes": 299,
+      "sha256": "34f85c3ba5a80af1088103bad58c80d3d99a81dff0e828e557d236b896ffa1a5"
+    },
+    "SETUP_GUIDE.md": {
+      "bytes": 5600,
+      "sha256": "10fd527e032377ab649798b1fa8b9c3a88b1b42e9c6da4b804b1776c2ac5271d"
+    },
+    "SpendTrail-1.0.0+2-source.zip": {
+      "bytes": 7439274,
+      "sha256": "c24fe27220e89e4a12e6afe3fcc5622fb2d8fff721df267ea6a5c744a0914ed2"
+    },
+    "SpendTrail-1.0.0+2-usb-demo.apk": {
+      "bytes": 57636991,
+      "sha256": "e92c31851b106a0a26f4f02c5798ac870e352c664c3c403bb369b71490f46a03"
+    }
+  },
+  "bundle": {
+    "name": "SpendTrail-1.0.0+2-usb-demo.zip",
+    "bytes": 35616285,
+    "sha256": "c6ee2b293dc7e41b3fb8f9bda95715da7c3a72ef9b03ca5fac9ff7c9a000fc80"
+  }
+}

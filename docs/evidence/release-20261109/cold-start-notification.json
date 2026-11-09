@@ -1,0 +1,19 @@
+{
+  "status": "passed",
+  "process_absent_before_push": true,
+  "notification": {
+    "status": "accepted",
+    "attempts": 1,
+    "accepted_at": "2026-11-09 16:56:49.983121+05:00",
+    "received_at": "2026-11-09 16:57:25.177895+05:00",
+    "opened_at": "2026-11-09 16:57:25.177895+05:00",
+    "last_error": null,
+    "provider_message_present": true
+  },
+  "existing_transaction_link_opened_after_authentication": true,
+  "spending_records_unchanged": {
+    "transactions": 9,
+    "spent": "18998.55"
+  },
+  "transport": "actual Firebase and Samsung SM-A725F"
+}

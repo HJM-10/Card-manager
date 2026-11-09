@@ -47,10 +47,18 @@ class _SplashScreenState extends State<SplashScreen>
         curve: Interval(begin, end, curve: curve),
       );
 
+  bool _started = false;
+
   @override
-  void initState() {
-    super.initState();
-    _c.forward().whenComplete(_goHome);
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_started) return;
+    _started = true;
+    if (MediaQuery.disableAnimationsOf(context)) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _goHome());
+    } else {
+      _c.forward().whenComplete(_goHome);
+    }
   }
 
   void _goHome() {

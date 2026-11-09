@@ -5,6 +5,10 @@ ID: com.hjm.Spendtrail, matching the registered Firebase Android app.
 
 See the [project roadmap](docs/ROADMAP.md) for the six-week build plan, ordered backlog and acceptance criteria.
 
+The final Android USB demonstration is version **1.0.0 (build 2)**. Start with
+the [setup/install guide](docs/SETUP_GUIDE.md), [scripted demonstration](docs/DEMO_GUIDE.md)
+and [release/device/accessibility evidence](docs/RELEASE_VERIFICATION.md).
+
 **Default launch:** the animated SpendTrail splash, sign-in or registration, then the original wallet layout. Open **Cards → Account card profiles** to manage server-backed fictional cards. See the [backend setup and API guide](backend/README.md) to run the API. Use `--dart-define=LEGACY_DEMO=true` for a local-only review of the wallet.
 
 All balances and money actions are simulated. No bank connection, payment processing, or messages to recipients.
@@ -19,7 +23,8 @@ Choose a saved category when recording a purchase, or open its details and tap *
 
 ## Features
 
-**Transaction alerts:** notification delivery is being connected to Firebase.
+**Transaction alerts:** Firebase delivery is implemented and verified on the
+Android phone, including a cold-start transaction link after fingerprint login.
 The implementation includes **Profile → Transaction alerts**, owned alert
 history from the Home bell, permission handling, generic foreground banners and
 authenticated transaction links. Builds without Firebase configuration keep
@@ -92,7 +97,7 @@ flutter run
 flutter analyze
 flutter test
 flutter build web --release
-flutter build apk --release
+flutter build apk --release --flavor demo --dart-define=API_BASE_URL=http://127.0.0.1:8000
 ```
 
 Tests exercise startup and adding a card, expense editing, action confirmation,

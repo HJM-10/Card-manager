@@ -242,15 +242,33 @@ class _PurchasesScreenState extends State<PurchasesScreen> {
                 ),
               for (final record in records)
                 Card(
-                  child: ListTile(
-                    title: Text(record['merchant'] as String),
-                    subtitle: Text(
-                      '${_date(record['occurred_at'] as String)} · ${record['channel']}\n${record['category'] ?? 'Uncategorized'} · ${record['kind']} · ${record['status']}',
-                    ),
-                    trailing: Text(
-                      '${record['kind'] == 'refund' ? '−' : ''}PKR ${record['amount']}',
-                    ),
-                    onTap: () => detail(record),
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      final stacked =
+                          constraints.maxWidth < 360 ||
+                          MediaQuery.textScalerOf(context).scale(14) > 20;
+                      final amount = Text(
+                        '${record['kind'] == 'refund' ? '−' : ''}PKR ${record['amount']}',
+                      );
+                      return ListTile(
+                        title: Text(record['merchant'] as String),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '${_date(record['occurred_at'] as String)} · ${record['channel']}\n${record['category'] ?? 'Uncategorized'} · ${record['kind']} · ${record['status']}',
+                            ),
+                            if (stacked)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 8),
+                                child: amount,
+                              ),
+                          ],
+                        ),
+                        trailing: stacked ? null : amount,
+                        onTap: () => detail(record),
+                      );
+                    },
                   ),
                 ),
               if (loading) const Center(child: CircularProgressIndicator()),
@@ -566,6 +584,7 @@ class _PurchaseEditorState extends State<_PurchaseEditor> {
                       ),
                     DropdownButtonFormField<String>(
                       initialValue: channel,
+                      isExpanded: true,
                       decoration: const InputDecoration(labelText: 'Channel'),
                       items: const [
                         DropdownMenuItem(
@@ -584,6 +603,7 @@ class _PurchaseEditorState extends State<_PurchaseEditor> {
                     if (widget.simulation && !refund)
                       DropdownButtonFormField<String>(
                         initialValue: status,
+                        isExpanded: true,
                         decoration: const InputDecoration(
                           labelText: 'Payment outcome',
                         ),

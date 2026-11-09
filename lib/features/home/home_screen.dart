@@ -130,8 +130,10 @@ class _Header extends ConsumerWidget {
           ),
         ),
         if (appearanceAction != null) appearanceAction!,
-        Pressable(
-          onTap:
+        IconButton(
+          tooltip: 'Transaction alerts',
+          constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+          onPressed:
               onNotifications ??
               () => showDialog<void>(
                 context: context,
@@ -148,9 +150,9 @@ class _Header extends ConsumerWidget {
                   ],
                 ),
               ),
-          child: Container(
-            width: 42,
-            height: 42,
+          icon: Container(
+            width: 24,
+            height: 24,
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.surface,
               shape: BoxShape.circle,
@@ -164,8 +166,8 @@ class _Header extends ConsumerWidget {
                   color: Theme.of(context).colorScheme.onSurface,
                 ),
                 Positioned(
-                  top: 9,
-                  right: 10,
+                  top: 0,
+                  right: 0,
                   child: Container(
                     width: 8,
                     height: 8,

@@ -253,6 +253,15 @@ administrator connection and `tools.verify_backup_evidence` for repeatable
 rehearsal/verification. Dumps stay under ignored `backend/.local/backups`;
 only sanitized verification evidence belongs in Git.
 
+### Final USB demo delivery
+
+The final app is version 1.0.0, build 2. See the [setup guide](../docs/SETUP_GUIDE.md),
+[demonstration script](../docs/DEMO_GUIDE.md) and [release verification](../docs/RELEASE_VERIFICATION.md)
+for the release-mode USB APK, final accessibility/device checks and packaging.
+`tools.live_acceptance` runs the real Flutter HTTP journey against an isolated
+restricted API using `TEST_DATABASE_URL`; `tools.package_demo` creates the
+local review bundle without credentials, databases or service-account keys.
+
 The transaction notification APIs and separate retrying FCM worker are
 implemented and verified with actual Firebase acceptance and phone receipt,
 including cold-start transaction opening after fingerprint sign-in. See

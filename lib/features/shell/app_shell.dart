@@ -157,7 +157,8 @@ class FloatingNavBar extends ConsumerWidget {
                 child: AnimatedContainer(
                   duration: duration,
                   curve: Curves.easeOutCubic,
-                  height: 44,
+                  height: 48,
+                  constraints: const BoxConstraints(minWidth: 48),
                   padding: EdgeInsets.symmetric(
                     horizontal: i == current ? 16 : 13,
                   ),
